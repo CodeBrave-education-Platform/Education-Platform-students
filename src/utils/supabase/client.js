@@ -18,6 +18,12 @@ export function createClient() {
         verifyOtp: async () => {
           throw new Error("Missing Supabase Environment Variables.");
         },
+        signInWithOAuth: async () => {
+          throw new Error("Missing Supabase Environment Variables.");
+        },
+        updateUser: async () => {
+          throw new Error("Missing Supabase Environment Variables.");
+        },
         getUser: async () => ({ data: { user: null }, error: null }),
         signOut: async () => {},
       }
