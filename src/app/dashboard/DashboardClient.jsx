@@ -11,6 +11,7 @@ import {
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
   ArrowUpRight, AlertCircle, FileText, Clock
 } from 'lucide-react'
+import { initiateRazorpayCheckout } from '@/utils/payment'
 
 export default function DashboardClient({ 
   user, 
@@ -40,32 +41,43 @@ export default function DashboardClient({
   // Interactive Search Query
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Simulated Razorpay payment states
+  // Simulated Razorpay payment states & Profile details
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [selectedCheckoutCourse, setSelectedCheckoutCourse] = useState(null)
   const [paymentState, setPaymentState] = useState('IDLE') // 'IDLE' | 'CONNECTING' | 'AUTHORIZING' | 'SUCCESS'
-  const [paymentPhone, setPaymentPhone] = useState(phoneNumber !== 'Not Provided' ? phoneNumber : '')
+  
+  // Profile pre-fills and dynamic contact numbers
+  const [profileName, setProfileName] = useState(profile.full_name || '')
+  const [profilePhone, setProfilePhone] = useState(profile.phone || '')
+  const [paymentPhone, setPaymentPhone] = useState(profile.phone || (phoneNumber !== 'Not Provided' ? phoneNumber : ''))
+  const [paymentMode, setPaymentMode] = useState('SANDBOX') // 'SANDBOX' | 'LIVE_RAZORPAY'
+  const [razorpayKey, setRazorpayKey] = useState('')
+  
+  // Profile update indicators
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileSuccess, setProfileSuccess] = useState('')
+  const [profileError, setProfileError] = useState('')
 
   React.useEffect(() => {
     if (checkoutCourseId) {
       const allAvailableCourses = [
         ...directory,
         {
-          id: 'course-free-1',
+          id: 'f0000000-0000-0000-0000-000000000001',
           title: 'Foundations of Mathematics & Algebra',
           price: 0,
           level: 'foundation',
           description: 'Master core algebraic concepts, linear equations, inequalities, and functions. Recommended for early IIT JEE foundation tracks.'
         },
         {
-          id: 'course-prem-1',
+          id: 'f0000000-0000-0000-0000-000000000002',
           title: 'IIT JEE Mains Mastery: Physics & Chemistry',
           price: 4999,
           level: 'mains',
           description: 'Comprehensive preparation ledger covering kinematics, thermodynamics, organic chemistry, and chemical bonding with step-by-step guides.'
         },
         {
-          id: 'course-prem-2',
+          id: 'f0000000-0000-0000-0000-000000000003',
           title: 'IIT JEE Advanced: Elite Calculus & Trigonometry',
           price: 9999,
           level: 'advanced',
@@ -164,7 +176,7 @@ export default function DashboardClient({
       const { data: newEnroll, error } = await supabase
         .from('enrollments')
         .insert({
-          student_id: user.id,
+          user_id: user.id,
           course_id: courseId
         })
         .select('*, courses(*)')
@@ -187,7 +199,54 @@ export default function DashboardClient({
     }
   }
 
-  const displayName = profile.full_name || user.email.split('@')[0]
+  // Handle Profile Edits (Name & Phone Number)
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault()
+    if (!profileName.trim()) {
+      setProfileError('Full Name is required.')
+      return
+    }
+
+    setProfileLoading(true)
+    setProfileError('')
+    setProfileSuccess('')
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profileName.trim(),
+          phone: profilePhone.trim()
+        })
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      setProfileSuccess('Profile details successfully updated!')
+      
+      // Sync payment phone pre-fill reactively
+      if (profilePhone.trim()) {
+        setPaymentPhone(profilePhone.trim())
+      }
+
+      // Trigger a server-side route refresh to sync state
+      startTransition(() => {
+        router.refresh()
+      })
+
+      setTimeout(() => {
+        setProfileSuccess('')
+      }, 3000)
+    } catch (err) {
+      console.error('Profile Update Error:', err)
+      setProfileError(err.message || 'Failed to update profile details.')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const displayName = profileName || user.email.split('@')[0]
+  const displayPhone = profilePhone || 'Not Provided'
   const displayRole = isTeacher ? 'Instructor' : 'Student'
 
   // Dynamic Metrics definitions
@@ -212,42 +271,12 @@ export default function DashboardClient({
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex min-h-screen">
+      <div className="relative z-10 flex min-h-screen pt-16">
         
         {/* Sidebar Nav */}
         <aside className="w-64 border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl hidden md:flex flex-col p-6 gap-8 justify-between">
           <div className="space-y-8">
-            <div className="flex items-center gap-2 select-none">
-              <svg className="w-36 h-7" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Custom drawn geometric letter 'A' */}
-                <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'S' */}
-                <path d="M76 16 C76 12, 56 12, 56 18 C56 24, 76 26, 76 32 C76 38, 56 38, 56 34" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'E' */}
-                <path d="M110 12 L92 12 L92 42 L110 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                <path d="M92 27 L106 27" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'N' */}
-                <path d="M122 42 L122 12 L142 42 L142 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'T' */}
-                <path d="M152 12 L178 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                <path d="M165 12 L165 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'R' */}
-                <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26 L188 26" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                <path d="M198 26 L210 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                
-                {/* Custom drawn geometric letter 'A' with RED accented leg */}
-                <path d="M220 44 L236 10" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-                {/* Red accent leg matching logo image */}
-                <path d="M236 10 L252 44" stroke="#DC2626" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
-              </svg>
-            </div>
+            <div className="pt-2 select-none" />
 
             <nav className="space-y-1.5">
               {isTeacher ? (
@@ -715,7 +744,15 @@ export default function DashboardClient({
                                   <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => handleEnroll(course.id)}
+                                    onClick={() => {
+                                      if (course.price > 0) {
+                                        setSelectedCheckoutCourse(course)
+                                        setShowPaymentModal(true)
+                                        setPaymentState('INITIATED')
+                                      } else {
+                                        handleEnroll(course.id)
+                                      }
+                                    }}
                                     disabled={loading}
                                     className="flex items-center gap-1 px-4.5 py-2 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:bg-gradient-to-r dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-[10px] rounded-full border border-[#FAF6F2]/60 dark:border-transparent shadow-sm cursor-pointer disabled:opacity-50 select-none transition-all"
                                   >
@@ -765,7 +802,7 @@ export default function DashboardClient({
                           </div>
                           <div className="flex items-center justify-center md:justify-start gap-1.5">
                             <Phone className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{phoneNumber}</span>
+                            <span>{displayPhone}</span>
                           </div>
                         </div>
                       </div>
@@ -774,6 +811,79 @@ export default function DashboardClient({
                           Account Verified
                         </span>
                       </div>
+                    </div>
+
+                    {/* Premium Profile Editing Card */}
+                    <div className="bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-zinc-900/60 dark:border-zinc-800 rounded-[2rem] p-8 space-y-6 transition-all duration-300 hover:shadow-2xl">
+                      <div>
+                        <h4 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-200">Update Profile Details</h4>
+                        <p className="text-[11px] text-slate-400 dark:text-zinc-400 mt-1">
+                          Modify your display name and contact details. Phone numbers are pre-filled securely into your Razorpay checkout sessions.
+                        </p>
+                      </div>
+
+                      <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Full Name</label>
+                            <input 
+                              type="text"
+                              value={profileName}
+                              onChange={(e) => setProfileName(e.target.value)}
+                              placeholder="Your full name"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-455 mb-1 ml-2">Indian Phone Number</label>
+                            <input 
+                              type="text"
+                              value={profilePhone}
+                              onChange={(e) => setProfilePhone(e.target.value)}
+                              placeholder="Enter 10 digit number"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex-1 mr-4">
+                            <AnimatePresence>
+                              {profileSuccess && (
+                                <motion.span
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -10 }}
+                                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-450"
+                                >
+                                  {profileSuccess}
+                                </motion.span>
+                              )}
+                              {profileError && (
+                                <motion.span
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -10 }}
+                                  className="text-xs font-semibold text-rose-600 dark:text-rose-455"
+                                >
+                                  {profileError}
+                                </motion.span>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            type="submit"
+                            disabled={profileLoading}
+                            className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
+                          >
+                            {profileLoading ? 'Updating...' : 'Save Profile Details'}
+                          </motion.button>
+                        </div>
+                      </form>
                     </div>
                   </motion.div>
                 )}
@@ -1022,7 +1132,32 @@ export default function DashboardClient({
                 </div>
 
                 {/* Simulated Payment Credentials Form */}
-                <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                <div className="space-y-4 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                  <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-xl border border-slate-200/50 dark:border-zinc-800/80">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('SANDBOX')}
+                      className={`flex-1 text-center py-2 text-[10px] font-bold rounded-lg transition-all cursor-pointer select-none ${
+                        paymentMode === 'SANDBOX' 
+                          ? 'bg-white dark:bg-zinc-850 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/40 dark:border-zinc-700/40' 
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      Sandbox Simulation
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('LIVE_RAZORPAY')}
+                      className={`flex-1 text-center py-2 text-[10px] font-bold rounded-lg transition-all cursor-pointer select-none ${
+                        paymentMode === 'LIVE_RAZORPAY' 
+                          ? 'bg-white dark:bg-zinc-850 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/40 dark:border-zinc-700/40' 
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      Razorpay Live Mode
+                    </button>
+                  </div>
+
                   <div>
                     <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Billing Email</label>
                     <input 
@@ -1043,6 +1178,20 @@ export default function DashboardClient({
                       className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                     />
                   </div>
+
+                  {paymentMode === 'LIVE_RAZORPAY' && (
+                    <div className="pt-1 animate-fadeIn">
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Razorpay Key ID (Optional)</label>
+                      <input 
+                        type="text" 
+                        placeholder="rzp_test_..."
+                        value={razorpayKey}
+                        onChange={(e) => setRazorpayKey(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-mono text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                      />
+                      <p className="text-[9px] text-slate-400 mt-1 ml-2 font-medium">Leave blank to use ASENTRA's sandbox test key.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1055,81 +1204,160 @@ export default function DashboardClient({
                         alert('Please enter a valid billing contact number.')
                         return
                       }
-                      setPaymentState('CONNECTING')
-                      
-                      // Step 1: Connect simulation (1.2s)
-                      setTimeout(() => {
-                        setPaymentState('AUTHORIZING')
+
+                      if (paymentMode === 'SANDBOX') {
+                        setPaymentState('CONNECTING')
                         
-                        // Step 2: Authorize transaction & execute DB persistence (1.5s)
-                        setTimeout(async () => {
-                          try {
-                            // Upsert the course into Supabase public.courses to prevent foreign key errors
-                            await supabase
-                              .from('courses')
-                              .upsert({
-                                id: selectedCheckoutCourse.id,
-                                title: selectedCheckoutCourse.title,
-                                description: selectedCheckoutCourse.description || 'Pre-configured premium preparation ledger.',
-                                price: selectedCheckoutCourse.price,
-                                level: selectedCheckoutCourse.level
-                              })
+                        // Step 1: Connect simulation (1.2s)
+                        setTimeout(() => {
+                          setPaymentState('AUTHORIZING')
+                          
+                          // Step 2: Authorize transaction & execute DB persistence (1.5s)
+                          setTimeout(async () => {
+                            try {
+                              // Upsert the course into Supabase public.courses to prevent foreign key errors
+                              await supabase
+                                .from('courses')
+                                .upsert({
+                                  id: selectedCheckoutCourse.id,
+                                  title: selectedCheckoutCourse.title,
+                                  description: selectedCheckoutCourse.description || 'Pre-configured premium preparation ledger.',
+                                  price: selectedCheckoutCourse.price,
+                                  level: selectedCheckoutCourse.level
+                                })
 
-                            // Write real enrollment row
-                            const { error: enrollErr } = await supabase
-                              .from('enrollments')
-                              .insert({
-                                user_id: user.id,
-                                course_id: selectedCheckoutCourse.id,
-                                status: 'active'
-                              })
-                            
-                            if (enrollErr) throw enrollErr
-
-                            // Write real invoice row
-                            const { error: invoiceErr } = await supabase
-                              .from('invoices')
-                              .insert({
-                                user_id: user.id,
-                                course_id: selectedCheckoutCourse.id,
-                                razorpay_payment_id: 'pay_' + Math.random().toString(36).substring(2, 14),
-                                amount_paid: selectedCheckoutCourse.price,
-                                currency: 'INR',
-                                status: 'paid'
-                              })
+                              // Write real enrollment row
+                              const { error: enrollErr } = await supabase
+                                .from('enrollments')
+                                .insert({
+                                  user_id: user.id,
+                                  course_id: selectedCheckoutCourse.id,
+                                  status: 'active'
+                                })
                               
-                            if (invoiceErr) throw invoiceErr
+                              if (enrollErr && enrollErr.code !== '23505') throw enrollErr
 
-                            // Success state
-                            setPaymentState('SUCCESS')
-                            
-                            // Refresh routing states and close modal after 1.5s
-                            setTimeout(() => {
-                              setShowPaymentModal(false)
-                              router.push('/dashboard') // clear parameters
-                              startTransition(() => {
-                                router.refresh()
-                              })
-                            }, 1500)
+                              // Write real invoice row
+                              const { error: invoiceErr } = await supabase
+                                .from('invoices')
+                                .insert({
+                                  user_id: user.id,
+                                  course_id: selectedCheckoutCourse.id,
+                                  razorpay_payment_id: 'pay_sim_' + Math.random().toString(36).substring(2, 14),
+                                  amount_paid: selectedCheckoutCourse.price,
+                                  currency: 'INR',
+                                  status: 'paid'
+                                })
+                                
+                              if (invoiceErr) throw invoiceErr
 
-                          } catch (err) {
-                            console.error('Simulated Gateway Error:', err)
-                            alert('Transaction execution failed: ' + err.message)
-                            setPaymentState('INITIATED')
-                          }
-                        }, 1500)
-                      }, 1200)
+                              // Success state
+                              setPaymentState('SUCCESS')
+                              
+                              // Refresh routing states and close modal after 1.5s
+                              setTimeout(() => {
+                                setShowPaymentModal(false)
+                                router.push('/dashboard') // clear parameters
+                                startTransition(() => {
+                                  router.refresh()
+                                })
+                              }, 1500)
+
+                            } catch (err) {
+                              console.error('Simulated Gateway Error:', err)
+                              alert('Transaction execution failed: ' + err.message)
+                              setPaymentState('INITIATED')
+                            }
+                          }, 1500)
+                        }, 1200)
+                      } else {
+                        // LIVE RAZORPAY MODE
+                        setPaymentState('CONNECTING')
+                        try {
+                          await initiateRazorpayCheckout({
+                            key: razorpayKey.trim() || 'rzp_test_YOUR_KEY_HERE', // Fallback key ID
+                            amount: selectedCheckoutCourse.price * 100, // in paise
+                            currency: 'INR',
+                            courseName: selectedCheckoutCourse.title,
+                            description: selectedCheckoutCourse.description || 'ASENTRA Academy Premium Course',
+                            userEmail: user.email,
+                            userPhone: paymentPhone,
+                            onSuccess: async (response) => {
+                              setPaymentState('AUTHORIZING')
+                              try {
+                                // Upsert the course into Supabase public.courses
+                                await supabase
+                                  .from('courses')
+                                  .upsert({
+                                    id: selectedCheckoutCourse.id,
+                                    title: selectedCheckoutCourse.title,
+                                    description: selectedCheckoutCourse.description || 'Pre-configured premium preparation ledger.',
+                                    price: selectedCheckoutCourse.price,
+                                    level: selectedCheckoutCourse.level
+                                  })
+
+                                // Write real enrollment row
+                                const { error: enrollErr } = await supabase
+                                  .from('enrollments')
+                                  .insert({
+                                    user_id: user.id,
+                                    course_id: selectedCheckoutCourse.id,
+                                    status: 'active'
+                                  })
+
+                                if (enrollErr && enrollErr.code !== '23505') throw enrollErr
+
+                                // Write real invoice row
+                                const { error: invoiceErr } = await supabase
+                                  .from('invoices')
+                                  .insert({
+                                    user_id: user.id,
+                                    course_id: selectedCheckoutCourse.id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    amount_paid: selectedCheckoutCourse.price,
+                                    currency: 'INR',
+                                    status: 'paid'
+                                  })
+                                  
+                                if (invoiceErr) throw invoiceErr
+
+                                // Success state
+                                setPaymentState('SUCCESS')
+                                
+                                setTimeout(() => {
+                                  setShowPaymentModal(false)
+                                  router.push('/dashboard') // clear parameters
+                                  startTransition(() => {
+                                    router.refresh()
+                                  })
+                                }, 1500)
+                              } catch (dbErr) {
+                                console.error('Database Sync Error:', dbErr)
+                                alert('Payment succeeded but database enrollment sync failed: ' + dbErr.message)
+                                setPaymentState('INITIATED')
+                              }
+                            },
+                            onDismiss: () => {
+                              setPaymentState('INITIATED')
+                            }
+                          })
+                        } catch (err) {
+                          console.error('Razorpay SDK Initiation Error:', err)
+                          alert('Razorpay Checkout initialization failed: ' + err.message)
+                          setPaymentState('INITIATED')
+                        }
+                      }
                     }}
                     className="w-full flex items-center justify-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg shadow-blue-500/20 active:scale-[0.99] transition-all text-xs tracking-wide select-none cursor-pointer"
                   >
-                    <span>Authorize simulated payment</span>
+                    <span>{paymentMode === 'SANDBOX' ? 'Authorize simulated payment' : 'Pay securely via Razorpay'}</span>
                   </button>
                 )}
 
                 {paymentState === 'CONNECTING' && (
                   <div className="flex items-center justify-center gap-2 py-3 text-xs font-semibold text-blue-600">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Connecting to Razorpay secure gateway...</span>
+                    <span>{paymentMode === 'SANDBOX' ? 'Connecting to simulated gateway...' : 'Loading Razorpay SDK & secure gateway...'}</span>
                   </div>
                 )}
 

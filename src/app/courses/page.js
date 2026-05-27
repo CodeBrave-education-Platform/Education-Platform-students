@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const mockCourses = [
   {
-    id: 'course-free-1',
+    id: 'f0000000-0000-0000-0000-000000000001',
     title: 'Foundations of Mathematics & Algebra',
     description: 'Master core algebraic concepts, linear equations, inequalities, and functions. Recommended for early IIT JEE foundation tracks.',
     price: 0,
@@ -16,7 +16,7 @@ const mockCourses = [
     features: ['12 High-definition modules', 'Weekly practice ledgers', 'Doubt solving community access']
   },
   {
-    id: 'course-prem-1',
+    id: 'f0000000-0000-0000-0000-000000000002',
     title: 'IIT JEE Mains Mastery: Physics & Chemistry',
     description: 'Comprehensive preparation ledger covering kinematics, thermodynamics, organic chemistry, and chemical bonding with step-by-step guides.',
     price: 4999,
@@ -24,7 +24,7 @@ const mockCourses = [
     features: ['Premium video curriculum', '30 Full-length mock tests', 'Dedicated 1-on-1 expert checks']
   },
   {
-    id: 'course-prem-2',
+    id: 'f0000000-0000-0000-0000-000000000003',
     title: 'IIT JEE Advanced: Elite Calculus & Trigonometry',
     description: 'Solve advanced level limits, continuity, differential equations, and complex variables. Outfitted for high-tier engineering candidates.',
     price: 9999,
