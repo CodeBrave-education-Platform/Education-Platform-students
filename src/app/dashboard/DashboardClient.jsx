@@ -49,6 +49,9 @@ export default function DashboardClient({
   // Profile pre-fills and dynamic contact numbers
   const [profileName, setProfileName] = useState(profile.full_name || '')
   const [profilePhone, setProfilePhone] = useState(profile.phone || '')
+  const [targetYear, setTargetYear] = useState(profile.target_year || '')
+  const [academicBatch, setAcademicBatch] = useState(profile.academic_batch || '')
+  const [preferredSubject, setPreferredSubject] = useState(profile.preferred_subject || '')
   const [paymentPhone, setPaymentPhone] = useState(profile.phone || (phoneNumber !== 'Not Provided' ? phoneNumber : ''))
   const [paymentMode, setPaymentMode] = useState('SANDBOX') // 'SANDBOX' | 'LIVE_RAZORPAY'
   const [razorpayKey, setRazorpayKey] = useState('')
@@ -216,7 +219,10 @@ export default function DashboardClient({
         .from('profiles')
         .update({
           full_name: profileName.trim(),
-          phone: profilePhone.trim()
+          phone: profilePhone.trim(),
+          target_year: targetYear.trim(),
+          academic_batch: academicBatch.trim(),
+          preferred_subject: preferredSubject.trim()
         })
         .eq('id', user.id)
 
@@ -271,10 +277,10 @@ export default function DashboardClient({
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex min-h-screen pt-16">
+      <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 px-6 max-w-7xl mx-auto w-full">
         
         {/* Sidebar Nav */}
-        <aside className="w-64 border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl hidden md:flex flex-col p-6 gap-8 justify-between">
+        <aside className="w-64 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl hidden md:flex flex-col p-6 gap-8 justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] h-fit sticky top-6">
           <div className="space-y-8">
             <div className="pt-2 select-none" />
 
@@ -381,7 +387,7 @@ export default function DashboardClient({
         </aside>
 
         {/* Dashboard Content Area */}
-        <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border border-white dark:border-zinc-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-fade-in-scroll">
           
           <header className="p-6 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
             <div>
@@ -805,6 +811,21 @@ export default function DashboardClient({
                             <span>{displayPhone}</span>
                           </div>
                         </div>
+
+                        {/* Display extra student academic parameters */}
+                        {(targetYear || academicBatch || preferredSubject) && (
+                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-blue-600 dark:text-indigo-400 pt-2 border-t border-slate-100 dark:border-zinc-800/80 mt-2">
+                            {targetYear && (
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Target: IIT JEE {targetYear}</span>
+                            )}
+                            {academicBatch && (
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Batch: {academicBatch}</span>
+                            )}
+                            {preferredSubject && (
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Focus: {preferredSubject}</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="shrink-0">
                         <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider">
@@ -818,7 +839,7 @@ export default function DashboardClient({
                       <div>
                         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-200">Update Profile Details</h4>
                         <p className="text-[11px] text-slate-400 dark:text-zinc-400 mt-1">
-                          Modify your display name and contact details. Phone numbers are pre-filled securely into your Razorpay checkout sessions.
+                          Modify your display name, stream focus, and contact details. Phone numbers are pre-filled securely into your Razorpay checkout sessions.
                         </p>
                       </div>
 
@@ -844,6 +865,49 @@ export default function DashboardClient({
                               placeholder="Enter 10 digit number"
                               className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Target JEE Year</label>
+                            <input 
+                              type="text"
+                              value={targetYear}
+                              onChange={(e) => setTargetYear(e.target.value)}
+                              placeholder="e.g. 2027"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Prep Batch / Stream</label>
+                            <select 
+                              value={academicBatch}
+                              onChange={(e) => setAcademicBatch(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                            >
+                              <option value="">Select Stream</option>
+                              <option value="11th Standard Foundation">11th Standard Foundation</option>
+                              <option value="12th Standard Mains">12th Standard Mains</option>
+                              <option value="Dropper Elite JEE Track">Dropper Elite JEE Track</option>
+                              <option value="Instructor / Faculty">Instructor / Faculty</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-455 mb-1 ml-2">Preferred Subject Focus</label>
+                            <select 
+                              value={preferredSubject}
+                              onChange={(e) => setPreferredSubject(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                            >
+                              <option value="">Select Subject</option>
+                              <option value="Mathematics">Mathematics</option>
+                              <option value="Physics">Physics</option>
+                              <option value="Chemistry">Chemistry</option>
+                              <option value="Full PCM Syllabus">Full PCM Syllabus</option>
+                            </select>
                           </div>
                         </div>
 

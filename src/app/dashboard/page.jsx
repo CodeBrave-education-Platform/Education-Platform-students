@@ -2,6 +2,7 @@ import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import DashboardClient from './DashboardClient'
+import Navbar from '@/components/Navbar'
 
 export default async function DashboardPage(props) {
   const searchParams = await props.searchParams
@@ -115,15 +116,18 @@ export default async function DashboardPage(props) {
   ]
 
   return (
-    <DashboardClient 
-      user={user} 
-      profile={profile} 
-      initialCourses={initialCourses}
-      initialEnrollments={initialEnrollments}
-      allCourses={allCourses}
-      mockInvoices={mockInvoices}
-      phoneNumber={phoneNumber}
-      checkoutCourseId={checkoutCourseId}
-    />
+    <>
+      <Navbar />
+      <DashboardClient 
+        user={user} 
+        profile={profile} 
+        initialCourses={initialCourses}
+        initialEnrollments={initialEnrollments}
+        allCourses={allCourses}
+        mockInvoices={mockInvoices}
+        phoneNumber={phoneNumber}
+        checkoutCourseId={checkoutCourseId}
+      />
+    </>
   )
 }

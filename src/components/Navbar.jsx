@@ -13,7 +13,7 @@ export default async function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-zinc-200/40 dark:border-zinc-800/40 bg-white/30 dark:bg-zinc-900/30 backdrop-blur-xl px-6 py-3 flex items-center justify-between transition-all duration-300">
+    <nav className="relative w-full border-b border-zinc-200/40 dark:border-zinc-800/40 bg-white/30 dark:bg-zinc-900/30 backdrop-blur-xl px-6 py-4 flex items-center justify-between transition-all duration-300 mb-6 shadow-sm shadow-zinc-100 dark:shadow-none">
       <Link href="/" className="flex flex-col items-start select-none group">
         <svg className="w-36 h-7" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Custom drawn geometric letter 'A' */}
