@@ -9,7 +9,7 @@ import {
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
-  ArrowUpRight, AlertCircle, FileText
+  ArrowUpRight, AlertCircle, FileText, Clock
 } from 'lucide-react'
 
 export default function DashboardClient({ 
@@ -17,7 +17,9 @@ export default function DashboardClient({
   profile, 
   initialCourses, 
   initialEnrollments, 
-  allCourses 
+  allCourses,
+  mockInvoices = [],
+  phoneNumber = 'Not Provided'
 }) {
   const router = useRouter()
   const supabase = createClient()
@@ -635,6 +637,84 @@ export default function DashboardClient({
                 )}
 
               </AnimatePresence>
+            </div>
+
+            {/* Profile & Billing Section Divider */}
+            <div className="mt-16 pt-12 border-t border-slate-200/60" />
+
+            {/* Profile Overview Card */}
+            <div className="bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-2xl">
+              {/* Avatar placeholder */}
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
+                {displayName.substring(0, 2).toUpperCase()}
+              </div>
+              <div className="space-y-1 text-center md:text-left flex-1">
+                <h4 className="text-lg font-semibold tracking-tight text-slate-900">{displayName}</h4>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-xs text-slate-500 font-medium">
+                  <div className="flex items-center justify-center md:justify-start gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="flex items-center justify-center md:justify-start gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{phoneNumber}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="shrink-0">
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                  Account Verified
+                </span>
+              </div>
+            </div>
+
+            {/* Invoices Ledger */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold tracking-tight text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <span>Invoices Ledger</span>
+              </h3>
+              
+              <div className="overflow-hidden rounded-3xl border border-white bg-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white bg-slate-50/50 text-[10px] font-semibold uppercase tracking-wider text-slate-450 select-none">
+                      <th className="px-6 py-4">Invoice ID</th>
+                      <th className="px-6 py-4">Course</th>
+                      <th className="px-6 py-4">Razorpay Payment ID</th>
+                      <th className="px-6 py-4">Amount Paid</th>
+                      <th className="px-6 py-4">Date</th>
+                      <th className="px-6 py-4 text-right">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-800">
+                    {mockInvoices?.map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-white/40 transition-colors">
+                        <td className="px-6 py-4 font-bold text-slate-900">{invoice.id}</td>
+                        <td className="px-6 py-4">{invoice.courseTitle}</td>
+                        <td className="px-6 py-4 font-mono text-[10px] text-slate-500">{invoice.razorpayId}</td>
+                        <td className="px-6 py-4 font-semibold">{invoice.amount}</td>
+                        <td className="px-6 py-4 text-slate-500">{new Date(invoice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                        <td className="px-6 py-4 text-right">
+                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                            {invoice.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <a 
+                            href="#" 
+                            onClick={(e) => { e.preventDefault(); alert(`Downloading invoice ${invoice.id} in PDF format...`) }}
+                            className="text-blue-600 hover:underline font-semibold"
+                          >
+                            Download PDF
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
           </div>

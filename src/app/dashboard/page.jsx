@@ -89,6 +89,29 @@ export default async function DashboardPage() {
     allCourses = coursesData || []
   }
 
+  const phoneNumber = user.user_metadata?.phone_number || user.phone || 'Not Provided'
+
+  const mockInvoices = [
+    {
+      id: 'inv-1001',
+      courseTitle: 'Foundations of Mathematics & Algebra',
+      razorpayId: 'pay_Nsh721Hhs812',
+      amount: 'Free',
+      currency: 'INR',
+      date: '2026-04-10',
+      status: 'Paid'
+    },
+    {
+      id: 'inv-1002',
+      courseTitle: 'IIT JEE Mains Mastery: Physics & Chemistry',
+      razorpayId: 'pay_Osk192Jks921',
+      amount: '₹4,999',
+      currency: 'INR',
+      date: '2026-05-15',
+      status: 'Paid'
+    }
+  ]
+
   return (
     <DashboardClient 
       user={user} 
@@ -96,6 +119,8 @@ export default async function DashboardPage() {
       initialCourses={initialCourses}
       initialEnrollments={initialEnrollments}
       allCourses={allCourses}
+      mockInvoices={mockInvoices}
+      phoneNumber={phoneNumber}
     />
   )
 }
