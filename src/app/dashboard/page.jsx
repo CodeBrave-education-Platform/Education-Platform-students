@@ -76,19 +76,26 @@ export default async function DashboardPage(props) {
     initialEnrollments = enrollsData || []
   } else {
     // 1. Fetch courses the student is enrolled in
-    const { data: enrollsData } = await supabase
+    const { data: enrollsData, error: enrollsError } = await supabase
       .from('enrollments')
       .select('*, courses(*)')
       .eq('user_id', user.id)
       
+    if (enrollsError) {
+      console.error('DASHBOARD ENROLLMENTS FETCH ERROR:', JSON.stringify(enrollsError), 'MSG:', enrollsError.message, 'CODE:', enrollsError.code)
+    }
     initialEnrollments = enrollsData || []
 
     // 2. Fetch all courses in the platform (with instructor full name) for browsing
-    const { data: coursesData } = await supabase
+    const { data: coursesData, error: coursesError } = await supabase
       .from('courses')
       .select('*, profiles(full_name)')
       .order('created_at', { ascending: false })
       
+    if (coursesError) {
+      console.error('DASHBOARD COURSES FETCH ERROR:', JSON.stringify(coursesError), 'MSG:', coursesError.message, 'CODE:', coursesError.code)
+    }
+    console.log('DASHBOARD COURSES FETCHED COUNT:', coursesData ? coursesData.length : 0)
     allCourses = coursesData || []
   }
 
@@ -117,7 +124,7 @@ export default async function DashboardPage(props) {
 
   return (
     <>
-      <Navbar />
+      <Navbar user={user} profile={profile} />
       <DashboardClient 
         user={user} 
         profile={profile} 

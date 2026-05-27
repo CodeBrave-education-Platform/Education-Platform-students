@@ -16,6 +16,22 @@ const mockCourses = [
     features: ['12 High-definition modules', 'Weekly practice ledgers', 'Doubt solving community access']
   },
   {
+    id: 'f0000000-0000-0000-0000-000000000101',
+    title: '1 Rupee Real Payment Gateway Test Course',
+    description: 'Use this course to test actual live or sandbox payment processing. Charged at the minimum standard currency unit of 1 INR.',
+    price: 1,
+    level: 'mains',
+    features: ['Minimum value live gateway testing', 'Instant status callbacks', 'Razorpay signature verification']
+  },
+  {
+    id: 'f0000000-0000-0000-0000-000000000102',
+    title: '10 Rupee Micro-Seminar: JEE Exam Strategies',
+    description: 'Perfect for testing medium-value sandbox or live micro-transactions. Outlines time management strategies and high-weightage topics.',
+    price: 10,
+    level: 'advanced',
+    features: ['Micro-transaction sandbox testing', 'Syllabus weightage strategies list', 'Full enrollment ledger records']
+  },
+  {
     id: 'f0000000-0000-0000-0000-000000000002',
     title: 'IIT JEE Mains Mastery: Physics & Chemistry',
     description: 'Comprehensive preparation ledger covering kinematics, thermodynamics, organic chemistry, and chemical bonding with step-by-step guides.',
@@ -39,6 +55,27 @@ export default async function CoursesPage() {
   
   // Safe Server-Side Session check to prevent layout misfires
   const { data: { session } } = await supabase.auth.getSession()
+
+  // Fetch actual courses from DB
+  const { data: dbCourses } = await supabase
+    .from('courses')
+    .select('*, profiles(full_name)')
+    .order('created_at', { ascending: false })
+
+  const coursesList = dbCourses && dbCourses.length > 0 ? dbCourses : mockCourses
+
+  const getFeatures = (course) => {
+    if (course.features && Array.isArray(course.features)) {
+      return course.features
+    }
+    if (course.level === 'foundation') {
+      return ['12 High-definition modules', 'Weekly practice ledgers', 'Doubt solving community access']
+    } else if (course.level === 'advanced') {
+      return ['High-difficulty elite drills', 'Previous 15 years solved archives', 'Direct weekly faculty mentoring']
+    } else {
+      return ['Premium video curriculum', '30 Full-length mock tests', 'Dedicated 1-on-1 expert checks']
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-50 via-white to-slate-50 overflow-x-hidden font-sans select-none text-slate-800">
@@ -83,8 +120,9 @@ export default async function CoursesPage() {
 
         {/* 3. COURSES GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-          {mockCourses.map((course) => {
-            const isFree = course.price === 0
+          {coursesList.map((course) => {
+            const isFree = Number(course.price) === 0
+            const features = getFeatures(course)
 
             return (
               <div 
@@ -120,7 +158,7 @@ export default async function CoursesPage() {
 
                   {/* Bullet features */}
                   <ul className="space-y-2.5 pt-4 border-t border-slate-100">
-                    {course.features.map((feat, idx) => (
+                    {features.map((feat, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-[11px] font-semibold text-slate-650">
                         <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0" />
                         <span>{feat}</span>
@@ -134,7 +172,7 @@ export default async function CoursesPage() {
                   <div className="flex items-baseline justify-between">
                     <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Cost</span>
                     <span className="text-3xl font-extrabold text-slate-900">
-                      {isFree ? 'Free' : `₹${course.price.toLocaleString('en-IN')}`}
+                      {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
                     </span>
                   </div>
 

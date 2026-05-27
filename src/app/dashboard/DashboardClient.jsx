@@ -4,12 +4,12 @@ import * as React from 'react'
 import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { 
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
-  ArrowUpRight, AlertCircle, FileText, Clock
+  ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu
 } from 'lucide-react'
 import { initiateRazorpayCheckout } from '@/utils/payment'
 
@@ -24,14 +24,27 @@ export default function DashboardClient({
   checkoutCourseId
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [isPending, startTransition] = useTransition()
 
-  // Core active tab states
+  // Core active tab states derived directly from searchParams to avoid latency and polling loops
   // Student tabs: 'MY_LEARNING' | 'BROWSE' | 'PROFILE' | 'INVOICES'
   // Instructor tabs: 'MY_COURSES' | 'ROSTER' | 'PROFILE'
   const isTeacher = profile.role === 'teacher'
-  const [activeTab, setActiveTab] = useState(isTeacher ? 'MY_COURSES' : 'MY_LEARNING')
+  const tabParam = searchParams.get('tab')
+  const activeTab = React.useMemo(() => {
+    if (isTeacher) {
+      if (tabParam === 'roster') return 'ROSTER'
+      if (tabParam === 'profile') return 'PROFILE'
+      return 'MY_COURSES' // default
+    } else {
+      if (tabParam === 'browse') return 'BROWSE'
+      if (tabParam === 'invoices') return 'INVOICES'
+      if (tabParam === 'profile') return 'PROFILE'
+      return 'MY_LEARNING' // default
+    }
+  }, [tabParam, isTeacher])
 
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
@@ -52,6 +65,10 @@ export default function DashboardClient({
   const [targetYear, setTargetYear] = useState(profile.target_year || '')
   const [academicBatch, setAcademicBatch] = useState(profile.academic_batch || '')
   const [preferredSubject, setPreferredSubject] = useState(profile.preferred_subject || '')
+  const [dailyStudyHours, setDailyStudyHours] = useState(profile.daily_study_hours || '8 Hours')
+  const [syllabusProgress, setSyllabusProgress] = useState(profile.syllabus_progress || '45%')
+  const [testAverage, setTestAverage] = useState(profile.test_average || '82%')
+  const [academicStrengths, setAcademicStrengths] = useState(profile.academic_strengths || 'Physics & Calculus')
   const [paymentPhone, setPaymentPhone] = useState(profile.phone || (phoneNumber !== 'Not Provided' ? phoneNumber : ''))
   const [paymentMode, setPaymentMode] = useState('SANDBOX') // 'SANDBOX' | 'LIVE_RAZORPAY'
   const [razorpayKey, setRazorpayKey] = useState('')
@@ -60,6 +77,10 @@ export default function DashboardClient({
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileSuccess, setProfileSuccess] = useState('')
   const [profileError, setProfileError] = useState('')
+
+  // Sidebar collapsing & mobile menu toggles
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   React.useEffect(() => {
     if (checkoutCourseId) {
@@ -95,6 +116,7 @@ export default function DashboardClient({
       }
     }
   }, [checkoutCourseId, directory])
+
 
   // Create Course Form States
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -222,7 +244,11 @@ export default function DashboardClient({
           phone: profilePhone.trim(),
           target_year: targetYear.trim(),
           academic_batch: academicBatch.trim(),
-          preferred_subject: preferredSubject.trim()
+          preferred_subject: preferredSubject.trim(),
+          daily_study_hours: dailyStudyHours.trim(),
+          syllabus_progress: syllabusProgress.trim(),
+          test_average: testAverage.trim(),
+          academic_strengths: academicStrengths.trim()
         })
         .eq('id', user.id)
 
@@ -254,6 +280,7 @@ export default function DashboardClient({
   const displayName = profileName || user.email.split('@')[0]
   const displayPhone = profilePhone || 'Not Provided'
   const displayRole = isTeacher ? 'Instructor' : 'Student'
+  const displayInitials = displayName.substring(0, 2).toUpperCase()
 
   // Dynamic Metrics definitions
   const teacherStats = [
@@ -277,126 +304,113 @@ export default function DashboardClient({
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 px-6 max-w-7xl mx-auto w-full">
+      <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
         
         {/* Sidebar Nav */}
-        <aside className="w-64 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl hidden md:flex flex-col p-6 gap-8 justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] h-fit sticky top-6">
-          <div className="space-y-8">
-            <div className="pt-2 select-none" />
-
-            <nav className="space-y-1.5">
+        <aside className="w-24 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-900/60 hidden md:flex flex-col gap-6 justify-between py-6 px-2 shrink-0 h-[calc(100vh-62px)] sticky top-[62px] z-40">
+          <div className="space-y-6">
+            <nav className="space-y-4">
               {isTeacher ? (
                 <>
                   <button 
-                    onClick={() => setActiveTab('MY_COURSES')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
+                    onClick={() => router.push('/dashboard?tab=courses')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
                     }`}
                   >
-                    <LayoutDashboard className="w-4.5 h-4.5" />
-                    <span>My Courses</span>
+                    <LayoutDashboard className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
                   </button>
                   <button 
-                    onClick={() => setActiveTab('ROSTER')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
+                    onClick={() => router.push('/dashboard?tab=roster')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
                     }`}
                   >
-                    <Users className="w-4.5 h-4.5" />
-                    <span>Students Roster</span>
+                    <Users className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
                   </button>
                   <button 
-                    onClick={() => setActiveTab('PROFILE')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
-                      activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-650 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
-                    }`}
+                    onClick={() => router.push('/profile')}
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
                   >
-                    <User className="w-4.5 h-4.5" />
-                    <span>My Profile</span>
+                    <User className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
                 </>
               ) : (
                 <>
                   <button 
-                    onClick={() => setActiveTab('MY_LEARNING')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
+                    onClick={() => router.push('/dashboard?tab=learning')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
                     }`}
                   >
-                    <BookOpenCheck className="w-4.5 h-4.5" />
-                    <span>My Learning</span>
+                    <BookOpenCheck className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
                   </button>
                   <button 
-                    onClick={() => setActiveTab('BROWSE')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
+                    onClick={() => router.push('/dashboard?tab=browse')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
                     }`}
                   >
-                    <Search className="w-4.5 h-4.5" />
-                    <span>Browse Directory</span>
+                    <Search className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
                   </button>
                   <button 
-                    onClick={() => setActiveTab('PROFILE')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
-                      activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-650 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
-                    }`}
+                    onClick={() => router.push('/profile')}
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
                   >
-                    <User className="w-4.5 h-4.5" />
-                    <span>My Profile</span>
+                    <User className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
                   <button 
-                    onClick={() => setActiveTab('INVOICES')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-extrabold rounded-2xl transition-all cursor-pointer ${
+                    onClick={() => router.push('/dashboard?tab=invoices')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-indigo-950/20 dark:text-indigo-400 border-l-4 border-blue-600 dark:border-indigo-500 shadow-sm' 
-                        : 'text-slate-650 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40'
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
                     }`}
                   >
-                    <FileText className="w-4.5 h-4.5" />
-                    <span>Invoices Ledger</span>
+                    <FileText className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Invoices</span>
                   </button>
                 </>
               )}
             </nav>
           </div>
-
-          {/* User profile capsule in sidebar */}
-          <div className="border-t border-zinc-200/50 dark:border-zinc-800/50 pt-4 flex flex-col gap-3">
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-extrabold shadow-md">
-                {displayName.substring(0, 2).toUpperCase()}
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 truncate">{displayName}</p>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide truncate">{displayRole}</p>
-              </div>
-            </div>
-          </div>
         </aside>
 
         {/* Dashboard Content Area */}
-        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border border-white dark:border-zinc-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-fade-in-scroll">
+        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out">
           
           <header className="p-6 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">
-                {isTeacher ? 'Instructor Control Panel' : 'Student Learning Hub'}
-              </h1>
-              <p className="text-xs font-semibold text-zinc-400 mt-0.5">
-                Dashboard &bull; Signed in as <span className="text-blue-600 dark:text-indigo-405">{user.email}</span>
-              </p>
+            <div className="flex items-center">
+              {/* Responsive Hamburger Toggle Menu for Mobile */}
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="md:hidden p-2 -ml-2 mr-3 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 cursor-pointer select-none transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">
+                  {isTeacher ? 'Instructor Control Panel' : 'Student Learning Hub'}
+                </h1>
+                <p className="text-xs font-semibold text-zinc-400 mt-0.5">
+                  Dashboard &bull; Signed in as <span className="text-blue-600 dark:text-indigo-405">{user.email}</span>
+                </p>
+              </div>
             </div>
             
             {/* Quick action button for Instructors */}
@@ -413,7 +427,7 @@ export default function DashboardClient({
             )}
           </header>
 
-          <div className="flex-1 p-6 md:p-8 space-y-8 max-w-6xl w-full mx-auto">
+          <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
             {/* Dynamic Banner */}
             <div className="p-8 rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-500 to-indigo-600 text-white relative overflow-hidden shadow-xl shadow-blue-500/10 dark:shadow-none">
@@ -623,7 +637,7 @@ export default function DashboardClient({
                           <p className="text-xs text-zinc-400">Kickstart your skill upgrade today. Explore our available course catalogs!</p>
                         </div>
                         <button
-                          onClick={() => setActiveTab('BROWSE')}
+                          onClick={() => router.push('/dashboard?tab=browse')}
                           className="px-5 py-2.5 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-xs rounded-full border border-[#FAF6F2]/60 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Browse Available Courses
@@ -788,104 +802,222 @@ export default function DashboardClient({
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -15 }}
-                    className="space-y-6"
+                    className="space-y-8"
                   >
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-150 flex items-center gap-2">
-                      <User className="w-5 h-5 text-blue-600" />
-                      <span>My Profile Overview</span>
-                    </h3>
+                    {/* Header */}
+                    <div className="flex justify-between items-center pb-2">
+                      <h3 className="text-xl font-black text-slate-900 dark:text-zinc-150 flex items-center gap-2 tracking-tight">
+                        <User className="w-5 h-5 text-blue-600" />
+                        <span>Academic Profile Dossier</span>
+                      </h3>
+                      <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider select-none shadow-sm">
+                        Verified Student Account
+                      </span>
+                    </div>
 
-                    <div className="bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-zinc-900/60 dark:border-zinc-800 rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-2xl">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
-                        {displayName.substring(0, 2).toUpperCase()}
+                    {/* Personal & Contact Overview Card */}
+                    <div className="bg-white/60 backdrop-blur-xl shadow-md shadow-zinc-100/50 dark:bg-zinc-900/60 dark:shadow-none rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-md shrink-0 select-none">
+                        {displayInitials}
                       </div>
-                      <div className="space-y-1 text-center md:text-left flex-1">
-                        <h4 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-100">{displayName}</h4>
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                          <div className="flex items-center justify-center md:justify-start gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="space-y-2 text-center md:text-left flex-1">
+                        <h4 className="text-xl font-black tracking-tight text-slate-900 dark:text-zinc-100">{displayName}</h4>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-xs text-slate-500 dark:text-zinc-400 font-semibold justify-center md:justify-start">
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-4 h-4 text-slate-400" />
                             <span>{user.email}</span>
                           </div>
-                          <div className="flex items-center justify-center md:justify-start gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-4 h-4 text-slate-400" />
                             <span>{displayPhone}</span>
                           </div>
                         </div>
 
                         {/* Display extra student academic parameters */}
                         {(targetYear || academicBatch || preferredSubject) && (
-                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-blue-600 dark:text-indigo-400 pt-2 border-t border-slate-100 dark:border-zinc-800/80 mt-2">
+                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-blue-600 dark:text-indigo-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
                             {targetYear && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Target: IIT JEE {targetYear}</span>
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
                             )}
                             {academicBatch && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Batch: {academicBatch}</span>
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
                             )}
                             {preferredSubject && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/30">Focus: {preferredSubject}</span>
+                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
                             )}
                           </div>
                         )}
                       </div>
-                      <div className="shrink-0">
-                        <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider">
-                          Account Verified
-                        </span>
+                    </div>
+
+                    {/* Academic Performance Metrics Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400', icon: Clock },
+                        { label: 'Syllabus Covered', value: syllabusProgress, desc: 'Core curricula completion', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400', icon: BookOpenCheck },
+                        { label: 'Practice Assessment Avg', value: testAverage, desc: 'Average mock test score', color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/20 dark:text-blue-400', icon: Award },
+                        { label: 'Academic Strength', value: academicStrengths, desc: 'Top performing area', color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/20 dark:text-purple-400', icon: Sparkles }
+                      ].map((item, index) => {
+                        const IconComponent = item.icon
+                        return (
+                          <div key={index} className="p-5 rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-50 dark:border-zinc-800/20 flex flex-col gap-3">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{item.label}</span>
+                              <div className={`p-2 rounded-xl shrink-0 ${item.color}`}>
+                                <IconComponent className="w-4 h-4" />
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-lg font-black text-slate-800 dark:text-zinc-150 leading-tight">{item.value}</p>
+                              <p className="text-[9px] font-semibold text-zinc-400 mt-1">{item.desc}</p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Progress Visualizers & timelines */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      
+                      {/* Visual Progress Bar Card */}
+                      <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-50 dark:border-zinc-800/20 space-y-6">
+                        <div>
+                          <h4 className="text-sm font-black text-slate-800 dark:text-zinc-200">Syllabus Completion & Stats</h4>
+                          <p className="text-[10px] text-zinc-400 mt-1">Real-time stats from core mock tests and lessons checklist.</p>
+                        </div>
+                        
+                        {/* Syllabus Coverage Bar */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
+                            <span>Syllabus Progress Indicator</span>
+                            <span className="text-blue-600">{syllabusProgress}</span>
+                          </div>
+                          <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-500"
+                              style={{ width: syllabusProgress.includes('%') ? syllabusProgress : `${syllabusProgress}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Test Average Bar */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
+                            <span>Mock Assessment Average Score</span>
+                            <span className="text-emerald-600">{testAverage}</span>
+                          </div>
+                          <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 rounded-full transition-all duration-500"
+                              style={{ width: testAverage.includes('%') ? testAverage : `${testAverage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Checklist items */}
+                        <div className="pt-2 grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                            <span>Kinematics & Fluids (Done)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                            <span>Algebra & Limits (Done)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
+                            <span>Calculus & Derivatives (Active)</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full" />
+                            <span>Organic Compounds (Revision)</span>
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Interactive timelines roadmap */}
+                      <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-50 dark:border-zinc-800/20 space-y-4">
+                        <div>
+                          <h4 className="text-sm font-black text-slate-800 dark:text-zinc-200">Personalized IIT JEE Prep Journey</h4>
+                          <p className="text-[10px] text-zinc-400 mt-1">Visualizing your structured syllabus stages.</p>
+                        </div>
+
+                        <div className="space-y-3.5 relative pl-4 border-l border-zinc-200 dark:border-zinc-800 mt-2">
+                          {[
+                            { title: 'Stage 1: Foundation Phase', desc: 'Core formulas, equations, and basic vectors.', status: 'COMPLETED', color: 'bg-emerald-500 text-emerald-100 border-emerald-500' },
+                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-blue-600 text-blue-100 border-blue-600 animate-pulse' },
+                            { title: 'Stage 3: Advanced Curriculums', desc: 'Multi-concept modules and IIT PYQs.', status: 'LOCKED', color: 'bg-slate-200 dark:bg-zinc-800 text-zinc-400 border-transparent' }
+                          ].map((stage, idx) => (
+                            <div key={idx} className="relative space-y-1">
+                              <span className={`absolute -left-[22px] top-1 w-3 h-3 rounded-full border-2 ${stage.color}`} />
+                              <div className="flex justify-between items-center">
+                                <h5 className="text-xs font-bold text-slate-850 dark:text-zinc-200">{stage.title}</h5>
+                                <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+                                  stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                                }`}>{stage.status}</span>
+                              </div>
+                              <p className="text-[10px] text-zinc-400 leading-normal">{stage.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                     </div>
 
                     {/* Premium Profile Editing Card */}
-                    <div className="bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-zinc-900/60 dark:border-zinc-800 rounded-[2rem] p-8 space-y-6 transition-all duration-300 hover:shadow-2xl">
+                    <div className="bg-white/60 backdrop-blur-xl shadow-sm dark:bg-zinc-900/60 rounded-[2rem] p-8 space-y-6 transition-all duration-300">
                       <div>
-                        <h4 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-200">Update Profile Details</h4>
-                        <p className="text-[11px] text-slate-400 dark:text-zinc-400 mt-1">
-                          Modify your display name, stream focus, and contact details. Phone numbers are pre-filled securely into your Razorpay checkout sessions.
+                        <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-200">Update Profile Details</h4>
+                        <p className="text-[11px] text-slate-400 dark:text-zinc-400 mt-1 font-semibold">
+                          Modify your display name, stream focus, and contact details. New fields let you securely update your student dossier indicators in real-time.
                         </p>
                       </div>
 
-                      <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-xl">
+                      <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-3xl">
+                        {/* Core Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Full Name</label>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Full Name</label>
                             <input 
                               type="text"
                               value={profileName}
                               onChange={(e) => setProfileName(e.target.value)}
                               placeholder="Your full name"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-455 mb-1 ml-2">Indian Phone Number</label>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Indian Phone Number</label>
                             <input 
                               type="text"
                               value={profilePhone}
                               onChange={(e) => setProfilePhone(e.target.value)}
                               placeholder="Enter 10 digit number"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
                         </div>
 
+                        {/* Stream / Focus Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Target JEE Year</label>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Target JEE Year</label>
                             <input 
                               type="text"
                               value={targetYear}
                               onChange={(e) => setTargetYear(e.target.value)}
                               placeholder="e.g. 2027"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 mb-1 ml-2">Prep Batch / Stream</label>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Prep Batch / Stream</label>
                             <select 
                               value={academicBatch}
                               onChange={(e) => setAcademicBatch(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             >
                               <option value="">Select Stream</option>
                               <option value="11th Standard Foundation">11th Standard Foundation</option>
@@ -896,11 +1028,11 @@ export default function DashboardClient({
                           </div>
 
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-455 mb-1 ml-2">Preferred Subject Focus</label>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Preferred Subject Focus</label>
                             <select 
                               value={preferredSubject}
                               onChange={(e) => setPreferredSubject(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             >
                               <option value="">Select Subject</option>
                               <option value="Mathematics">Mathematics</option>
@@ -908,6 +1040,56 @@ export default function DashboardClient({
                               <option value="Chemistry">Chemistry</option>
                               <option value="Full PCM Syllabus">Full PCM Syllabus</option>
                             </select>
+                          </div>
+                        </div>
+
+                        {/* NEW: Extended Dossier Parameters Section */}
+                        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-850/80 space-y-4">
+                          <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-350">Academic Dossier Indicators</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Daily Study hours</label>
+                              <input 
+                                type="text"
+                                value={dailyStudyHours}
+                                onChange={(e) => setDailyStudyHours(e.target.value)}
+                                placeholder="e.g. 8 Hours"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Syllabus Progress %</label>
+                              <input 
+                                type="text"
+                                value={syllabusProgress}
+                                onChange={(e) => setSyllabusProgress(e.target.value)}
+                                placeholder="e.g. 45%"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Test score average %</label>
+                              <input 
+                                type="text"
+                                value={testAverage}
+                                onChange={(e) => setTestAverage(e.target.value)}
+                                placeholder="e.g. 82%"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Academic Strength</label>
+                              <input 
+                                type="text"
+                                value={academicStrengths}
+                                onChange={(e) => setAcademicStrengths(e.target.value)}
+                                placeholder="e.g. Kinematics"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -919,7 +1101,7 @@ export default function DashboardClient({
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
-                                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-450"
+                                  className="text-xs font-bold text-emerald-600 dark:text-emerald-450"
                                 >
                                   {profileSuccess}
                                 </motion.span>
@@ -929,7 +1111,7 @@ export default function DashboardClient({
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
-                                  className="text-xs font-semibold text-rose-600 dark:text-rose-455"
+                                  className="text-xs font-bold text-rose-600 dark:text-rose-455"
                                 >
                                   {profileError}
                                 </motion.span>
@@ -944,7 +1126,7 @@ export default function DashboardClient({
                             disabled={profileLoading}
                             className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
                           >
-                            {profileLoading ? 'Updating...' : 'Save Profile Details'}
+                            {profileLoading ? 'Updating Dossier...' : 'Save Profile Dossier'}
                           </motion.button>
                         </div>
                       </form>
@@ -1014,6 +1196,157 @@ export default function DashboardClient({
           </div>
         </main>
       </div>
+
+      {/* MOBILE DRAWER SIDEBAR OVERLAY */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black backdrop-blur-sm z-50 md:hidden"
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-zinc-900 z-50 shadow-2xl p-6 flex flex-col justify-between md:hidden border-r border-zinc-200/50 dark:border-zinc-800/50"
+            >
+              <div className="space-y-8 flex flex-col h-full justify-between">
+                <div className="space-y-8">
+                  {/* Drawer Header */}
+                  <div className="flex justify-between items-center border-b border-zinc-150/40 dark:border-zinc-800/40 pb-4">
+                    <div className="flex items-center gap-2 select-none">
+                      {/* ASENTRA Vector Logo */}
+                      <svg className="w-28 h-6" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M76 16 C76 12, 56 12, 56 18 C56 24, 76 26, 76 32 C76 38, 56 38, 56 34" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M110 12 L92 12 L92 42 L110 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M92 27 L106 27" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M122 42 L122 12 L142 42 L142 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M152 12 L178 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M165 12 L165 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M198 26 L210 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M220 44 L236 10" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100" />
+                        <path d="M236 10 L252 44" stroke="#DC2626" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100" />
+                      </svg>
+                    </div>
+                    <button 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Drawer Navigation Links */}
+                  <nav className="space-y-3">
+                    {isTeacher ? (
+                      <>
+                        <button 
+                          onClick={() => { router.push('/dashboard?tab=courses'); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'MY_COURSES' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold shadow-sm' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <LayoutDashboard className="w-5 h-5 shrink-0" />
+                          <span>My Courses</span>
+                        </button>
+                        <button 
+                          onClick={() => { router.push('/dashboard?tab=roster'); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'ROSTER' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <Users className="w-5 h-5 shrink-0" />
+                          <span>Students Roster</span>
+                        </button>
+                        <button 
+                          onClick={() => { router.push('/profile'); setIsMobileMenuOpen(false); }}
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                        >
+                          <User className="w-5 h-5 shrink-0" />
+                          <span>My Profile</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => { router.push('/dashboard?tab=learning'); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'MY_LEARNING' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <BookOpenCheck className="w-5 h-5 shrink-0" />
+                          <span>My Learning</span>
+                        </button>
+                        <button 
+                          onClick={() => { router.push('/dashboard?tab=browse'); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'BROWSE' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <Search className="w-5 h-5 shrink-0" />
+                          <span>Browse Directory</span>
+                        </button>
+                        <button 
+                          onClick={() => { router.push('/profile'); setIsMobileMenuOpen(false); }}
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                        >
+                          <User className="w-5 h-5 shrink-0" />
+                          <span>My Profile</span>
+                        </button>
+                        <button 
+                          onClick={() => { router.push('/dashboard?tab=invoices'); setIsMobileMenuOpen(false); }}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'INVOICES' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <FileText className="w-5 h-5 shrink-0" />
+                          <span>Invoices Ledger</span>
+                        </button>
+                      </>
+                    )}
+                  </nav>
+                </div>
+
+                {/* Drawer Profile Capsule */}
+                <div className="border-t border-zinc-150/40 dark:border-zinc-800/50 pt-5 flex flex-col gap-3">
+                  <div className="flex items-center gap-3.5 px-2">
+                    <div className="w-11 h-11 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-extrabold shadow-sm shadow-blue-500/10 shrink-0 select-none">
+                      {displayName.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-sm font-black text-slate-800 dark:text-zinc-100 truncate tracking-tight">{displayName}</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-0.5">{displayRole}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* CREATE COURSE PANEL (SLIDE OVER DRAWER) */}
       <AnimatePresence>
