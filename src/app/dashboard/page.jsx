@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import DashboardClient from './DashboardClient'
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props) {
+  const searchParams = await props.searchParams
+  const checkoutCourseId = searchParams?.checkout || null
   const supabase = await createClient()
 
   // Retrieve authenticated user session
@@ -121,6 +123,7 @@ export default async function DashboardPage() {
       allCourses={allCourses}
       mockInvoices={mockInvoices}
       phoneNumber={phoneNumber}
+      checkoutCourseId={checkoutCourseId}
     />
   )
 }
