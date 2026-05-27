@@ -19,14 +19,8 @@ function AsentraLogo({ className = "w-48" }) {
 
   return (
     <div className={`flex flex-col items-center justify-center ${className} select-none`}>
-      {/* Circle Icon Mark */}
-      <svg className="w-14 h-14" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="42" stroke={strokeColor} strokeWidth="3" className="transition-colors duration-300" />
-        <path d="M28 66 L50 28 L72 66" stroke={strokeColor} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className="transition-colors duration-300" />
-      </svg>
-      
-      {/* Lettering Wordmark */}
-      <svg className="w-52 h-10 mt-3" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Lettering Wordmark ONLY (Removed the circular icon mark to improve visual legibility and space efficiency) */}
+      <svg className="w-52 h-10" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Custom drawn geometric letter 'A' */}
         <path d="M12 44 L28 10 L44 44" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-colors duration-300" />
         <path d="M20 32 L36 32" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" className="transition-colors duration-300" />
@@ -112,6 +106,34 @@ export default function Home() {
     }
   }
 
+  // Handle and present informative visual debug aids for standard Supabase/SMTP issues
+  const handleAuthError = (err, context = "Auth Error") => {
+    console.error(context + ":", err)
+    const msg = err.message || 'Failed to authenticate.'
+    
+    if (msg.toLowerCase().includes('confirmation email') || msg.toLowerCase().includes('smtp') || msg.toLowerCase().includes('rate limit')) {
+      setError(
+        <div className="space-y-2 text-left leading-normal">
+          <p className="font-extrabold text-[11px] text-rose-600">Error sending confirmation email (Supabase SMTP issue)</p>
+          <p className="text-[10px] text-rose-500 font-normal leading-relaxed">
+            This happens because the default Supabase email provider is rate-limited (3 signups/hour) or your Resend SMTP credentials are misconfigured.
+          </p>
+          <p className="text-[10px] text-slate-800 dark:text-slate-200 font-bold mt-2">
+            💡 To solve this immediately during testing:
+          </p>
+          <ul className="list-disc pl-4 text-[9.5px] text-slate-650 dark:text-slate-400 space-y-1 font-semibold">
+            <li>Open your <strong>Supabase Dashboard</strong> &rarr; <strong>Authentication</strong> &rarr; <strong>Providers</strong> &rarr; <strong>Email</strong>.</li>
+            <li>Toggle <strong>Confirm Email</strong> to <strong>OFF</strong>.</li>
+            <li>This automatically confirms all new signups instantly, bypassing email verification entirely!</li>
+          </ul>
+        </div>
+      )
+    } else {
+      setError(msg)
+    }
+    setShakeCount(prev => prev + 1)
+  }
+
   // Handle standard credential actions (Step 1)
   const handleAuthSubmit = async (e) => {
     e.preventDefault()
@@ -193,9 +215,7 @@ export default function Home() {
         }
       }
     } catch (err) {
-      console.error("Auth Error:", err)
-      setError(err.message || 'Failed to authenticate.')
-      setShakeCount(prev => prev + 1)
+      handleAuthError(err, "Auth Error")
     } finally {
       setLoading(false)
     }
@@ -245,9 +265,7 @@ export default function Home() {
         }, 1200)
       }
     } catch (err) {
-      console.error("Verification Error:", err)
-      setError(err.message || 'Invalid or expired verification code.')
-      setShakeCount(prev => prev + 1)
+      handleAuthError(err, "Verification Error")
     } finally {
       setLoading(false)
     }
@@ -749,10 +767,9 @@ export default function Home() {
                 
                 {/* Animated graphic asset display */}
                 <img 
-                  src="/auth_illustration.png" 
-                  alt="Asentra 3D Student Illustration" 
-                  className="w-full h-full object-contain relative z-10 drop-shadow-2xl animate-float"
-                  style={{ animationDuration: '6s' }}
+                  src="/academic_prosperity.png" 
+                  alt="ASENTRA Academic Prosperity" 
+                  className="w-full h-full object-cover rounded-2xl relative z-10 drop-shadow-2xl"
                   onError={(e) => {
                     // Fail-safe dynamic Vector blueprint drawing in case PNG asset is missing or blocked
                     e.target.style.display = 'none';
