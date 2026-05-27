@@ -28,12 +28,10 @@ export default function DashboardClient({
   const supabase = createClient()
   const [isPending, startTransition] = useTransition()
 
-  // Core active tab states derived directly from searchParams to avoid latency and polling loops
-  // Student tabs: 'MY_LEARNING' | 'BROWSE' | 'PROFILE' | 'INVOICES'
-  // Instructor tabs: 'MY_COURSES' | 'ROSTER' | 'PROFILE'
+  // Local reactive state for active tab to achieve 0ms transition latency between dashboard sections
   const isTeacher = profile.role === 'teacher'
-  const tabParam = searchParams.get('tab')
-  const activeTab = React.useMemo(() => {
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab')
     if (isTeacher) {
       if (tabParam === 'roster') return 'ROSTER'
       if (tabParam === 'profile') return 'PROFILE'
@@ -44,7 +42,39 @@ export default function DashboardClient({
       if (tabParam === 'profile') return 'PROFILE'
       return 'MY_LEARNING' // default
     }
-  }, [tabParam, isTeacher])
+  })
+
+  // Synchronize state back to browser URL bar in-place (0ms SPA-grade navigation)
+  const handleTabChange = (tabName, queryParam) => {
+    setActiveTab(tabName)
+    setIsMobileMenuOpen(false)
+    
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('tab', queryParam)
+      window.history.pushState(null, '', url.toString())
+    }
+  }
+
+  // React to browser back/forward buttons (Popstate event synchronization)
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const tabParam = urlParams.get('tab')
+      if (isTeacher) {
+        if (tabParam === 'roster') setActiveTab('ROSTER')
+        else if (tabParam === 'profile') setActiveTab('PROFILE')
+        else setActiveTab('MY_COURSES')
+      } else {
+        if (tabParam === 'browse') setActiveTab('BROWSE')
+        else if (tabParam === 'invoices') setActiveTab('INVOICES')
+        else if (tabParam === 'profile') setActiveTab('PROFILE')
+        else setActiveTab('MY_LEARNING')
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [isTeacher])
 
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
@@ -271,7 +301,7 @@ export default function DashboardClient({
               {isTeacher ? (
                 <>
                   <button 
-                    onClick={() => router.push('/dashboard?tab=courses')}
+                    onClick={() => handleTabChange('MY_COURSES', 'courses')}
                     className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'MY_COURSES' 
                         ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
@@ -282,7 +312,7 @@ export default function DashboardClient({
                     <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
                   </button>
                   <button 
-                    onClick={() => router.push('/dashboard?tab=roster')}
+                    onClick={() => handleTabChange('ROSTER', 'roster')}
                     className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'ROSTER' 
                         ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
@@ -293,8 +323,12 @@ export default function DashboardClient({
                     <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
                   </button>
                   <button 
-                    onClick={() => router.push('/profile')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                      activeTab === 'PROFILE' 
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                    }`}
                   >
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -303,7 +337,7 @@ export default function DashboardClient({
               ) : (
                 <>
                   <button 
-                    onClick={() => router.push('/dashboard?tab=learning')}
+                    onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                     className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'MY_LEARNING' 
                         ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
@@ -314,7 +348,7 @@ export default function DashboardClient({
                     <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
                   </button>
                   <button 
-                    onClick={() => router.push('/dashboard?tab=browse')}
+                    onClick={() => handleTabChange('BROWSE', 'browse')}
                     className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'BROWSE' 
                         ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
@@ -325,14 +359,18 @@ export default function DashboardClient({
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
                   </button>
                   <button 
-                    onClick={() => router.push('/profile')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                      activeTab === 'PROFILE' 
+                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                    }`}
                   >
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
                   <button 
-                    onClick={() => router.push('/dashboard?tab=invoices')}
+                    onClick={() => handleTabChange('INVOICES', 'invoices')}
                     className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
                       activeTab === 'INVOICES' 
                         ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
@@ -595,7 +633,7 @@ export default function DashboardClient({
                           <p className="text-xs text-zinc-400">Kickstart your skill upgrade today. Explore our available course catalogs!</p>
                         </div>
                         <button
-                          onClick={() => router.push('/dashboard?tab=browse')}
+                          onClick={() => handleTabChange('BROWSE', 'browse')}
                           className="px-5 py-2.5 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-xs rounded-full border border-[#FAF6F2]/60 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Browse Available Courses
@@ -1210,7 +1248,7 @@ export default function DashboardClient({
                     {isTeacher ? (
                       <>
                         <button 
-                          onClick={() => { router.push('/dashboard?tab=courses'); setIsMobileMenuOpen(false); }}
+                          onClick={() => handleTabChange('MY_COURSES', 'courses')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_COURSES' 
                               ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold shadow-sm' 
@@ -1221,7 +1259,7 @@ export default function DashboardClient({
                           <span>My Courses</span>
                         </button>
                         <button 
-                          onClick={() => { router.push('/dashboard?tab=roster'); setIsMobileMenuOpen(false); }}
+                          onClick={() => handleTabChange('ROSTER', 'roster')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ROSTER' 
                               ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
@@ -1232,8 +1270,12 @@ export default function DashboardClient({
                           <span>Students Roster</span>
                         </button>
                         <button 
-                          onClick={() => { router.push('/profile'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          onClick={() => handleTabChange('PROFILE', 'profile')}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'PROFILE' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
                         >
                           <User className="w-5 h-5 shrink-0" />
                           <span>My Profile</span>
@@ -1242,10 +1284,10 @@ export default function DashboardClient({
                     ) : (
                       <>
                         <button 
-                          onClick={() => { router.push('/dashboard?tab=learning'); setIsMobileMenuOpen(false); }}
+                          onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1253,10 +1295,10 @@ export default function DashboardClient({
                           <span>My Learning</span>
                         </button>
                         <button 
-                          onClick={() => { router.push('/dashboard?tab=browse'); setIsMobileMenuOpen(false); }}
+                          onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1264,14 +1306,18 @@ export default function DashboardClient({
                           <span>Browse Directory</span>
                         </button>
                         <button 
-                          onClick={() => { router.push('/profile'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          onClick={() => handleTabChange('PROFILE', 'profile')}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'PROFILE' 
+                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
                         >
                           <User className="w-5 h-5 shrink-0" />
                           <span>My Profile</span>
                         </button>
                         <button 
-                          onClick={() => { router.push('/dashboard?tab=invoices'); setIsMobileMenuOpen(false); }}
+                          onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
                               ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
