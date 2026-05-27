@@ -877,22 +877,11 @@ export default function DashboardClient({
                               {/* Card Content Section */}
                               <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                                 <div className="space-y-3">
-                                  {/* Title & Language Row */}
+                                  {/* Title Row */}
                                   <div className="flex items-start justify-between gap-2.5">
                                     <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-150 leading-snug line-clamp-2">
                                       {course.title}
                                     </h4>
-                                    <div className="flex items-center gap-1.5 shrink-0 mt-0.5 select-none">
-                                      <span className="bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-400 text-[9px] px-2 py-0.5 rounded font-black tracking-wide">
-                                        {language}
-                                      </span>
-                                      {/* WhatsApp capsule */}
-                                      <div className="w-5 h-5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500 cursor-pointer hover:scale-105 transition-transform">
-                                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                                          <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.371a9.936 9.936 0 004.777 1.21h.005c5.505 0 9.989-4.478 9.99-9.984A9.97 9.97 0 0012.012 2zm5.78 14.101c-.273.767-1.355 1.396-1.854 1.488-.475.088-.934.331-3.034-.5-2.684-1.06-4.385-3.83-4.521-4.01-.132-.18-1.077-1.431-1.077-2.729 0-1.298.675-1.936.915-2.195.24-.259.525-.324.7-.324.175 0 .35 0 .5.013.159.009.373-.062.584.45.22.535.751 1.831.816 1.966.065.132.109.288.022.463-.088.175-.132.282-.263.435-.132.153-.276.341-.393.458-.132.132-.271.276-.118.539.153.263.682 1.118 1.464 1.815.998.89 1.838 1.164 2.1.132.263-.132.569-.307.744-.45.175-.143.35-.123.525-.062s1.107.525 1.298.621c.191.096.319.143.366.223.048.08.048.463-.225 1.23z"/>
-                                        </svg>
-                                      </div>
-                                    </div>
                                   </div>
 
                                   {/* Description line */}
