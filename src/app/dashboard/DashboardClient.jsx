@@ -5,13 +5,13 @@ import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Script from 'next/script'
 import { 
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
   ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu
 } from 'lucide-react'
-import { initiateRazorpayCheckout } from '@/utils/payment'
 
 export default function DashboardClient({ 
   user, 
@@ -117,6 +117,7 @@ export default function DashboardClient({
   // Enrollment Action States
   const [enrollLoadingId, setEnrollLoadingId] = useState(null)
   const [enrollError, setEnrollError] = useState('')
+  const [checkoutLoadingId, setCheckoutLoadingId] = useState(null)
 
   // Filtered Course Directory for Student Search
   const filteredDirectory = directory.filter(course => {
@@ -209,6 +210,107 @@ export default function DashboardClient({
       setEnrollError(err.message || 'Failed to enroll in course. Please try again.')
     } finally {
       setEnrollLoadingId(null)
+    }
+  }
+
+  // Handle Secure Razorpay checkout and enrollment directly inside the student dashboard
+  const handleRazorpayCheckout = async (course) => {
+    setCheckoutLoadingId(course.id)
+    try {
+      // Step A: Fetch order creation parameters from secure server-side API
+      const orderResponse = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: course.id,
+          price: course.price
+        })
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderResponse.ok || orderData.error) {
+        throw new Error(orderData.error || 'Failed to initialize transaction order ID.')
+      }
+
+      // Step B: Configure Razorpay JS Checkout Overlay options
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_SuSd4sFUgQBxn0',
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'ASENTRA ACADEMY',
+        description: course.title,
+        order_id: orderData.id,
+        theme: {
+          color: '#2563EB' // Deep blue theme accent
+        },
+        prefill: {
+          email: user.email,
+          contact: profile.phone || ''
+        },
+        // Step C: Razorpay payment transaction completed handler
+        handler: async function (response) {
+          try {
+            setCheckoutLoadingId(course.id)
+            
+            // Call server-side route to securely verify signatures and persist enrollment
+            const verifyResponse = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                courseId: course.id,
+                userId: user.id
+              })
+            })
+
+            const verifyResult = await verifyResponse.json()
+
+            if (verifyResponse.ok && verifyResult.success) {
+              alert('Enrollment Successful! Welcome to ASENTRA Academy.')
+              
+              // Upsert enrollment in local state instantly for 0ms reactive UI update
+              const newEnroll = {
+                id: response.razorpay_payment_id,
+                user_id: user.id,
+                course_id: course.id,
+                status: 'active',
+                enrolled_at: new Date().toISOString(),
+                courses: course,
+                profiles: profile
+              }
+              setEnrollments(prev => [newEnroll, ...prev])
+              
+              // Trigger a server-side route refresh to sync standard server cached states
+              startTransition(() => {
+                router.refresh()
+              })
+            } else {
+              alert('Signature verification failed: ' + (verifyResult.error || 'Potential transaction mismatch.'))
+            }
+          } catch (verifyErr) {
+            console.error('Signature Verification Error:', verifyErr)
+            alert('An error occurred during transaction validation: ' + verifyErr.message)
+          } finally {
+            setCheckoutLoadingId(null)
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setCheckoutLoadingId(null)
+          }
+        }
+      }
+
+      // Step D: Open official Razorpay modal directly
+      const razorpayObject = new window.Razorpay(options)
+      razorpayObject.open()
+    } catch (err) {
+      console.error('Razorpay Checkout failed:', err)
+      alert(err.message || 'Failed to initialize payment gateway. Check network.')
+      setCheckoutLoadingId(null)
     }
   }
 
@@ -729,7 +831,10 @@ export default function DashboardClient({
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredDirectory.map((course) => {
                           const enrolled = checkIsEnrolled(course.id)
-                          const loading = enrollLoadingId === course.id
+                          const loading = enrollLoadingId === course.id || checkoutLoadingId === course.id
+                          const isFree = Number(course.price) === 0
+                          const originalPrice = course.original_price || (course.price > 0 ? course.price * 1.25 : 0)
+                          
                           return (
                             <motion.div
                               key={course.id}
@@ -737,9 +842,23 @@ export default function DashboardClient({
                               className="p-6 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[190px] transition-all"
                             >
                               <div className="space-y-2">
-                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#F6E5D8]/60 dark:bg-zinc-800 text-[#5C3F2F] dark:text-zinc-300 rounded-full">
-                                  Course
-                                </span>
+                                <div className="flex justify-between items-center w-full">
+                                  <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#F6E5D8]/60 dark:bg-zinc-800 text-[#5C3F2F] dark:text-zinc-300 rounded-full">
+                                    Course
+                                  </span>
+                                  {!enrolled && (
+                                    <div className="flex items-center gap-1.5 select-none">
+                                      {!isFree && originalPrice > course.price && (
+                                        <span className="text-[10px] text-zinc-400 line-through">
+                                          ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
+                                        </span>
+                                      )}
+                                      <span className="text-xs font-black text-blue-600 dark:text-blue-400">
+                                        {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                                 <h4 className="text-base font-black text-[#3A251B] dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
                                 <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                   {course.description || 'No description provided.'}
@@ -762,7 +881,7 @@ export default function DashboardClient({
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
                                       if (course.price > 0) {
-                                        router.push('/courses')
+                                        handleRazorpayCheckout(course)
                                       } else {
                                         handleEnroll(course.id)
                                       }
@@ -1464,6 +1583,12 @@ export default function DashboardClient({
           </>
         )}
       </AnimatePresence>
+
+      {/* Official script loader injected lazily to optimize hydration performance */}
+      <Script 
+        src="https://checkout.razorpay.com/v1/checkout.js" 
+        strategy="lazyOnload" 
+      />
 
     </div>
   )
