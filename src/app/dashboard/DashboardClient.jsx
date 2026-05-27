@@ -754,41 +754,95 @@ export default function DashboardClient({
                         </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {enrollments.map((enroll) => {
                           const course = enroll.courses
                           if (!course) return null
+                          
+                          const thumbUrl = getThumbnailUrl(course)
+                          const aspirantInfo = course.aspirant_info || (course.level === 'advanced' ? 'For JEE Advanced Aspirants' : 'For IIT-JEE Aspirants')
+                          const batchInfo = course.batch_info || 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
+
                           return (
-                            <motion.div
+                            <motion.div 
                               key={enroll.id}
-                              whileHover={{ y: -4 }}
-                              className="p-6 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
+                              whileHover={{ y: -6 }}
+                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-[2.5rem] overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group min-h-[500px]"
                             >
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-start">
-                                  <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
-                                    Enrolled
-                                  </span>
-                                  <span className="text-[10px] text-zinc-400">
-                                    Enrolled {new Date(enroll.enrolled_at).toLocaleDateString()}
-                                  </span>
-                                </div>
-                                <h4 className="text-base font-black text-[#3A251B] dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
-                                <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                                  {course.description || 'No description provided.'}
-                                </p>
-                              </div>
-                              <div className="border-t border-zinc-150/40 dark:border-zinc-800/40 pt-4 mt-4 flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  <span>Self-paced</span>
+                              {/* Premium Widescreen Banner Image Header */}
+                              <div className="w-full h-48 overflow-hidden relative shrink-0">
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/20 via-transparent to-transparent z-10" />
+                                <img 
+                                  src={thumbUrl} 
+                                  alt={course.title}
+                                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                                />
+                                <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
+                                  Enrolled
                                 </span>
-                                <button 
-                                  className="flex items-center gap-1 text-[10px] font-extrabold text-[#B37E5F] dark:text-indigo-400 hover:underline cursor-pointer"
-                                >
-                                  <span>Resume Syllabi</span>
-                                  <ArrowRight className="w-3 h-3" />
-                                </button>
+                              </div>
+
+                              {/* Card Content Section */}
+                              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                <div className="space-y-3">
+                                  {/* Title Row */}
+                                  <div className="flex items-start justify-between gap-2.5">
+                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-150 leading-snug line-clamp-2">
+                                      {course.title}
+                                    </h4>
+                                  </div>
+
+                                  {/* Description line */}
+                                  <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                    {course.description || 'No description provided.'}
+                                  </p>
+
+                                  {/* Detail metadata list */}
+                                  <div className="space-y-1.5 pt-2 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                    <div className="flex items-center gap-2">
+                                      <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
+                                      <span>{aspirantInfo}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                      </svg>
+                                      <span>{batchInfo}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Access Granted Row & Action Buttons */}
+                                <div className="space-y-4 pt-1">
+                                  <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-3 select-none">
+                                    <div className="flex items-center gap-1.5">
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                      <span className="text-xs font-black text-emerald-650 dark:text-emerald-455">
+                                        Access Granted
+                                      </span>
+                                    </div>
+                                    <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">
+                                      {new Date(enroll.enrolled_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+
+                                  {/* Dual CTAs Grid */}
+                                  <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
+                                    <button
+                                      onClick={() => handleTabChange('PROFILE', 'profile')}
+                                      className="border border-blue-600 hover:bg-blue-50/50 dark:border-blue-500/70 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                    >
+                                      MY DOSSIER
+                                    </button>
+                                    
+                                    <button
+                                      className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                    >
+                                      <span>RESUME SYLLABI</span>
+                                      <ArrowRight className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                             </motion.div>
                           )
