@@ -13,6 +13,18 @@ import {
   ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu
 } from 'lucide-react'
 
+const getThumbnailUrl = (course) => {
+  if (course.thumbnail_url) return course.thumbnail_url
+  
+  // Dynamic academic fallback covers matching course difficulty level
+  const defaultThumbs = {
+    foundation: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80',
+    mains: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
+    advanced: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80'
+  }
+  return defaultThumbs[course.level] || defaultThumbs.foundation
+}
+
 export default function DashboardClient({ 
   user, 
   profile, 
@@ -828,77 +840,145 @@ export default function DashboardClient({
                         <p className="text-xs text-zinc-450 dark:text-zinc-450 font-semibold">No courses matched your query. Try searching for other key phrases!</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredDirectory.map((course) => {
                           const enrolled = checkIsEnrolled(course.id)
                           const loading = enrollLoadingId === course.id || checkoutLoadingId === course.id
                           const isFree = Number(course.price) === 0
-                          const originalPrice = course.original_price || (course.price > 0 ? course.price * 1.25 : 0)
+                          const thumbUrl = getThumbnailUrl(course)
                           
+                          // Custom mapped details for high-fidelity visual matching with Image 2
+                          const language = course.language || 'Hinglish'
+                          const aspirantInfo = course.aspirant_info || (course.level === 'advanced' ? 'For JEE Advanced Aspirants' : 'For IIT-JEE Aspirants')
+                          const batchInfo = course.batch_info || 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
+                          const originalPrice = course.original_price || (course.price > 0 ? course.price * 1.25 : 0)
+
                           return (
-                            <motion.div
+                            <motion.div 
                               key={course.id}
-                              whileHover={{ y: -4 }}
-                              className="p-6 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[190px] transition-all"
+                              whileHover={{ y: -6 }}
+                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-[2.5rem] overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group min-h-[540px]"
                             >
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center w-full">
-                                  <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#F6E5D8]/60 dark:bg-zinc-800 text-[#5C3F2F] dark:text-zinc-300 rounded-full">
-                                    Course
+                              {/* Premium Widescreen Banner Image Header */}
+                              <div className="w-full h-48 overflow-hidden relative shrink-0">
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/20 via-transparent to-transparent z-10" />
+                                <img 
+                                  src={thumbUrl} 
+                                  alt={course.title}
+                                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                                />
+                                {enrolled && (
+                                  <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
+                                    Enrolled
                                   </span>
-                                  {!enrolled && (
-                                    <div className="flex items-center gap-1.5 select-none">
-                                      {!isFree && originalPrice > course.price && (
-                                        <span className="text-[10px] text-zinc-400 line-through">
-                                          ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
-                                        </span>
-                                      )}
-                                      <span className="text-xs font-black text-blue-600 dark:text-blue-400">
+                                )}
+                              </div>
+
+                              {/* Card Content Section */}
+                              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                <div className="space-y-3">
+                                  {/* Title & Language Row */}
+                                  <div className="flex items-start justify-between gap-2.5">
+                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-150 leading-snug line-clamp-2">
+                                      {course.title}
+                                    </h4>
+                                    <div className="flex items-center gap-1.5 shrink-0 mt-0.5 select-none">
+                                      <span className="bg-slate-100 dark:bg-zinc-800 text-slate-650 dark:text-zinc-400 text-[9px] px-2 py-0.5 rounded font-black tracking-wide">
+                                        {language}
+                                      </span>
+                                      {/* WhatsApp capsule */}
+                                      <div className="w-5 h-5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500 cursor-pointer hover:scale-105 transition-transform">
+                                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                          <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.371a9.936 9.936 0 004.777 1.21h.005c5.505 0 9.989-4.478 9.99-9.984A9.97 9.97 0 0012.012 2zm5.78 14.101c-.273.767-1.355 1.396-1.854 1.488-.475.088-.934.331-3.034-.5-2.684-1.06-4.385-3.83-4.521-4.01-.132-.18-1.077-1.431-1.077-2.729 0-1.298.675-1.936.915-2.195.24-.259.525-.324.7-.324.175 0 .35 0 .5.013.159.009.373-.062.584.45.22.535.751 1.831.816 1.966.065.132.109.288.022.463-.088.175-.132.282-.263.435-.132.153-.276.341-.393.458-.132.132-.271.276-.118.539.153.263.682 1.118 1.464 1.815.998.89 1.838 1.164 2.1.132.263-.132.569-.307.744-.45.175-.143.35-.123.525-.062s1.107.525 1.298.621c.191.096.319.143.366.223.048.08.048.463-.225 1.23z"/>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Description line */}
+                                  <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                    {course.description || 'No description provided.'}
+                                  </p>
+
+                                  {/* Detail metadata list */}
+                                  <div className="space-y-1.5 pt-2 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                    <div className="flex items-center gap-2">
+                                      <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
+                                      <span>{aspirantInfo}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                      </svg>
+                                      <span>{batchInfo}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Cost Row & Action Buttons */}
+                                <div className="space-y-4 pt-1">
+                                  <div className="space-y-0.5 border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
+                                    <div className="flex items-center gap-2 flex-wrap select-none">
+                                      <span className="text-xl font-black text-slate-900 dark:text-zinc-100">
                                         {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
                                       </span>
+                                      {!isFree && originalPrice > course.price && (
+                                        <>
+                                          <span className="text-[10px] font-semibold text-slate-400 line-through mt-0.5">
+                                            ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
+                                          </span>
+                                          <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wide border border-emerald-100/10">
+                                            Discount of {Math.round(((originalPrice - course.price) / originalPrice) * 100)}% applied
+                                          </span>
+                                        </>
+                                      )}
                                     </div>
-                                  )}
-                                </div>
-                                <h4 className="text-base font-black text-[#3A251B] dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
-                                <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                                  {course.description || 'No description provided.'}
-                                </p>
-                              </div>
-                              <div className="border-t border-zinc-150/40 dark:border-zinc-800/40 pt-4 mt-4 flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
-                                  <User className="w-3.5 h-3.5" />
-                                  <span>{course.profiles?.full_name || 'Platform Faculty'}</span>
-                                </span>
-                                
-                                {enrolled ? (
-                                  <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-450 select-none">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                    <span>Registered</span>
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                                      (FOR FULL BATCH)
+                                    </p>
                                   </div>
-                                ) : (
-                                  <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={() => {
-                                      if (course.price > 0) {
-                                        handleRazorpayCheckout(course)
-                                      } else {
-                                        handleEnroll(course.id)
-                                      }
-                                    }}
-                                    disabled={loading}
-                                    className="flex items-center gap-1 px-4.5 py-2 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:bg-gradient-to-r dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-[10px] rounded-full border border-[#FAF6F2]/60 dark:border-transparent shadow-sm cursor-pointer disabled:opacity-50 select-none transition-all"
-                                  >
-                                    {loading ? (
-                                      <Loader2 className="w-3 h-3 animate-spin" />
+
+                                  {/* Dual CTAs Grid */}
+                                  <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
+                                    <button
+                                      onClick={() => handleTabChange('MY_LEARNING', 'learning')}
+                                      className="border border-blue-600 hover:bg-blue-50/50 dark:border-blue-500/70 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                    >
+                                      EXPLORE
+                                    </button>
+                                    
+                                    {enrolled ? (
+                                      <div className="flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider select-none">
+                                        <CheckCircle2 className="w-3.5 h-3.5 animate-pulse" />
+                                        <span>Registered</span>
+                                      </div>
+                                    ) : isFree ? (
+                                      <button
+                                        onClick={() => handleEnroll(course.id)}
+                                        disabled={loading}
+                                        className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+                                      >
+                                        {loading ? (
+                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        ) : (
+                                          <span>ENROLL FREE</span>
+                                        )}
+                                      </button>
                                     ) : (
-                                      <>
-                                        <span>Enroll Now</span>
-                                        <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
-                                      </>
+                                      <button
+                                        onClick={() => handleRazorpayCheckout(course)}
+                                        disabled={loading}
+                                        className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/10"
+                                      >
+                                        {loading ? (
+                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        ) : (
+                                          <span>BUY NOW</span>
+                                        )}
+                                      </button>
                                     )}
-                                  </motion.button>
-                                )}
+                                  </div>
+                                </div>
                               </div>
                             </motion.div>
                           )
