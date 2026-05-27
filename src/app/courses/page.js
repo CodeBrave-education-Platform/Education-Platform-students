@@ -323,7 +323,6 @@ export default function CoursesPage() {
               const isFree = Number(course.price) === 0
               const thumbUrl = getThumbnailUrl(course)
               const isCheckingOut = checkoutLoadingId === course.id
-              const isOffline = course.ribbon === 'OFFLINE'
 
               return (
                 <div 
@@ -338,11 +337,7 @@ export default function CoursesPage() {
                       alt={course.title}
                       className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
                     />
-                    
-                    {/* Ribbon Indicator at Top-Left */}
-                    <div className={`absolute top-0 left-0 text-white text-[9px] font-black px-3.5 py-1.5 rounded-br-2xl uppercase tracking-widest z-20 ${isOffline ? 'bg-red-600' : 'bg-blue-600'}`}>
-                      {course.ribbon || 'ONLINE'}
-                    </div>
+
                   </div>
 
                   {/* Card Content Section */}
