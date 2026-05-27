@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes'
 import { 
   Mail, Phone, Lock, Eye, EyeOff, KeyRound, Loader2, 
   ArrowRight, AlertCircle, Sparkles, User, CheckCircle2, 
-  Sun, Moon, ShieldAlert
+  Sun, Moon
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -41,7 +41,7 @@ function AsentraLogo({ className = "w-48" }) {
         
         {/* Custom drawn geometric letter 'R' */}
         <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26 L188 26" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-colors duration-300" />
-        <path d="M198 26 L210 42" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-colors duration-300" />
+        <path d="M198 26 L210 42" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" className="transition-colors duration-300" />
         
         {/* Custom drawn geometric letter 'A' with RED accented leg */}
         <path d="M220 44 L236 10" stroke={strokeColor} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-colors duration-300" />
@@ -55,6 +55,238 @@ function AsentraLogo({ className = "w-48" }) {
         IIT JEE Mains <span className="text-red-500">•</span> Advanced <span className="text-red-500">•</span> Foundations
       </div>
     </div>
+  )
+}
+
+// Interactive Pencil-Hugging Student Cartoon Illustration (Vector SVG)
+function InteractiveStudent({ 
+  focusedInput, 
+  isWriting, 
+  charCount, 
+  errorShakeKey, 
+  isSuccess 
+}) {
+  const isPasswordFocused = focusedInput === 'password' || focusedInput === 'confirmpass'
+  const isInputFocused = focusedInput && !isPasswordFocused
+
+  // Pupil coordinate calculations based on focus state and text character length
+  let pupilX = 0
+  let pupilY = 0
+
+  if (isInputFocused) {
+    // Look left towards the login form, and slide slightly right as they type
+    pupilY = 1.5
+    const baseLookLeft = -4.5
+    const typeAdvance = Math.min(charCount * 0.15, 3)
+    pupilX = baseLookLeft + typeAdvance
+  }
+
+  // Animation variants for wiggling/writing pencil
+  const pencilVariants = {
+    idle: { y: 0, rotate: 0 },
+    writing: {
+      x: [0, -1, 1, -1, 1, 0],
+      y: [0, 1.5, -1, 1.5, 0],
+      rotate: [0, -0.5, 0.5, -0.5, 0],
+      transition: { duration: 0.3, repeat: Infinity, ease: "easeInOut" }
+    }
+  }
+
+  // Animation variants for head shaking on error input
+  const headVariants = {
+    idle: { x: 0, rotate: 0 },
+    shake: {
+      x: [0, -7, 7, -7, 7, -4, 4, 0],
+      rotate: [0, -3, 3, -3, 3, -1.5, 1.5, 0],
+      transition: { duration: 0.5, ease: "easeInOut" }
+    }
+  }
+
+  // Success celebration variants
+  const bodyVariants = {
+    idle: { y: 0 },
+    celebrate: {
+      y: [0, -15, 0, -8, 0],
+      transition: { duration: 0.6, ease: "easeOut" }
+    }
+  }
+
+  return (
+    <motion.div 
+      className="relative w-full h-full max-w-[280px] flex items-center justify-center select-none"
+      animate={isSuccess ? "celebrate" : "idle"}
+      variants={bodyVariants}
+    >
+      <svg 
+        className="w-full h-auto overflow-visible" 
+        viewBox="0 0 300 380" 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Shadow base circle */}
+        <ellipse cx="140" cy="335" rx="55" ry="10" fill="#EADCC9" opacity="0.8" />
+
+        {/* 1. THE GIANT HUGGED PENCIL */}
+        <motion.g
+          animate={isWriting ? "writing" : "idle"}
+          variants={pencilVariants}
+          className="origin-bottom"
+        >
+          {/* Pencil Body Yellow/Cream */}
+          <path 
+            d="M170 50 L204 50 L204 260 L170 260 Z" 
+            fill="#EAD6B5" 
+            stroke="#1E293B" 
+            strokeWidth="4" 
+            strokeLinejoin="round" 
+          />
+          {/* Pencil stripes */}
+          <line x1="181" y1="50" x2="181" y2="260" stroke="#1E293B" strokeWidth="3" />
+          <line x1="193" y1="50" x2="193" y2="260" stroke="#1E293B" strokeWidth="3" />
+          
+          {/* Pencil Top Bevel Wood Cap */}
+          <path 
+            d="M170 50 L187 25 L204 50 Z" 
+            fill="#FFF" 
+            stroke="#1E293B" 
+            strokeWidth="4" 
+            strokeLinejoin="round" 
+          />
+          {/* Sharp lead tip */}
+          <polygon points="183,32 187,25 191,32" fill="#1E293B" />
+
+          {/* Pencil Bottom Sharpened Wood Point */}
+          <path 
+            d="M170 260 L187 298 L204 260 Z" 
+            fill="#EADCC9" 
+            stroke="#1E293B" 
+            strokeWidth="4" 
+            strokeLinejoin="round" 
+          />
+          {/* Graphite Lead Tip */}
+          <polygon points="182,286 187,298 192,286" fill="#1E293B" />
+        </motion.g>
+
+        {/* 2. THE STUDENT CHARACTER */}
+        {/* Legs / Trousers */}
+        <rect x="94" y="220" width="56" height="100" rx="4" fill="#EAE2D5" stroke="#1E293B" strokeWidth="4" />
+        <line x1="122" y1="220" x2="122" y2="310" stroke="#1E293B" strokeWidth="4" />
+        
+        {/* Feet / Shoes */}
+        <path d="M84 320 C84 312, 114 312, 114 320 Z" fill="#1E293B" />
+        <path d="M130 320 C130 312, 160 312, 160 320 Z" fill="#1E293B" />
+
+        {/* Torso / Shirt */}
+        <rect x="86" y="140" width="72" height="90" rx="5" fill="#FAF6EE" stroke="#1E293B" strokeWidth="4" />
+
+        {/* Arms wrapped around pencil */}
+        <motion.g
+          animate={isWriting ? "writing" : "idle"}
+          variants={pencilVariants}
+        >
+          {/* Arm 1 (Upper) */}
+          <path 
+            d="M110 160 Q145 150, 185 160" 
+            fill="none" 
+            stroke="#1E293B" 
+            strokeWidth="4.5" 
+            strokeLinecap="round" 
+          />
+          {/* Hand 1 */}
+          <circle cx="184" cy="160" r="7" fill="#FAF6EE" stroke="#1E293B" strokeWidth="3" />
+
+          {/* Arm 2 (Lower) */}
+          <path 
+            d="M110 185 Q145 178, 185 188" 
+            fill="none" 
+            stroke="#1E293B" 
+            strokeWidth="4.5" 
+            strokeLinecap="round" 
+          />
+          {/* Hand 2 */}
+          <circle cx="184" cy="188" r="7" fill="#FAF6EE" stroke="#1E293B" strokeWidth="3" />
+        </motion.g>
+
+        {/* 3. HEAD & ANIME EXPRESSIONS GROUP */}
+        <motion.g
+          key={errorShakeKey}
+          animate="shake"
+          initial="idle"
+          variants={headVariants}
+          className="origin-center"
+          style={{ originX: "122px", originY: "105px" }}
+        >
+          {/* Ears */}
+          <circle cx="86" cy="105" r="7" fill="#FAF6EE" stroke="#1E293B" strokeWidth="4" />
+          <circle cx="158" cy="105" r="7" fill="#FAF6EE" stroke="#1E293B" strokeWidth="4" />
+
+          {/* Face */}
+          <circle cx="122" cy="105" r="36" fill="#FAF6EE" stroke="#1E293B" strokeWidth="4" />
+
+          {/* Beanie Hat */}
+          <path d="M86 95 C86 58, 158 58, 158 95 Z" fill="#EAE2D5" stroke="#1E293B" strokeWidth="4" />
+          {/* Hat Ribs */}
+          <line x1="104" y1="67" x2="104" y2="95" stroke="#1E293B" strokeWidth="3.5" />
+          <line x1="122" y1="64" x2="122" y2="95" stroke="#1E293B" strokeWidth="3.5" />
+          <line x1="140" y1="67" x2="140" y2="95" stroke="#1E293B" strokeWidth="3.5" />
+          
+          {/* Round Glasses frames */}
+          <circle cx="106" cy="112" r="14" fill="none" stroke="#1E293B" strokeWidth="3.5" />
+          <circle cx="138" cy="112" r="14" fill="none" stroke="#1E293B" strokeWidth="3.5" />
+          <line x1="120" y1="112" x2="124" y2="112" stroke="#1E293B" strokeWidth="4" />
+
+          {/* Dynamic Eye state render */}
+          {isPasswordFocused ? (
+            // Adorable Closed smile eyes (Winks ^^ representing secrecy)
+            <>
+              <path d="M99 114 Q106 107, 113 114" fill="none" stroke="#1E293B" strokeWidth="3.5" strokeLinecap="round" />
+              <path d="M131 114 Q138 107, 145 114" fill="none" stroke="#1E293B" strokeWidth="3.5" strokeLinecap="round" />
+            </>
+          ) : (
+            // Round pupils with gaze tracking
+            <>
+              <motion.circle 
+                cx={106 + pupilX} 
+                cy={112 + pupilY} 
+                r="3" 
+                fill="#1E293B" 
+                animate={{ x: pupilX, y: pupilY }}
+                transition={{ type: "spring", stiffness: 150, damping: 15 }}
+              />
+              <motion.circle 
+                cx={138 + pupilX} 
+                cy={112 + pupilY} 
+                r="3" 
+                fill="#1E293B" 
+                animate={{ x: pupilX, y: pupilY }}
+                transition={{ type: "spring", stiffness: 150, damping: 15 }}
+              />
+            </>
+          )}
+
+          {/* Nose */}
+          <path d="M122 112 Q125 116 122 118" fill="none" stroke="#1E293B" strokeWidth="3" />
+
+          {/* Smiling Mouth */}
+          <path 
+            d="M114 127 Q122 133, 130 127" 
+            fill="none" 
+            stroke="#1E293B" 
+            strokeWidth="3.5" 
+            strokeLinecap="round" 
+          />
+        </motion.g>
+
+        {/* Sparkle details floating when success */}
+        {isSuccess && (
+          <g>
+            <motion.circle cx="80" cy="50" r="4" fill="#3B82F6" initial={{ scale: 0 }} animate={{ scale: [0, 1.5, 0], y: -50 }} transition={{ duration: 1, repeat: Infinity }} />
+            <motion.circle cx="210" cy="30" r="5" fill="#EC4899" initial={{ scale: 0 }} animate={{ scale: [0, 1.5, 0], y: -45 }} transition={{ duration: 1.2, repeat: Infinity }} />
+            <motion.circle cx="140" cy="20" r="3" fill="#10B981" initial={{ scale: 0 }} animate={{ scale: [0, 1.5, 0], y: -60 }} transition={{ duration: 0.8, repeat: Infinity }} />
+          </g>
+        )}
+      </svg>
+    </motion.div>
   )
 }
 
@@ -88,14 +320,24 @@ export default function Home() {
   const [success, setSuccess] = useState('')
   const [shakeCount, setShakeCount] = useState(0)
 
+  // Interactive Illustration State Managers
+  const [focusedInput, setFocusedInput] = useState(null)
+  const [isWriting, setIsWriting] = useState(false)
+  const [charCount, setCharCount] = useState(0)
+  const [errorShakeKey, setErrorShakeKey] = useState(0)
+  const [writingTimeout, setWritingTimeout] = useState(null)
+
   useEffect(() => {
     document.title = "Asentra | Portal"
     setMounted(true)
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 1200)
-    return () => clearTimeout(timer)
-  }, [])
+    return () => {
+      clearTimeout(timer)
+      if (writingTimeout) clearTimeout(writingTimeout)
+    }
+  }, [writingTimeout])
 
   // Framer Motion Shake Animation Variants
   const cardVariants = {
@@ -106,11 +348,22 @@ export default function Home() {
     }
   }
 
-  // Handle and present informative visual debug aids for standard Supabase/SMTP issues
+  // Wiggle illustration hands/pencil on typing
+  const triggerWriting = () => {
+    setIsWriting(true)
+    if (writingTimeout) clearTimeout(writingTimeout)
+    const timeout = setTimeout(() => setIsWriting(false), 300)
+    setWritingTimeout(timeout)
+  }
+
+  // Handle informative SMTP visual debugger or default errors
   const handleAuthError = (err, context = "Auth Error") => {
     console.error(context + ":", err)
     const msg = err.message || 'Failed to authenticate.'
     
+    // Increment shake keys to trigger the character's head shake animation
+    setErrorShakeKey(prev => prev + 1)
+
     if (msg.toLowerCase().includes('confirmation email') || msg.toLowerCase().includes('smtp') || msg.toLowerCase().includes('rate limit')) {
       setError(
         <div className="space-y-2 text-left leading-normal">
@@ -290,9 +543,7 @@ export default function Home() {
 
       if (oauthError) throw oauthError
     } catch (err) {
-      console.error("Google Auth Error:", err)
-      setError(err.message || 'Failed to initiate Google sign-in.')
-      setShakeCount(prev => prev + 1)
+      handleAuthError(err, "Google Auth Error")
     } finally {
       setLoading(false)
     }
@@ -378,7 +629,7 @@ export default function Home() {
                     }}
                     className={`flex-1 text-center py-2.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
                       activeTab === 'register'
-                        ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                        ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-450 shadow-sm'
                         : 'text-slate-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-zinc-200'
                     }`}
                   >
@@ -413,7 +664,16 @@ export default function Home() {
                           type="text"
                           required
                           value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
+                          onFocus={() => {
+                            setFocusedInput('fullname')
+                            setCharCount(fullName.length)
+                          }}
+                          onBlur={() => setFocusedInput(null)}
+                          onChange={(e) => {
+                            setFullName(e.target.value)
+                            setCharCount(e.target.value.length)
+                            triggerWriting()
+                          }}
                           placeholder="Dr. Sarah Jenkins"
                           disabled={loading}
                           className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
@@ -436,7 +696,16 @@ export default function Home() {
                         type="email"
                         required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => {
+                          setFocusedInput('email')
+                          setCharCount(email.length)
+                        }}
+                        onBlur={() => setFocusedInput(null)}
+                        onChange={(e) => {
+                          setEmail(e.target.value)
+                          setCharCount(e.target.value.length)
+                          triggerWriting()
+                        }}
                         placeholder="email@gmail.com"
                         disabled={loading}
                         className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
@@ -462,9 +731,16 @@ export default function Home() {
                           type="tel"
                           required
                           value={phone}
+                          onFocus={() => {
+                            setFocusedInput('phone')
+                            setCharCount(phone.length)
+                          }}
+                          onBlur={() => setFocusedInput(null)}
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, '')
                             setPhone(val.substring(0, 10))
+                            setCharCount(val.substring(0, 10).length)
+                            triggerWriting()
                           }}
                           placeholder="9876543210"
                           disabled={loading}
@@ -528,7 +804,12 @@ export default function Home() {
                         type={showPassword ? 'text' : 'password'}
                         required
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setFocusedInput('password')}
+                        onBlur={() => setFocusedInput(null)}
+                        onChange={(e) => {
+                          setPassword(e.target.value)
+                          triggerWriting()
+                        }}
                         placeholder="••••••••"
                         disabled={loading}
                         className="w-full pl-10 pr-10 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
@@ -558,7 +839,12 @@ export default function Home() {
                           type={showPassword ? 'text' : 'password'}
                           required
                           value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onFocus={() => setFocusedInput('confirmpass')}
+                          onBlur={() => setFocusedInput(null)}
+                          onChange={(e) => {
+                            setConfirmPassword(e.target.value)
+                            triggerWriting()
+                          }}
                           placeholder="••••••••"
                           disabled={loading}
                           className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
@@ -669,9 +955,16 @@ export default function Home() {
                         maxLength={6}
                         required
                         value={otp}
+                        onFocus={() => {
+                          setFocusedInput('otp')
+                          setCharCount(otp.length)
+                        }}
+                        onBlur={() => setFocusedInput(null)}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '')
                           setOtp(val.substring(0, 6))
+                          setCharCount(val.substring(0, 6).length)
+                          triggerWriting()
                         }}
                         placeholder="000000"
                         disabled={loading}
@@ -748,57 +1041,33 @@ export default function Home() {
         <section className="hidden md:flex w-[55%] relative items-center justify-center p-12 bg-gradient-to-bl from-blue-100/50 to-transparent dark:from-zinc-950 dark:to-transparent">
           
           {/* Framed Graphic Frame */}
-          <div className="w-full h-full max-w-md rounded-3xl bg-blue-50/50 dark:bg-zinc-900/30 shadow-inner flex flex-col items-center justify-center relative overflow-hidden p-6 border border-white/60 dark:border-zinc-800/40">
+          <div className="w-full h-full max-w-md rounded-3xl bg-[#F4ECE1]/65 dark:bg-zinc-900/30 shadow-inner flex flex-col items-center justify-center relative overflow-hidden p-6 border border-white/60 dark:border-zinc-800/40">
             
             {/* Ambient animated blurs inside card */}
-            <div className="absolute w-48 h-48 bg-blue-400/10 dark:bg-indigo-950/20 rounded-full blur-2xl top-10 right-10 pointer-events-none" />
-            <div className="absolute w-56 h-56 bg-indigo-400/10 dark:bg-purple-950/15 rounded-full blur-3xl bottom-10 left-5 pointer-events-none" />
+            <div className="absolute w-48 h-48 bg-blue-400/5 dark:bg-indigo-950/20 rounded-full blur-2xl top-10 right-10 pointer-events-none" />
+            <div className="absolute w-56 h-56 bg-indigo-400/5 dark:bg-purple-950/15 rounded-full blur-3xl bottom-10 left-5 pointer-events-none" />
 
             {/* Graphics container */}
-            <motion.div
-              whileHover={{ y: -6 }}
-              className="relative z-10 w-full flex flex-col items-center text-center space-y-6 select-none"
-            >
+            <div className="relative z-10 w-full flex flex-col items-center text-center space-y-6 select-none">
               
-              {/* Refined Student Laptop 3D mock image mapping */}
-              <div className="relative w-72 h-72 flex items-center justify-center">
-                {/* Visual Glass floating shadow */}
-                <div className="absolute bottom-2 w-48 h-6 bg-blue-900/10 dark:bg-zinc-950/40 rounded-full blur-xl animate-pulse" />
-                
-                {/* Animated graphic asset display */}
-                <img 
-                  src="/academic_prosperity.png" 
-                  alt="ASENTRA Academic Prosperity" 
-                  className="w-full h-full object-cover rounded-2xl relative z-10 drop-shadow-2xl"
-                  onError={(e) => {
-                    // Fail-safe dynamic Vector blueprint drawing in case PNG asset is missing or blocked
-                    e.target.style.display = 'none';
-                    const fallback = e.target.nextSibling;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-
-                {/* Highly premium abstract SVG Classroom Blueprint Fallback */}
-                <div className="absolute inset-0 z-0 hidden items-center justify-center text-slate-350 dark:text-zinc-700">
-                  <svg className="w-56 h-56 opacity-60" viewBox="0 0 200 200" fill="none">
-                    <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
-                    <rect x="50" y="50" width="100" height="100" rx="12" stroke="currentColor" strokeWidth="1.5" />
-                    <circle cx="100" cy="100" r="30" fill="none" stroke="currentColor" strokeWidth="1" />
-                    <path d="M50 150 L150 150 M70 120 L130 120 M85 90 L115 90" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M100 20 L100 50 M100 150 L100 180" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
-                  </svg>
-                </div>
-              </div>
+              {/* Interactive SVG Student illustration */}
+              <InteractiveStudent 
+                focusedInput={focusedInput}
+                isWriting={isWriting}
+                charCount={charCount}
+                errorShakeKey={errorShakeKey}
+                isSuccess={!!success}
+              />
 
               {/* Illustration branding tagline */}
-              <div className="space-y-2 max-w-xs">
-                <h3 className="text-base font-extrabold text-slate-800 dark:text-zinc-200 tracking-tight">Your future is being created today</h3>
-                <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
+              <div className="space-y-1.5 max-w-xs">
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 tracking-tight">Your future is being created today</h3>
+                <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-semibold leading-relaxed">
                   Leverage high-fidelity custom lectures, instant tutor rosters, and live curriculum tracking inside a singular portal.
                 </p>
               </div>
 
-            </motion.div>
+            </div>
 
           </div>
 
