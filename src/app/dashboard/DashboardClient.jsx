@@ -260,51 +260,39 @@ export default function DashboardClient({
           email: user.email,
           contact: profile.phone || ''
         },
+        notes: {
+          userId: user.id,
+          courseId: course.id
+        },
         // Step C: Razorpay payment transaction completed handler
-        handler: async function (response) {
+        handler: function (response) {
           try {
             setCheckoutLoadingId(course.id)
             
-            // Call server-side route to securely verify signatures and persist enrollment
-            const verifyResponse = await fetch('/api/razorpay/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                courseId: course.id,
-                userId: user.id
-              })
-            })
-
-            const verifyResult = await verifyResponse.json()
-
-            if (verifyResponse.ok && verifyResult.success) {
-              alert('Enrollment Successful! Welcome to ASENTRA Academy.')
-              
-              // Upsert enrollment in local state instantly for 0ms reactive UI update
-              const newEnroll = {
-                id: response.razorpay_payment_id,
-                user_id: user.id,
-                course_id: course.id,
-                status: 'active',
-                enrolled_at: new Date().toISOString(),
-                courses: course,
-                profiles: profile
-              }
-              setEnrollments(prev => [newEnroll, ...prev])
-              
-              // Trigger a server-side route refresh to sync standard server cached states
-              startTransition(() => {
-                router.refresh()
-              })
-            } else {
-              alert('Signature verification failed: ' + (verifyResult.error || 'Potential transaction mismatch.'))
+            // Professional background provisioning alert
+            alert('Payment Successful! We are securing your enrollment and provisioning your course access. You are being redirected to your learning dashboard.')
+            
+            // Upsert enrollment in local state instantly for 0ms reactive UI update
+            const newEnroll = {
+              id: response.razorpay_payment_id || `temp_${Date.now()}`,
+              user_id: user.id,
+              course_id: course.id,
+              status: 'active',
+              enrolled_at: new Date().toISOString(),
+              courses: course,
+              profiles: profile
             }
-          } catch (verifyErr) {
-            console.error('Signature Verification Error:', verifyErr)
-            alert('An error occurred during transaction validation: ' + verifyErr.message)
+            setEnrollments(prev => [newEnroll, ...prev])
+            
+            // Switch tabs instantly to My Learning tab
+            handleTabChange('MY_LEARNING', 'learning')
+            
+            // Trigger a server-side route refresh to sync standard server cached states
+            startTransition(() => {
+              router.refresh()
+            })
+          } catch (err) {
+            console.error('Optimistic enrollment transition error:', err)
           } finally {
             setCheckoutLoadingId(null)
           }
