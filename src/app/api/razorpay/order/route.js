@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Razorpay from 'razorpay'
 import { createClient } from '@/utils/supabase/server'
+import { orderRateLimit } from '@/utils/rate-limit'
 
 // Initialize Razorpay instance securely on the server-side
 const razorpay = new Razorpay({
@@ -10,6 +11,16 @@ const razorpay = new Razorpay({
 
 export async function POST(request) {
   try {
+    // 1. Enforce Serverless Rate Limiting via Upstash Redis to prevent abuse/DDoS
+    const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+    const { success } = await orderRateLimit.limit(ip)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again in a minute.' },
+        { status: 429 }
+      )
+    }
+
     const { courseId, price } = await request.json()
 
     if (!courseId || price === undefined) {
