@@ -10,8 +10,8 @@ export default async function Home() {
   // Initialize Supabase Server Component Client strictly as required
   const supabase = createServerComponentClient({ cookies: () => cookies() })
   
-  // Safe Server-Side Session check to prevent OAuth misfires
-  const { data: { session } } = await supabase.auth.getSession()
+  // Safe Server-Side User check using secure cryptographic validation
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-50 via-white to-indigo-50/30 overflow-x-hidden font-sans select-none text-slate-800">
@@ -28,7 +28,7 @@ export default async function Home() {
 
           {/* Dynamic Navigation CTAs */}
           <div className="flex items-center gap-6">
-            {session ? (
+            {user ? (
               <Link 
                 href="/dashboard" 
                 className="bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:shadow-lg transition-all"
@@ -77,7 +77,7 @@ export default async function Home() {
 
           {/* Dynamic call to action */}
           <div className="pt-2">
-            {session ? (
+            {user ? (
               <Link 
                 href="/dashboard" 
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-lg inline-flex items-center gap-2 group"

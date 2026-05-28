@@ -16,9 +16,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'courseId and price are required' }, { status: 400 })
     }
 
+    const supabase = await createClient()
+
+    // Authenticate the user securely using getUser() to prevent unauthenticated/spoofed order creations
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized: Secure user authentication required' }, { status: 401 })
+    }
+
     // TODO: cross-check the price against the Supabase courses table before creation
     let verifiedPrice = Number(price)
-    const supabase = await createClient()
 
     // Query database for course details to prevent price tampering
     const { data: dbCourse, error: dbError } = await supabase
