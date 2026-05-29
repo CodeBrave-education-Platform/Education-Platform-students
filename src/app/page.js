@@ -1,153 +1,102 @@
 import * as React from 'react'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Sparkles, BookOpen, CheckCircle, Compass, ArrowRight } from 'lucide-react'
+import { createClient } from '@/utils/supabase/server'
+import Navbar from '@/components/Navbar'
+import LiveTicker from '@/components/landing/LiveTicker'
+import HeroInteractive from '@/components/landing/HeroInteractive'
+import FeatureScroll from '@/components/landing/FeatureScroll'
+import Footer from '@/components/Footer'
 
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  // Initialize Supabase Server Component Client strictly as required
-  const supabase = createServerComponentClient({ cookies: () => cookies() })
+  const supabase = await createClient()
   
-  // Safe Server-Side User check using secure cryptographic validation
+  // Safe Server-Side User session check
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Retrieve user profile if session exists
+  let profile = null
+  if (user) {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    profile = prof
+  }
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-50 via-white to-indigo-50/30 overflow-x-hidden font-sans select-none text-slate-800">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden font-sans select-none text-slate-800 flex flex-col justify-between">
       
-      {/* 1. THE SMART NAVBAR */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 transition-all">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo brand */}
-          <Link href="/" className="flex items-center gap-2 select-none">
-            <span className="text-2xl font-extrabold tracking-widest uppercase text-slate-900">
-              ASENTRA
-            </span>
-          </Link>
+      <div>
+        {/* 1. THE LIVE TELEMETRY TICKER */}
+        <LiveTicker />
 
-          {/* Dynamic Navigation CTAs */}
-          <div className="flex items-center gap-6">
-            {user ? (
-              <Link 
-                href="/dashboard" 
-                className="bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:shadow-lg transition-all"
-              >
-                Go to Portal →
-              </Link>
-            ) : (
-              <div className="flex items-center gap-6">
-                <Link 
-                  href="/login" 
-                  className="text-slate-700 hover:text-slate-900 font-semibold text-sm transition-colors"
-                >
-                  Log In
-                </Link>
-                <Link 
-                  href="/login?tab=register" 
-                  className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-semibold"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+        {/* 2. THE DYNAMIC NAVBAR ROUTING */}
+        {user ? (
+          <Navbar user={user} profile={profile} />
+        ) : (
+          /* Beautiful Public Guest Glass Navbar matching structure of standard Navbar */
+          <nav className="sticky top-0 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-6 py-3.5 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
+            <Link href="/" className="flex items-center group">
+              <svg className="w-36 h-7 text-slate-900" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Geometric letter 'A' */}
+                <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                
+                {/* Geometric letter 'S' */}
+                <path d="M76 16 C76 12, 56 12, 56 18 C56 24, 76 26, 76 32 C76 38, 56 38, 56 34" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                
+                {/* Geometric letter 'E' */}
+                <path d="M110 12 L92 12 L92 42 L110 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M92 27 L106 27" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                
+                {/* Geometric letter 'N' */}
+                <path d="M122 42 L122 12 L142 42 L142 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                
+                {/* Geometric letter 'T' */}
+                <path d="M152 12 L178 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M165 12 L165 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+                
+                {/* Geometric letter 'R' */}
+                <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26 L188 26" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M198 26 L210 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                
+                {/* Geometric letter 'A' with RED accented leg */}
+                <path d="M220 44 L236 10" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Red accent leg matching logo image */}
+                <path d="M236 10 L252 44" stroke="#DC2626" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+              </svg>
+            </Link>
 
-      {/* 2. THE HERO SECTION */}
-      <main className="pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 min-h-[90vh]">
-        
-        {/* Left Side: Editorial Typography Copy */}
-        <section className="w-full lg:w-1/2 flex flex-col items-start text-left space-y-6 lg:space-y-8 relative z-10 animate-fade-in">
-          {/* Pill Badge */}
-          <div className="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase">
-            IIT JEE MAINS • ADVANCED • FOUNDATIONS
-          </div>
-
-          {/* Heading H1 */}
-          <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-tight">
-            Your Future is Being Created Today.
-          </h1>
-
-          {/* Subtext description */}
-          <p className="text-slate-500 text-base lg:text-lg leading-relaxed max-w-xl font-medium">
-            Join India's most advanced learning portal. Premium live classes, structured test series, and dedicated doubt solving.
-          </p>
-
-          {/* Dynamic call to action */}
-          <div className="pt-2">
-            {user ? (
-              <Link 
-                href="/dashboard" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-lg inline-flex items-center gap-2 group"
-              >
-                <span>Enter Your Portal</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            ) : (
+            <div className="flex items-center gap-6">
               <Link 
                 href="/login" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-semibold shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-lg inline-flex items-center gap-2 group"
+                className="text-slate-600 hover:text-slate-900 font-bold text-xs tracking-wider uppercase transition-colors duration-150"
               >
-                <span>Start Learning for Free</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                Log In
               </Link>
-            )}
-          </div>
-        </section>
-
-        {/* Right Side: The Abstract Visual */}
-        <section className="hidden lg:flex w-1/2 relative justify-center">
-          
-          {/* Two absolute positioned glowing orbs behind the card for a 3D hovering effect */}
-          <div className="absolute w-[300px] h-[300px] bg-blue-400/20 rounded-full blur-3xl -top-12 -left-12 pointer-events-none" />
-          <div className="absolute w-[300px] h-[300px] bg-indigo-400/20 rounded-full blur-3xl -bottom-12 -right-12 pointer-events-none" />
-
-          {/* Premium hovering Glass card */}
-          <div className="w-[400px] h-[500px] bg-white/40 backdrop-blur-3xl border border-white rounded-[3rem] shadow-2xl relative z-10 flex flex-col items-center justify-between p-10 hover:-translate-y-1 transition-transform duration-500">
-            
-            {/* Logo header inside card */}
-            <div className="flex items-center gap-2 self-start select-none">
-              <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-extrabold text-xs shadow-md">
-                A
-              </div>
-              <span className="text-xs font-bold tracking-tight text-slate-800 uppercase">ASENTRA ACADEMY</span>
+              <Link 
+                href="/login?tab=register" 
+                className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors"
+              >
+                Register
+              </Link>
             </div>
+          </nav>
+        )}
 
-            {/* Glowing sparkles emblem in the dead center */}
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-white border border-slate-100 shadow-md shadow-slate-100 flex items-center justify-center text-blue-500 animate-pulse">
-                <Sparkles className="w-7 h-7" />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="text-base font-extrabold text-slate-900 leading-tight">Elevated Preparation</h3>
-                <p className="text-[11px] text-slate-400 font-semibold max-w-[200px]">Unlock structured foundation modules and test ledgers</p>
-              </div>
-            </div>
+        {/* 3. THE HIGH-FIDELITY HERO VAULT */}
+        <HeroInteractive user={user} />
 
-            {/* Bullet points summarizing success in bottom of glass card */}
-            <div className="w-full space-y-2 border-t border-slate-200/50 pt-6">
-              {[
-                { label: 'Interactive live curriculums', icon: BookOpen },
-                { label: 'Verified faculty checkouts', icon: CheckCircle },
-                { label: 'Premium IIT JEE foundations', icon: Compass }
-              ].map((item, idx) => {
-                const IconComponent = item.icon
-                return (
-                  <div key={idx} className="flex items-center gap-2.5 text-[10.5px] font-semibold text-slate-600">
-                    <IconComponent className="w-4 h-4 text-blue-500/80 shrink-0" />
-                    <span>{item.label}</span>
-                  </div>
-                )
-              })}
-            </div>
+        {/* 4. SCROLL-TRIGGERED TOURS */}
+        <FeatureScroll />
+      </div>
 
-          </div>
-
-        </section>
-
-      </main>
+      {/* 5. UNIFIED SYSTEM FOOTER */}
+      <Footer />
 
     </div>
   )
