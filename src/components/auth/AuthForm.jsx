@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Lock, User, Phone, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, Sparkles } from 'lucide-react'
+import { Mail, Lock, User, Phone, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
 export default function AuthForm({
   authMode,
@@ -32,29 +32,54 @@ export default function AuthForm({
   onVerifyOtp,
   onGoogleLogin,
   setError,
-  setSuccess
+  setSuccess,
+  focusedInput,
+  setFocusedInput
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
   // Standard input focus styles
   const inputContainerClass = "w-full flex flex-col gap-1 text-left relative"
   const inputClass = "w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white focus:border-transparent placeholder:text-slate-400"
-  const iconClass = "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-450 shrink-0 pointer-events-none"
+  const iconClass = "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 shrink-0 pointer-events-none"
 
   return (
     <section className="w-full p-8 sm:p-12 flex flex-col justify-center select-none font-sans bg-white">
       
-      {/* Brand Wordmark matching redesigned Landing page Guest Navbar */}
+      {/* Redesigned Brand Wordmark: Replaced "A" block with pristine SVG wordmark logo */}
       <div className="flex flex-col items-start gap-2 mb-8">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-extrabold text-sm shadow-md">
-            A
-          </div>
-          <span className="text-xl font-extrabold tracking-widest text-slate-950 uppercase">
-            ASENTRA
-          </span>
+        <Link href="/" className="flex items-center group">
+          <svg className="w-36 h-7 text-slate-900" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Geometric letter 'A' */}
+            <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+            
+            {/* Geometric letter 'S' */}
+            <path d="M76 16 C76 12, 56 12, 56 18 C56 24, 76 26, 76 32 C76 38, 56 38, 56 34" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            
+            {/* Geometric letter 'E' */}
+            <path d="M110 12 L92 12 L92 42 L110 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M92 27 L106 27" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+            
+            {/* Geometric letter 'N' */}
+            <path d="M122 42 L122 12 L142 42 L142 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            
+            {/* Geometric letter 'T' */}
+            <path d="M152 12 L178 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M165 12 L165 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+            
+            {/* Geometric letter 'R' */}
+            <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26 L188 26" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M198 26 L210 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            
+            {/* Geometric letter 'A' with RED accented leg */}
+            <path d="M220 44 L236 10" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            {/* Red accent leg matching logo image */}
+            <path d="M236 10 L252 44" stroke="#DC2626" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+          </svg>
         </Link>
-        <span className="text-[9px] font-extrabold tracking-[0.2em] text-slate-400 uppercase leading-none">
+        <span className="text-[8.5px] font-extrabold tracking-[0.22em] text-slate-400 uppercase leading-none mt-1">
           IIT JEE MAINS • ADVANCED • FOUNDATIONS
         </span>
       </div>
@@ -122,6 +147,8 @@ export default function AuthForm({
                 const val = e.target.value.replace(/[^0-9]/g, '')
                 setOtp(val)
               }}
+              onFocus={() => setFocusedInput('otp')}
+              onBlur={() => setFocusedInput(null)}
               disabled={loading}
               className="w-full text-center tracking-[0.6em] text-xl font-bold py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white focus:border-transparent placeholder:tracking-normal placeholder:text-sm placeholder:font-semibold placeholder:text-slate-400"
             />
@@ -200,7 +227,7 @@ export default function AuthForm({
                 >
                   {/* Full name */}
                   <div className={inputContainerClass}>
-                    <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Full Name</label>
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Full Name</label>
                     <div className="relative">
                       <User className={iconClass} />
                       <input
@@ -209,6 +236,8 @@ export default function AuthForm({
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
+                        onFocus={() => setFocusedInput('fullName')}
+                        onBlur={() => setFocusedInput(null)}
                         disabled={loading}
                         className={inputClass}
                       />
@@ -217,7 +246,7 @@ export default function AuthForm({
 
                   {/* Phone */}
                   <div className={inputContainerClass}>
-                    <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Mobile Number</label>
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Mobile Number</label>
                     <div className="relative">
                       <Phone className={iconClass} />
                       <input
@@ -230,6 +259,8 @@ export default function AuthForm({
                           const val = e.target.value.replace(/[^0-9]/g, '')
                           setPhone(val)
                         }}
+                        onFocus={() => setFocusedInput('phone')}
+                        onBlur={() => setFocusedInput(null)}
                         disabled={loading}
                         className={inputClass}
                       />
@@ -238,7 +269,7 @@ export default function AuthForm({
 
                   {/* Email */}
                   <div className={inputContainerClass}>
-                    <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Email Address</label>
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Email Address</label>
                     <div className="relative">
                       <Mail className={iconClass} />
                       <input
@@ -247,6 +278,8 @@ export default function AuthForm({
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => setFocusedInput('email')}
+                        onBlur={() => setFocusedInput(null)}
                         disabled={loading}
                         className={inputClass}
                       />
@@ -256,7 +289,7 @@ export default function AuthForm({
                   {/* Password & Confirm password side by side */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className={inputContainerClass}>
-                      <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Password</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Password</label>
                       <div className="relative">
                         <Lock className={iconClass} />
                         <input
@@ -265,6 +298,8 @@ export default function AuthForm({
                           required
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          onFocus={() => setFocusedInput('password')}
+                          onBlur={() => setFocusedInput(null)}
                           disabled={loading}
                           className={inputClass}
                         />
@@ -272,7 +307,7 @@ export default function AuthForm({
                     </div>
 
                     <div className={inputContainerClass}>
-                      <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Confirm Password</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Confirm Password</label>
                       <div className="relative">
                         <Lock className={iconClass} />
                         <input
@@ -281,6 +316,8 @@ export default function AuthForm({
                           required
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
+                          onFocus={() => setFocusedInput('password')}
+                          onBlur={() => setFocusedInput(null)}
                           disabled={loading}
                           className={inputClass}
                         />
@@ -291,7 +328,7 @@ export default function AuthForm({
                   {/* Role and Toggle show password */}
                   <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pt-1">
                     <div className="flex items-center gap-2 self-start">
-                      <span className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Default Role:</span>
+                      <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Default Role:</span>
                       <select
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
@@ -325,7 +362,7 @@ export default function AuthForm({
                 >
                   {/* Email */}
                   <div className={inputContainerClass}>
-                    <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Email Address</label>
+                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Email Address</label>
                     <div className="relative">
                       <Mail className={iconClass} />
                       <input
@@ -334,6 +371,8 @@ export default function AuthForm({
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => setFocusedInput('email')}
+                        onBlur={() => setFocusedInput(null)}
                         disabled={loading}
                         className={inputClass}
                       />
@@ -343,7 +382,7 @@ export default function AuthForm({
                   {/* Password */}
                   <div className={inputContainerClass}>
                     <div className="flex justify-between items-center mb-0.5">
-                      <label className="text-[10px] font-bold uppercase text-slate-450 tracking-wider">Password</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Password</label>
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -361,6 +400,8 @@ export default function AuthForm({
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setFocusedInput('password')}
+                        onBlur={() => setFocusedInput(null)}
                         disabled={loading}
                         className={inputClass}
                       />

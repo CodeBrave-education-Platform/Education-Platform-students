@@ -33,6 +33,9 @@ export default function AuthPage() {
   const [success, setSuccess] = useState('')
   const [shakeCount, setShakeCount] = useState(0)
 
+  // Track focused form input to drive interactive animations on Right-Side Visual
+  const [focusedInput, setFocusedInput] = useState(null) // 'email' | 'password' | 'fullName' | 'phone' | null
+
   useEffect(() => {
     document.title = "ASENTRA | Authentication"
     
@@ -278,10 +281,12 @@ export default function AuthPage() {
           onSubmit={handleAuthSubmit}
           onVerifyOtp={handleVerifyOtp}
           onGoogleLogin={handleGoogleLogin}
+          focusedInput={focusedInput}
+          setFocusedInput={setFocusedInput}
         />
 
         {/* Right Column: Sleek academic engineering visualizer */}
-        <AuthVisual />
+        <AuthVisual focusedInput={focusedInput} />
 
       </motion.div>
     </main>
