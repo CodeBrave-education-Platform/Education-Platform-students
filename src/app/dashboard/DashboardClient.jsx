@@ -10,8 +10,13 @@ import {
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
-  ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu
+  ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu,
+  TrendingUp, BarChart3
 } from 'lucide-react'
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  RadialBarChart, RadialBar
+} from 'recharts'
 
 const getThumbnailUrl = (course) => {
   if (course.thumbnail_url) return course.thumbnail_url
@@ -78,7 +83,10 @@ export default function DashboardClient({
   allCourses,
   mockInvoices = [],
   phoneNumber = 'Not Provided',
-  checkoutCourseId
+  checkoutCourseId,
+  initialBatches = [],
+  initialBatchEnrollments = [],
+  studentAnalytics = null
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -97,6 +105,8 @@ export default function DashboardClient({
       if (tabParam === 'browse') return 'BROWSE'
       if (tabParam === 'invoices') return 'INVOICES'
       if (tabParam === 'profile') return 'PROFILE'
+      if (tabParam === 'batches') return 'BATCHES'
+      if (tabParam === 'analytics') return 'ANALYTICS'
       return 'MY_LEARNING' // default
     }
   })
@@ -129,6 +139,8 @@ export default function DashboardClient({
           if (tabParam === 'browse') setActiveTab('BROWSE')
           else if (tabParam === 'invoices') setActiveTab('INVOICES')
           else if (tabParam === 'profile') setActiveTab('PROFILE')
+          else if (tabParam === 'batches') setActiveTab('BATCHES')
+          else if (tabParam === 'analytics') setActiveTab('ANALYTICS')
           else setActiveTab('MY_LEARNING')
         }
       })
@@ -522,6 +534,34 @@ export default function DashboardClient({
                     )}
                     <Search className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
+                  </button>
+                  <button 
+                    onClick={() => handleTabChange('BATCHES', 'batches')}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                      activeTab === 'BATCHES' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                    }`}
+                  >
+                    {activeTab === 'BATCHES' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
+                    <Users className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Batches</span>
+                  </button>
+                  <button 
+                    onClick={() => handleTabChange('ANALYTICS', 'analytics')}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                      activeTab === 'ANALYTICS' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                    }`}
+                  >
+                    {activeTab === 'ANALYTICS' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
+                    <TrendingUp className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Analytics</span>
                   </button>
                   <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
@@ -924,6 +964,301 @@ export default function DashboardClient({
                             </motion.div>
                           )
                         })}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Batches cohort tab panel */}
+                {activeTab === 'BATCHES' && !isTeacher && (
+                  <motion.div
+                    key="batches-panel"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    className="space-y-6 animate-fade-in"
+                  >
+                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-600 dark:text-indigo-400" />
+                      <span>Cohort-Based Live Batches ({initialBatches.length})</span>
+                    </h3>
+
+                    {initialBatches.length === 0 ? (
+                      <div className="p-12 text-center rounded-[2rem] border border-dashed border-zinc-200 dark:border-zinc-800 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md space-y-4 animate-fade-in">
+                        <div className="inline-flex p-4 rounded-full bg-white dark:bg-zinc-950 text-zinc-400 dark:text-zinc-600 shadow-inner">
+                          <Users className="w-8 h-8" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-extrabold text-[#3A251B] dark:text-zinc-200">No batches available</h4>
+                          <p className="text-xs text-zinc-400">There are no published batches active on the platform right now.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {initialBatches.map((batch) => {
+                          const isEnrolled = initialBatchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
+                          const formattedDate = new Date(batch.start_date).toLocaleDateString(undefined, {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })
+
+                          return (
+                            <div 
+                              key={batch.id} 
+                              className="bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/85 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between p-6 min-h-[300px]"
+                            >
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider select-none ${
+                                    isEnrolled
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
+                                      : 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-450 dark:border-blue-500/20'
+                                  }`}>
+                                    {isEnrolled ? 'Enrolled (Live)' : 'Open Enrollment'}
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-455 uppercase tracking-widest">
+                                    {formattedDate}
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <h4 className="text-sm font-black text-slate-800 dark:text-zinc-150 leading-snug line-clamp-2">
+                                    {batch.title}
+                                  </h4>
+                                  <p className="text-slate-505 dark:text-zinc-450 text-[11px] font-medium leading-relaxed line-clamp-3">
+                                    {batch.description}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-850/80 flex items-center justify-between gap-4">
+                                <div>
+                                  <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                                    Batch Tuition
+                                  </span>
+                                  <span className="text-sm font-extrabold text-slate-700 dark:text-zinc-305">
+                                    {Number(batch.price) === 0 ? 'Free' : `₹${Number(batch.price).toLocaleString()}`}
+                                  </span>
+                                </div>
+                                {isEnrolled ? (
+                                  <button
+                                    disabled
+                                    className="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-950/30 dark:border-emerald-500/25 dark:text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Active Cohort</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => alert('Batch registration is processed via admissions desk. Please contact support.')}
+                                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-blue-605 cursor-pointer text-center"
+                                  >
+                                    Join Live Batch
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Analytics tab panel */}
+                {activeTab === 'ANALYTICS' && !isTeacher && (
+                  <motion.div
+                    key="analytics-panel"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    className="space-y-6"
+                  >
+                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-blue-600 dark:text-indigo-400" />
+                      <span>My JEE Performance Dashboard</span>
+                    </h3>
+
+                    {(!studentAnalytics || Number(studentAnalytics.total_exams) === 0) ? (
+                      <div className="p-12 text-center rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md space-y-6 max-w-xl mx-auto animate-fade-in shadow-sm">
+                        <div className="inline-flex p-5 rounded-3xl bg-blue-50 dark:bg-zinc-950 text-blue-600 dark:text-indigo-500 shadow-inner">
+                          <BarChart3 className="w-10 h-10 animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-base font-extrabold text-slate-800 dark:text-zinc-200">No Exam Records Found</h4>
+                          <p className="text-xs text-slate-500 dark:text-zinc-450 leading-relaxed">
+                            To unlock this dashboard and track your percentile growth, solve mock tests or chapter quizzes under the focus learning panel.
+                          </p>
+                        </div>
+                        <div className="pt-2">
+                          <button
+                            onClick={() => handleTabChange('MY_LEARNING', 'learning')}
+                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-sm border border-blue-600 cursor-pointer hover:scale-[1.01] transition-all"
+                          >
+                            Take your first Mock Test
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-8 animate-fade-in">
+                        {/* KPI Cards Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                              <BookOpenCheck className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                                Exams Taken
+                              </span>
+                              <span className="text-xl font-black text-slate-850 dark:text-zinc-150">
+                                {studentAnalytics.total_exams}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-teal-50 dark:bg-teal-950/20 text-teal-650 dark:text-teal-400 rounded-2xl flex items-center justify-center shrink-0">
+                              <Award className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                                Average Score
+                              </span>
+                              <span className="text-xl font-black text-teal-600 dark:text-teal-400">
+                                {Number(studentAnalytics.average_score).toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shrink-0">
+                              <TrendingUp className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                                JEE Prep Standing
+                              </span>
+                              <span className="text-sm font-black text-slate-700 dark:text-zinc-300">
+                                {Number(studentAnalytics.average_score) >= 8 
+                                  ? 'Advanced Standard' 
+                                  : Number(studentAnalytics.average_score) >= 4 
+                                    ? 'Mains Competitive' 
+                                    : 'Foundational Growth'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chart visualizations */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                          
+                          {/* Radial Progress Score chart (1/3 width) */}
+                          <div className="lg:col-span-1 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-850/85 p-6 rounded-3xl flex flex-col justify-between items-center text-center shadow-sm">
+                            <div className="w-full text-left">
+                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-550 uppercase tracking-wider">
+                                Percentile Gauge
+                              </h4>
+                              <p className="text-[10px] font-bold text-slate-400 mt-0.5">Average Performance Meter</p>
+                            </div>
+                            
+                            <div className="relative w-48 h-48 flex items-center justify-center my-6">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <RadialBarChart 
+                                  cx="50%" 
+                                  cy="50%" 
+                                  innerRadius="70%" 
+                                  outerRadius="100%" 
+                                  barSize={12} 
+                                  data={[{ name: 'Score', value: Math.min(100, (Number(studentAnalytics.average_score) / 20) * 100), fill: '#0f766e' }]}
+                                  startAngle={90}
+                                  endAngle={-270}
+                                >
+                                  <RadialBar
+                                    background
+                                    dataKey="value"
+                                    cornerRadius={10}
+                                  />
+                                </RadialBarChart>
+                              </ResponsiveContainer>
+                              <div className="absolute flex flex-col items-center justify-center">
+                                <span className="text-2xl font-black text-teal-650 dark:text-teal-400">
+                                  {Math.round((Number(studentAnalytics.average_score) / 20) * 100)}%
+                                </span>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                  Score Index
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-[11px] font-bold text-slate-500 dark:text-[#3A251B]">
+                              Calculated out of maximum average benchmark scores.
+                            </div>
+                          </div>
+
+                          {/* Attempt Progression BarChart (2/3 width) */}
+                          <div className="lg:col-span-2 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-850/85 p-6 rounded-3xl flex flex-col justify-between shadow-sm">
+                            <div>
+                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-550 uppercase tracking-wider">
+                                Scores progression
+                              </h4>
+                              <p className="text-[10px] font-bold text-[#3A251B] mt-0.5">Attempt scores across last 5 tests</p>
+                            </div>
+
+                            <div className="h-60 w-full pt-6">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart 
+                                  data={studentAnalytics?.recent_scores ? [...studentAnalytics.recent_scores].reverse() : []}
+                                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                  <XAxis 
+                                    dataKey="date" 
+                                    stroke="#94a3b8" 
+                                    fontSize={10} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                    tickFormatter={(val) => {
+                                      const d = new Date(val)
+                                      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                                    }}
+                                  />
+                                  <YAxis 
+                                    stroke="#94a3b8" 
+                                    fontSize={10} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                  />
+                                  <Tooltip 
+                                    contentStyle={{ 
+                                      backgroundColor: '#fff', 
+                                      border: '1px solid #e2e8f0', 
+                                      borderRadius: '1rem',
+                                      fontSize: '11px',
+                                      fontWeight: 'bold',
+                                      color: '#1e293b'
+                                    }} 
+                                    labelFormatter={(label) => `Test Date: ${new Date(label).toLocaleDateString()}`}
+                                    formatter={(value) => [`Score: ${value} pts`, 'Grade']}
+                                  />
+                                  <Bar 
+                                    dataKey="score" 
+                                    fill="#2563eb" 
+                                    radius={[8, 8, 0, 0]} 
+                                    maxBarSize={45}
+                                  />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-450 uppercase tracking-widest pt-2">
+                              <span>Trend Tracker: Oldest</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                              <span>Newest Attempts</span>
+                            </div>
+                          </div>
+
+                        </div>
                       </div>
                     )}
                   </motion.div>
@@ -1626,6 +1961,28 @@ export default function DashboardClient({
                         >
                           <Search className="w-5 h-5 shrink-0" />
                           <span>Browse Directory</span>
+                        </button>
+                        <button 
+                          onClick={() => handleTabChange('BATCHES', 'batches')}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'BATCHES' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <Users className="w-5 h-5 shrink-0" />
+                          <span>Batches Cohorts</span>
+                        </button>
+                        <button 
+                          onClick={() => handleTabChange('ANALYTICS', 'analytics')}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'ANALYTICS' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <TrendingUp className="w-5 h-5 shrink-0" />
+                          <span>JEE Analytics</span>
                         </button>
                         <button 
                           onClick={() => handleTabChange('PROFILE', 'profile')}

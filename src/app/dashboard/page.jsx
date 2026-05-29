@@ -95,8 +95,32 @@ export default async function DashboardPage(props) {
     if (coursesError) {
       console.error('DASHBOARD COURSES FETCH ERROR:', JSON.stringify(coursesError), 'MSG:', coursesError.message, 'CODE:', coursesError.code)
     }
-    console.log('DASHBOARD COURSES FETCHED COUNT:', coursesData ? coursesData.length : 0)
     allCourses = coursesData || []
+  }
+
+  // Fetch hybrid cohorts and secure statistics aggregates
+  let initialBatches = []
+  let initialBatchEnrollments = []
+  let studentAnalytics = null
+
+  if (role !== 'teacher') {
+    const { data: batchesData } = await supabase
+      .from('batches')
+      .select('*')
+      .eq('status', 'published')
+      .order('start_date', { ascending: true })
+
+    const { data: batchEnrollsData } = await supabase
+      .from('batch_enrollments')
+      .select('*')
+      .eq('user_id', user.id)
+
+    const { data: analyticsData } = await supabase
+      .rpc('get_student_analytics', { student_id: user.id })
+
+    initialBatches = batchesData || []
+    initialBatchEnrollments = batchEnrollsData || []
+    studentAnalytics = analyticsData || null
   }
 
   const phoneNumber = user.user_metadata?.phone_number || user.phone || 'Not Provided'
@@ -134,6 +158,9 @@ export default async function DashboardPage(props) {
         mockInvoices={mockInvoices}
         phoneNumber={phoneNumber}
         checkoutCourseId={checkoutCourseId}
+        initialBatches={initialBatches}
+        initialBatchEnrollments={initialBatchEnrollments}
+        studentAnalytics={studentAnalytics}
       />
     </>
   )
