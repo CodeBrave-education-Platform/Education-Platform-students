@@ -88,6 +88,8 @@ create policy "Users manage own attempts"
   using ((select auth.uid()) = user_id);
 
 -- 5. Secure Blind Grading View (Drops correct_option_index completely)
-create or replace view public.student_questions as
+create or replace view public.student_questions 
+with (security_invoker = true) as
   select id, assessment_id, content, options, marks_positive, marks_negative
   from public.questions;
+
