@@ -273,6 +273,8 @@ export default function AuthPage() {
           loading={loading}
           error={error}
           success={success}
+          setError={setError}
+          setSuccess={setSuccess}
           onSubmit={handleAuthSubmit}
           onVerifyOtp={handleVerifyOtp}
           onGoogleLogin={handleGoogleLogin}

@@ -30,7 +30,9 @@ export default function AuthForm({
   success,
   onSubmit,
   onVerifyOtp,
-  onGoogleLogin
+  onGoogleLogin,
+  setError,
+  setSuccess
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
