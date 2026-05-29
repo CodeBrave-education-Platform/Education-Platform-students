@@ -152,6 +152,7 @@ export default function DashboardClient({
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
   const [enrollments, setEnrollments] = useState(initialEnrollments)
+  const [batchEnrollments, setBatchEnrollments] = useState(initialBatchEnrollments)
   const [directory, setDirectory] = useState(allCourses)
 
   // Interactive Search Query
@@ -370,6 +371,90 @@ export default function DashboardClient({
       razorpayObject.open()
     } catch (err) {
       console.error('Razorpay Checkout failed:', err)
+      alert(err.message || 'Failed to initialize payment gateway. Check network.')
+      setCheckoutLoadingId(null)
+    }
+  }
+
+  // Handle Secure Razorpay checkout for Hybrid cohort-based Batches
+  const handleBatchRazorpayCheckout = async (batch) => {
+    setCheckoutLoadingId(batch.id)
+    try {
+      // Step A: Fetch order creation parameters from secure server-side API
+      const orderResponse = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchId: batch.id,
+          price: batch.price
+        })
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderResponse.ok || orderData.error) {
+        throw new Error(orderData.error || 'Failed to initialize batch transaction order ID.')
+      }
+
+      // Step B: Configure Razorpay JS Checkout Overlay options
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_SuSd4sFUgQBxn0',
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'ASENTRA ACADEMY - BATCHES',
+        description: batch.title,
+        order_id: orderData.id,
+        theme: {
+          color: '#0F766E' // Premium teal accent for batches
+        },
+        prefill: {
+          email: user.email,
+          contact: profile.phone || ''
+        },
+        notes: {
+          userId: user.id,
+          batchId: batch.id
+        },
+        // Step C: Razorpay payment transaction completed handler
+        handler: function (response) {
+          try {
+            setCheckoutLoadingId(batch.id)
+            
+            // Professional background provisioning alert
+            alert('Payment Successful! We are securing your cohort seat and provisioning your batch access. Redirecting you shortly...')
+            
+            // Upsert enrollment in local state instantly for 0ms reactive UI update
+            const newBatchEnroll = {
+              id: response.razorpay_payment_id || `temp_b_${Date.now()}`,
+              user_id: user.id,
+              batch_id: batch.id,
+              status: 'active',
+              enrolled_at: new Date().toISOString()
+            }
+            setBatchEnrollments(prev => [newBatchEnroll, ...prev])
+            
+            // Trigger a server-side route refresh to sync standard server cached states
+            startTransition(() => {
+              router.refresh()
+            })
+          } catch (err) {
+            console.error('Optimistic batch enrollment transition error:', err)
+          } finally {
+            setCheckoutLoadingId(null)
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setCheckoutLoadingId(null)
+          }
+        }
+      }
+
+      // Step D: Open official Razorpay modal directly
+      const razorpayObject = new window.Razorpay(options)
+      razorpayObject.open()
+    } catch (err) {
+      console.error('Razorpay Batch Checkout failed:', err)
       alert(err.message || 'Failed to initialize payment gateway. Check network.')
       setCheckoutLoadingId(null)
     }
@@ -996,12 +1081,13 @@ export default function DashboardClient({
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {initialBatches.map((batch) => {
-                          const isEnrolled = initialBatchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
+                          const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
                           const formattedDate = new Date(batch.start_date).toLocaleDateString(undefined, {
                             month: 'long',
                             day: 'numeric',
                             year: 'numeric'
                           })
+                          const isCheckoutLoading = checkoutLoadingId === batch.id
 
                           return (
                             <div 
@@ -1043,17 +1129,25 @@ export default function DashboardClient({
                                 {isEnrolled ? (
                                   <button
                                     disabled
-                                    className="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-950/30 dark:border-emerald-500/25 dark:text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                                    className="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-950/30 dark:border-emerald-500/25 dark:text-emerald-450 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
                                   >
                                     <CheckCircle2 className="w-3.5 h-3.5" />
                                     <span>Active Cohort</span>
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => alert('Batch registration is processed via admissions desk. Please contact support.')}
-                                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-blue-605 cursor-pointer text-center"
+                                    onClick={() => handleBatchRazorpayCheckout(batch)}
+                                    disabled={isCheckoutLoading || checkoutLoadingId !== null}
+                                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-350 disabled:border-slate-100 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-blue-605 cursor-pointer text-center flex items-center gap-1.5"
                                   >
-                                    Join Live Batch
+                                    {isCheckoutLoading ? (
+                                      <>
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <span>Opening...</span>
+                                      </>
+                                    ) : (
+                                      <span>Join Live Batch</span>
+                                    )}
                                   </button>
                                 )}
                               </div>

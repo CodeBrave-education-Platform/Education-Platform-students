@@ -21,10 +21,14 @@ export async function POST(request) {
       )
     }
 
-    const { courseId, price } = await request.json()
+    const { courseId, batchId, price } = await request.json()
 
-    if (!courseId || price === undefined) {
-      return NextResponse.json({ error: 'courseId and price are required' }, { status: 400 })
+    if (!courseId && !batchId) {
+      return NextResponse.json({ error: 'courseId or batchId is required' }, { status: 400 })
+    }
+
+    if (price === undefined) {
+      return NextResponse.json({ error: 'price is required' }, { status: 400 })
     }
 
     const supabase = await createClient()
@@ -38,30 +42,53 @@ export async function POST(request) {
     // TODO: cross-check the price against the Supabase courses table before creation
     let verifiedPrice = Number(price)
 
-    // Query database for course details to prevent price tampering
-    const { data: dbCourse, error: dbError } = await supabase
-      .from('courses')
-      .select('price')
-      .eq('id', courseId)
-      .single()
+    if (batchId) {
+      // Query database for batch details to prevent price tampering
+      const { data: dbBatch, error: dbError } = await supabase
+        .from('batches')
+        .select('price')
+        .eq('id', batchId)
+        .single()
 
-    if (!dbError && dbCourse) {
-      verifiedPrice = Number(dbCourse.price)
-    } else {
-      // Fallback verification ledger mapping for mock courses in testing
-      const mockCoursePrices = {
-        'f0000000-0000-0000-0000-000000000001': 0,
-        'f0000000-0000-0000-0000-000000000101': 1,
-        'f0000000-0000-0000-0000-000000000102': 10,
-        'f0000000-0000-0000-0000-000000000002': 4999,
-        'f0000000-0000-0000-0000-000000000003': 9999
+      if (!dbError && dbBatch) {
+        verifiedPrice = Number(dbBatch.price)
+      } else {
+        // Fallback for standard test batches
+        const mockBatchPrices = {
+          'b0000000-0000-0000-0000-000000000001': 12000,
+          'b0000000-0000-0000-0000-000000000002': 3500,
+          'b0000000-0000-0000-0000-000000000003': 4200
+        }
+        if (mockBatchPrices[batchId] !== undefined) {
+          verifiedPrice = mockBatchPrices[batchId]
+        }
       }
-      if (mockCoursePrices[courseId] !== undefined) {
-        verifiedPrice = mockCoursePrices[courseId]
+    } else if (courseId) {
+      // Query database for course details to prevent price tampering
+      const { data: dbCourse, error: dbError } = await supabase
+        .from('courses')
+        .select('price')
+        .eq('id', courseId)
+        .single()
+
+      if (!dbError && dbCourse) {
+        verifiedPrice = Number(dbCourse.price)
+      } else {
+        // Fallback verification ledger mapping for mock courses in testing
+        const mockCoursePrices = {
+          'f0000000-0000-0000-0000-000000000001': 0,
+          'f0000000-0000-0000-0000-000000000101': 1,
+          'f0000000-0000-0000-0000-000000000102': 10,
+          'f0000000-0000-0000-0000-000000000002': 4999,
+          'f0000000-0000-0000-0000-000000000003': 9999
+        }
+        if (mockCoursePrices[courseId] !== undefined) {
+          verifiedPrice = mockCoursePrices[courseId]
+        }
       }
     }
 
-    // If course is actually free, no order creation is needed
+    // If item is actually free, no order creation is needed
     if (verifiedPrice === 0) {
       return NextResponse.json({ error: 'Cannot create Razorpay order for free course' }, { status: 400 })
     }
@@ -70,7 +97,7 @@ export async function POST(request) {
     const options = {
       amount: Math.round(verifiedPrice * 100), // amount in paise
       currency: 'INR',
-      receipt: 'rcpt_' + courseId.slice(0, 8),
+      receipt: 'rcpt_' + (batchId || courseId).slice(0, 8),
     }
 
     const order = await razorpay.orders.create(options)

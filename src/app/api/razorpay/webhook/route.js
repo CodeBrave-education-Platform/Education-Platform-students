@@ -53,12 +53,13 @@ export async function POST(request) {
       const notes = paymentEntity.notes || {}
       const userId = notes.userId
       const courseId = notes.courseId
+      const batchId = notes.batchId
 
-      console.log(`Processing captured payment ID: ${paymentId}, Amount: ${amountPaid} INR, User: ${userId}, Course: ${courseId}`)
+      console.log(`Processing captured payment ID: ${paymentId}, Amount: ${amountPaid} INR, User: ${userId}, Course: ${courseId}, Batch: ${batchId}`)
 
-      if (!userId || !courseId) {
-        console.warn(`Skipping onboarding for payment ${paymentId}: Missing userId or courseId in payment notes.`)
-        return NextResponse.json({ success: true, message: 'Skipped onboarding: missing user/course references in notes.' })
+      if (!userId || (!courseId && !batchId)) {
+        console.warn(`Skipping onboarding for payment ${paymentId}: Missing userId or product reference in payment notes.`)
+        return NextResponse.json({ success: true, message: 'Skipped onboarding: missing product references in notes.' })
       }
 
       // Initialize direct backend Supabase client using anon key
@@ -72,20 +73,38 @@ export async function POST(request) {
       const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
       try {
-        // Call Postgres Stored Stored Procedure (RPC) atomically
-        const { data, error: rpcError } = await supabase.rpc('execute_atomic_student_onboarding', {
-          _user_id: userId,
-          _course_id: courseId,
-          _payment_id: paymentId,
-          _amount: amountPaid
-        })
+        if (batchId) {
+          // Direct insert for batch enrollment (upserting to avoid duplicate errors on retry)
+          const { error: batchErr } = await supabase
+            .from('batch_enrollments')
+            .upsert({
+              user_id: userId,
+              batch_id: batchId,
+              status: 'active'
+            }, { onConflict: 'user_id,batch_id' })
 
-        if (rpcError) {
-          throw new Error(rpcError.message || JSON.stringify(rpcError))
+          if (batchErr) {
+            throw batchErr
+          }
+
+          console.log(`ACID Student Batch Onboarding completed successfully in database for payment ${paymentId}`)
+          return NextResponse.json({ success: true, message: 'Batch onboarding completed successfully' })
+        } else {
+          // Call Postgres Stored Stored Procedure (RPC) atomically
+          const { data, error: rpcError } = await supabase.rpc('execute_atomic_student_onboarding', {
+            _user_id: userId,
+            _course_id: courseId,
+            _payment_id: paymentId,
+            _amount: amountPaid
+          })
+
+          if (rpcError) {
+            throw new Error(rpcError.message || JSON.stringify(rpcError))
+          }
+
+          console.log(`ACID Student Onboarding completed successfully in database for payment ${paymentId}`)
+          return NextResponse.json({ success: true, message: 'Onboarding completed successfully' })
         }
-
-        console.log(`ACID Student Onboarding completed successfully in database for payment ${paymentId}`)
-        return NextResponse.json({ success: true, message: 'Onboarding completed successfully' })
 
       } catch (dbErr) {
         console.error(`CRITICAL: Database transaction failed. Initiating Saga Compensation (Auto-Refund) pipeline for Payment ID: ${paymentId}. Error:`, dbErr)
