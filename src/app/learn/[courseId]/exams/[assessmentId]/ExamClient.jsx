@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import { gradeAssessmentAction } from './actions'
 import { 
   Clock, 
@@ -14,8 +15,6 @@ import {
   AlertCircle, 
   Award,
   ChevronRight,
-  BookOpen,
-  Eye,
   Activity
 } from 'lucide-react'
 
@@ -25,7 +24,8 @@ export default function ExamClient({
   questions,
   attempt,
   alreadySubmitted,
-  user
+  user,
+  gradedMetrics
 }) {
   const router = useRouter()
 
@@ -35,11 +35,12 @@ export default function ExamClient({
       ? {
           success: true,
           score: attempt.score,
-          correctCount: Object.keys(attempt.answers_payload || {}).length, // simple fallback
-          incorrectCount: 0,
-          unattemptedCount: questions.length - Object.keys(attempt.answers_payload || {}).length,
+          correctCount: gradedMetrics?.correctCount ?? Object.keys(attempt.answers_payload || {}).length,
+          incorrectCount: gradedMetrics?.incorrectCount ?? 0,
+          unattemptedCount: gradedMetrics?.unattemptedCount ?? (questions.length - Object.keys(attempt.answers_payload || {}).length),
           submittedAt: attempt.submitted_at,
-          timeExceeded: false
+          timeExceeded: false,
+          questionStatuses: gradedMetrics?.questionStatuses ?? {}
         }
       : null
   )
@@ -66,6 +67,10 @@ export default function ExamClient({
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false)
+
+  // Interactive Loader progress states
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [loadingMessage, setLoadingMessage] = useState('Establishing Secure Connection...')
 
   // Timer state based on assessment limit
   const startedAtTime = new Date(attempt.started_at).getTime()
@@ -182,12 +187,32 @@ export default function ExamClient({
 
   const handleConfirmSubmit = async () => {
     setShowConfirmSubmit(false)
-    setIsSubmitting(true)
     await performGradingSubmission(savedAnswers)
   }
 
   const performGradingSubmission = async (answersToSubmit) => {
     setIsSubmitting(true)
+    setLoadingProgress(5)
+    setLoadingMessage('Initializing Secure Database Handshake...')
+    
+    // Simulate real-time progress steps for a highly interactive CAD preloader feel
+    const progressInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 95) {
+          clearInterval(progressInterval)
+          return 95
+        }
+        
+        // Dynamically update labels based on ticks
+        if (prev === 20) setLoadingMessage('Downloading Blind Answer Keys securely...')
+        if (prev === 45) setLoadingMessage('Evaluating Physics Multi-Choice Vectors...')
+        if (prev === 70) setLoadingMessage('Computing Chemistry Entropy and Markings...')
+        if (prev === 85) setLoadingMessage('Finalizing Zero-Trust Dossier and AIR estimate...')
+        
+        return prev + 1
+      })
+    }, 45)
+
     try {
       const result = await gradeAssessmentAction(
         course.id,
@@ -196,16 +221,23 @@ export default function ExamClient({
         answersToSubmit
       )
 
-      if (result.success) {
-        setSubmissionResult(result)
-      } else {
-        alert('Grading failed: ' + result.error)
-      }
+      clearInterval(progressInterval)
+      setLoadingProgress(100)
+      setLoadingMessage('Evaluation complete! Hydrating transcript...')
+
+      setTimeout(() => {
+        if (result.success) {
+          setSubmissionResult(result)
+        } else {
+          alert('Grading failed: ' + result.error)
+        }
+        setIsSubmitting(false)
+      }, 600)
     } catch (err) {
+      clearInterval(progressInterval)
+      setIsSubmitting(false)
       console.error(err)
       alert('Network submit error')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -242,7 +274,7 @@ export default function ExamClient({
               <span className="text-xs font-bold text-teal-600 uppercase tracking-wider block">
                 Assessment Graded Successfully
               </span>
-              <h2 className="text-2xl font-black text-slate-850 leading-tight">
+              <h2 className="text-2xl font-black text-slate-800 leading-tight">
                 {assessment.title}
               </h2>
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-0.5">
@@ -286,7 +318,7 @@ export default function ExamClient({
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Incorrect Response
               </span>
-              <span className="text-xl font-black text-red-500">
+              <span className="text-xl font-black text-rose-500">
                 {submissionResult.incorrectCount || 0}
               </span>
             </div>
@@ -302,29 +334,41 @@ export default function ExamClient({
             </div>
           )}
 
-          {/* Blind Submissions Dossier summary */}
-          <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100 space-y-4">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          {/* Secure Correct/Incorrect submissions summary list */}
+          <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 space-y-4">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
               <Activity className="w-4 h-4 text-teal-600" />
-              Zero-Trust Blind Submission Logs
+              Secure Graded Submission Dossier
             </h3>
             <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
               {questions.map((q, idx) => {
                 const answerIndex = savedAnswers[q.id]
                 const hasAnswered = answerIndex !== undefined && answerIndex !== -1
+                
+                const statusKey = submissionResult?.questionStatuses?.[q.id] || gradedMetrics?.questionStatuses?.[q.id] || 'unattempted'
+                
+                let iconElement = <XCircle className="w-4.5 h-4.5 text-slate-300 shrink-0" />
+                let statusText = 'Unattempted'
+                let textClass = 'text-slate-400 font-bold uppercase'
+                
+                if (statusKey === 'correct') {
+                  iconElement = <CheckCircle className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                  statusText = `Correct (Option ${['A', 'B', 'C', 'D'][answerIndex]})`
+                  textClass = 'text-emerald-600 font-black uppercase'
+                } else if (statusKey === 'incorrect') {
+                  iconElement = <XCircle className="w-4.5 h-4.5 text-rose-500 shrink-0" />
+                  statusText = `Incorrect (Option ${['A', 'B', 'C', 'D'][answerIndex]})`
+                  textClass = 'text-rose-500 font-black uppercase'
+                }
 
                 return (
-                  <div key={q.id} className="p-3 bg-white border border-slate-150 rounded-xl flex items-center justify-between text-xs font-bold gap-3">
+                  <div key={q.id} className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between text-xs font-bold gap-3">
                     <span className="text-slate-700">Question {idx + 1}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-400 font-extrabold uppercase">
-                        {hasAnswered ? `Submitted: Option ${['A', 'B', 'C', 'D'][answerIndex]}` : 'Unattempted'}
+                      <span className={textClass}>
+                        {statusText}
                       </span>
-                      {hasAnswered ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-slate-300 shrink-0" />
-                      )}
+                      {iconElement}
                     </div>
                   </div>
                 )
@@ -336,7 +380,7 @@ export default function ExamClient({
           <div className="flex gap-4 pt-2">
             <Link
               href="/dashboard"
-              className="flex-1 text-center py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition shadow-sm text-sm border border-teal-600"
+              className="flex-1 text-center py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition shadow-sm text-sm border border-teal-600 cursor-pointer"
             >
               Return to Dashboard
             </Link>
@@ -353,8 +397,66 @@ export default function ExamClient({
   const currentQSelected = selectedAnswers[currentQ?.id]
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 animate-fade-in flex flex-col select-none">
+    <div className="min-h-screen bg-slate-50 text-slate-800 animate-fade-in flex flex-col select-none relative">
       
+      {/* 1. Interactive CAD Submission loader overlay when submitting answers */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 select-none">
+          <div 
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, rgba(203, 213, 225, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(203, 213, 225, 0.2) 1px, transparent 1px)
+              `,
+              backgroundSize: '16px 16px'
+            }}
+            className="max-w-md w-full bg-white/95 border border-slate-200 shadow-2xl rounded-3xl p-8 space-y-6 text-center animate-in fade-in duration-300"
+          >
+            {/* Spinning Concentric CAD rings */}
+            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, ease: 'linear', duration: 3 }}
+                className="absolute inset-0 border-2 border-dashed border-teal-600 rounded-full"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ repeat: Infinity, ease: 'linear', duration: 2 }}
+                className="absolute w-12 h-12 border-2 border-slate-350 rounded-full border-t-teal-650"
+              />
+              <div className="absolute font-mono text-[10px] font-black text-slate-800">
+                {loadingProgress}%
+              </div>
+            </div>
+
+            {/* Title & dynamic readout */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none uppercase">
+                Server grading in progress
+              </h3>
+              <p className="text-slate-500 text-xs font-semibold">
+                Executing authoritative evaluation scripts
+              </p>
+            </div>
+
+            {/* Progress line */}
+            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+              <motion.div
+                animate={{ width: `${loadingProgress}%` }}
+                transition={{ duration: 0.1 }}
+                className="h-full bg-teal-600 rounded-full"
+              />
+            </div>
+
+            {/* Dynamic Telemetry logs box */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 font-mono text-[10px] text-teal-705 text-left font-semibold min-h-[50px] flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-ping" />
+              <span>{loadingMessage}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sticky Paletted Exam Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200/60 shadow-sm px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -364,7 +466,7 @@ export default function ExamClient({
               <ChevronRight className="w-3.5 h-3.5 text-slate-350" />
               <span className="text-slate-500">{course.title}</span>
             </div>
-            <h1 className="text-base md:text-lg font-black text-slate-850 truncate mt-0.5">
+            <h1 className="text-base md:text-lg font-black text-slate-800 truncate mt-0.5">
               {assessment.title}
             </h1>
           </div>
@@ -384,7 +486,7 @@ export default function ExamClient({
         </div>
       </header>
 
-      {/* Main split-screen grid - custom stacked on mobile POV */}
+      {/* Main split screen grid */}
       <main className="max-w-7xl w-full mx-auto p-4 md:p-8 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Left column (3/4 width): Active JEE Question Panel & controllers */}
@@ -395,10 +497,10 @@ export default function ExamClient({
               {/* Question Text block */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="px-3 py-1 bg-slate-50 border border-slate-150 rounded-xl text-xs font-black text-slate-550">
+                  <span className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-500">
                     Question {activeIdx + 1} of {questions.length}
                   </span>
-                  <span className="text-[10px] font-black uppercase text-teal-650 tracking-wider">
+                  <span className="text-[10px] font-black uppercase text-teal-600 tracking-wider">
                     JEE Marking: +{currentQ.marks_positive || 4} / -{currentQ.marks_negative || 1}
                   </span>
                 </div>
@@ -417,7 +519,7 @@ export default function ExamClient({
                     className={`w-full text-left p-4 rounded-2xl border text-xs md:text-sm font-bold transition flex items-center gap-3 cursor-pointer ${
                       currentQSelected === idx
                         ? 'bg-teal-50 border-teal-200 text-teal-650'
-                        : 'bg-white hover:bg-slate-50 border-slate-100 hover:border-slate-200 text-slate-700'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     <span className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center shrink-0 text-xs font-black ${
@@ -443,7 +545,7 @@ export default function ExamClient({
                   </button>
                   <button
                     onClick={handleClearResponse}
-                    className="flex-1 sm:flex-initial px-4 py-3 border border-slate-200 text-slate-550 hover:bg-slate-50 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+                    className="flex-1 sm:flex-initial px-4 py-3 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer"
                   >
                     Clear Response
                   </button>
@@ -490,7 +592,7 @@ export default function ExamClient({
                     const status = statuses[q.id]
                     const isActive = idx === activeIdx
 
-                    let bgClass = 'bg-slate-100 text-slate-400 border-slate-200' // not visited
+                    let bgClass = 'bg-slate-100 text-slate-405 border-slate-200' // not visited
                     if (status === 'answered') {
                       bgClass = 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
                     } else if (status === 'unanswered') {
@@ -504,7 +606,7 @@ export default function ExamClient({
                         key={q.id}
                         onClick={() => visitQuestion(idx)}
                         className={`w-10 h-10 rounded-xl border text-xs font-black transition flex items-center justify-center cursor-pointer ${bgClass} ${
-                          isActive ? 'ring-2 ring-teal-600/50 ring-offset-2 scale-105' : 'hover:scale-102'
+                          isActive ? 'ring-2 ring-teal-650/50 ring-offset-2 scale-105' : 'hover:scale-102'
                         }`}
                       >
                         {idx + 1}
@@ -522,7 +624,7 @@ export default function ExamClient({
                   Status Legend
                 </h4>
                 
-                <div className="grid grid-cols-2 gap-3 text-[10px] font-extrabold uppercase text-slate-500">
+                <div className="grid grid-cols-2 gap-3 text-[10px] font-extrabold uppercase text-slate-550">
                   <div className="flex items-center gap-2">
                     <span className="w-3.5 h-3.5 rounded-md bg-slate-100 border border-slate-200 shrink-0" />
                     <span>Not Visited ({unvisitedCount})</span>
@@ -550,7 +652,7 @@ export default function ExamClient({
                 disabled={isSubmitting}
                 className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-350 text-white text-xs font-black uppercase tracking-wider rounded-xl transition cursor-pointer shadow-sm border border-emerald-600 text-center"
               >
-                {isSubmitting ? 'Grading...' : 'Submit Assessment'}
+                Submit Assessment
               </button>
             </div>
 
@@ -563,7 +665,7 @@ export default function ExamClient({
       {showConfirmSubmit && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white p-6 md:p-8 rounded-3xl border border-slate-200/60 shadow-xl space-y-6 animate-fade-in text-center">
-            <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto text-teal-650 border border-teal-100">
+            <div className="w-14 h-14 bg-teal-550/10 rounded-2xl flex items-center justify-center mx-auto text-teal-600 border border-teal-100">
               <HelpCircle className="w-7 h-7" />
             </div>
             
@@ -590,7 +692,7 @@ export default function ExamClient({
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowConfirmSubmit(false)}
-                className="flex-1 py-3 bg-white hover:bg-slate-50 text-slate-550 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+                className="flex-1 py-3 bg-white hover:bg-slate-50 text-slate-500 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer"
               >
                 Cancel
               </button>

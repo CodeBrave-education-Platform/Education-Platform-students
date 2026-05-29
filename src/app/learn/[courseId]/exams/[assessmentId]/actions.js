@@ -71,18 +71,22 @@ export async function gradeAssessmentAction(courseId, assessmentId, attemptId, a
     let correctCount = 0
     let incorrectCount = 0
     let unattemptedCount = 0
+    const questionStatuses = {}
 
     realQuestions.forEach((q) => {
       const submittedOption = answers[q.id]
 
       if (submittedOption === undefined || submittedOption === null || submittedOption === -1) {
         unattemptedCount++
+        questionStatuses[q.id] = 'unattempted'
       } else if (Number(submittedOption) === q.correct_option_index) {
         score += q.marks_positive
         correctCount++
+        questionStatuses[q.id] = 'correct'
       } else {
         score -= q.marks_negative
         incorrectCount++
+        questionStatuses[q.id] = 'incorrect'
       }
     })
 
@@ -109,6 +113,7 @@ export async function gradeAssessmentAction(courseId, assessmentId, attemptId, a
       correctCount,
       incorrectCount,
       unattemptedCount,
+      questionStatuses,
       submittedAt: submittedAt.toISOString(),
       timeExceeded
     }

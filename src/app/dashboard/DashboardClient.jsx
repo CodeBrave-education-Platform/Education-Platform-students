@@ -57,7 +57,7 @@ const CourseSkeletonGrid = () => (
 )
 
 const TableSkeleton = () => (
-  <div className="overflow-x-auto rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md p-6 space-y-4">
+  <div className="overflow-x-auto rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md p-6 space-y-4">
     <div className="h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-1/4 mb-4 animate-pulse" />
     {[1, 2, 3].map((idx) => (
       <div key={idx} className="flex justify-between items-center py-4 border-b border-zinc-200/30 dark:border-zinc-800/30 animate-pulse">
@@ -520,15 +520,15 @@ export default function DashboardClient({
 
   // Dynamic Metrics definitions
   const teacherStats = [
-    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
-    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
-    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
   ]
 
   const studentStats = [
-    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
-    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
-    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
   ]
 
   const stats = isTeacher ? teacherStats : studentStats
@@ -550,12 +550,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'MY_COURSES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
@@ -564,12 +564,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ROSTER', 'roster')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'ROSTER' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
@@ -579,12 +579,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'PROFILE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -596,12 +596,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'MY_LEARNING' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <BookOpenCheck className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
@@ -610,12 +610,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BROWSE', 'browse')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'BROWSE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <Search className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
@@ -624,12 +624,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BATCHES', 'batches')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BATCHES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'BATCHES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Batches</span>
@@ -638,12 +638,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ANALYTICS' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'ANALYTICS' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <TrendingUp className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Analytics</span>
@@ -653,12 +653,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'PROFILE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -667,12 +667,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'INVOICES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
                     )}
                     <FileText className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Invoices</span>
@@ -686,7 +686,7 @@ export default function DashboardClient({
         {/* Dashboard Content Area */}
         <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out my-6 mr-6 ml-6">
           
-          <header className="p-6 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
+          <header className="p-6 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
             <div className="flex items-center">
               {/* Responsive Hamburger Toggle Menu for Mobile */}
               <button
@@ -701,7 +701,7 @@ export default function DashboardClient({
                   {isTeacher ? 'Instructor Control Panel' : 'Student Learning Hub'}
                 </h1>
                 <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-555 mt-1 uppercase tracking-wider">
-                  Dashboard &bull; Signed in as <span className="text-blue-600 dark:text-blue-400 font-bold lowercase">{user.email}</span>
+                  Dashboard &bull; Signed in as <span className="text-teal-600 dark:text-teal-400 font-bold lowercase">{user.email}</span>
                 </p>
               </div>
             </div>
@@ -712,7 +712,7 @@ export default function DashboardClient({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-750 text-white font-extrabold text-xs rounded-full border border-transparent shadow-md cursor-pointer select-none transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-750 text-white font-extrabold text-xs rounded-full border border-transparent shadow-md cursor-pointer select-none transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Course</span>
@@ -723,11 +723,11 @@ export default function DashboardClient({
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
             {/* Small Welcome Note (No gradients, premium Blue/White glass theme) */}
-            <div className="p-6 rounded-2xl bg-blue-50/40 dark:bg-blue-955/10 border border-blue-500/10 dark:border-blue-400/10 select-none shadow-sm">
+            <div className="p-6 rounded-2xl bg-teal-50/40 dark:bg-blue-955/10 border border-teal-500/10 dark:border-blue-400/10 select-none shadow-sm">
               <div className="max-w-3xl space-y-2">
                 <div className="flex items-center gap-2 select-none">
-                  <span className="w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                  <span className="w-1.5 h-1.5 bg-teal-600 dark:bg-blue-400 rounded-full animate-pulse" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400">
                     Portal Active
                   </span>
                 </div>
@@ -750,7 +750,7 @@ export default function DashboardClient({
                 return (
                   <div
                     key={stat.title}
-                    className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-500/20 dark:hover:border-blue-400/20 group cursor-pointer"
+                    className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-teal-500/20 dark:hover:border-blue-400/20 group cursor-pointer"
                   >
                     <div className={`p-3.5 rounded-2xl shrink-0 ${stat.color} transition-transform duration-300 group-hover:scale-110 shadow-sm`}>
                       <IconComponent className="w-5 h-5" />
@@ -793,8 +793,8 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-[#B37E5F] dark:text-indigo-400" />
+                      <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                         <span>Created Courses ({courses.length})</span>
                       </h3>
                     </div>
@@ -805,12 +805,12 @@ export default function DashboardClient({
                           <BookOpen className="w-8 h-8" />
                         </div>
                         <div className="space-y-1">
-                          <h4 className="text-sm font-extrabold text-[#3A251B] dark:text-zinc-200">No courses published yet</h4>
+                          <h4 className="text-sm font-extrabold text-slate-900 dark:text-zinc-200">No courses published yet</h4>
                           <p className="text-xs text-zinc-400">Share your domain expertise and construct your very first course!</p>
                         </div>
                         <button
                           onClick={() => setIsCreateOpen(true)}
-                          className="px-5 py-2.5 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-xs rounded-full border border-[#FAF6F2]/60 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
+                          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-slate-700 dark:from-teal-600 dark:to-teal-700 dark:text-white font-extrabold text-xs rounded-full border border-teal-600 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Create First Course
                         </button>
@@ -824,13 +824,13 @@ export default function DashboardClient({
                             <motion.div
                               key={course.id}
                               whileHover={{ y: -4 }}
-                              className="p-6 rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
+                              className="p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
                             >
                               <div className="space-y-2">
-                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full">
+                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full">
                                   Course
                                 </span>
-                                <h4 className="text-base font-black text-[#3A251B] dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
+                                <h4 className="text-base font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
                                 <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                   {course.description || 'No description provided.'}
                                 </p>
@@ -861,8 +861,8 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6"
                   >
-                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <Users className="w-5 h-5 text-[#B37E5F] dark:text-indigo-400" />
+                    <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                       <span>Student Enrolls Ledger ({enrollments.length})</span>
                     </h3>
 
@@ -872,27 +872,27 @@ export default function DashboardClient({
                           <Users className="w-8 h-8" />
                         </div>
                         <div className="space-y-1">
-                          <h4 className="text-sm font-extrabold text-[#3A251B] dark:text-zinc-200">Roster Empty</h4>
+                          <h4 className="text-sm font-extrabold text-slate-900 dark:text-zinc-200">Roster Empty</h4>
                           <p className="text-xs text-zinc-400">No students have enrolled in your active courses yet.</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="overflow-x-auto rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md">
+                      <div className="overflow-x-auto rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md">
                         <table className="w-full text-left border-collapse">
                           <thead>
-                            <tr className="border-b border-zinc-200/50 dark:border-zinc-800/50 text-[10px] font-black uppercase tracking-wider text-zinc-400 select-none">
+                            <tr className="border-b border-slate-200/50 dark:border-slate-800/50 text-[10px] font-black uppercase tracking-wider text-zinc-400 select-none">
                               <th className="px-6 py-4">Student</th>
                               <th className="px-6 py-4">Course</th>
                               <th className="px-6 py-4">Contact</th>
                               <th className="px-6 py-4 text-right">Date Enrolled</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-zinc-200/30 dark:divide-zinc-800/30 text-xs font-semibold text-[#3A251B] dark:text-zinc-200">
+                          <tbody className="divide-y divide-slate-200/30 dark:divide-zinc-800/30 text-xs font-semibold text-slate-900 dark:text-zinc-200">
                             {enrollments.map((enroll) => (
-                              <tr key={enroll.id} className="hover:bg-[#FAF6F2]/30 dark:hover:bg-zinc-950/20 transition-all">
+                              <tr key={enroll.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-950/20 transition-all">
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center font-bold text-[#5C3F2F] dark:text-indigo-400">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center font-bold text-slate-700 dark:text-teal-400">
                                       {(enroll.profiles?.full_name || 'ST').substring(0, 2).toUpperCase()}
                                     </div>
                                     <div>
@@ -932,8 +932,8 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6"
                   >
-                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <BookOpenCheck className="w-5 h-5 text-[#B37E5F] dark:text-indigo-400" />
+                    <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <BookOpenCheck className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                       <span>My Learning Catalog ({enrollments.length})</span>
                     </h3>
 
@@ -943,12 +943,12 @@ export default function DashboardClient({
                           <GraduationCap className="w-8 h-8" />
                         </div>
                         <div className="space-y-1">
-                          <h4 className="text-sm font-extrabold text-[#3A251B] dark:text-zinc-200">No active enrollments</h4>
+                          <h4 className="text-sm font-extrabold text-slate-900 dark:text-zinc-200">No active enrollments</h4>
                           <p className="text-xs text-zinc-400">Kickstart your skill upgrade today. Explore our available course catalogs!</p>
                         </div>
                         <button
                           onClick={() => handleTabChange('BROWSE', 'browse')}
-                          className="px-5 py-2.5 bg-gradient-to-r from-[#F6E5D8] to-[#FAF0E6] text-[#5C3F2F] dark:from-indigo-600 dark:to-purple-600 dark:text-white font-extrabold text-xs rounded-full border border-[#FAF6F2]/60 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
+                          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-slate-700 dark:from-teal-600 dark:to-teal-700 dark:text-white font-extrabold text-xs rounded-full border border-teal-600 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Browse Available Courses
                         </button>
@@ -968,7 +968,7 @@ export default function DashboardClient({
                               key={enroll.id}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-blue-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
+                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
@@ -1031,14 +1031,14 @@ export default function DashboardClient({
                                   <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
                                     <button
                                       onClick={() => handleTabChange('PROFILE', 'profile')}
-                                      className="border border-blue-600 hover:bg-blue-50/50 dark:border-blue-500/70 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                      className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 dark:hover:bg-teal-950/20 text-teal-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                     >
                                       MY DOSSIER
                                     </button>
                                     
                                     <button
                                       onClick={() => router.push(`/courses/${course.id}`)}
-                                      className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                      className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                     >
                                       <span>RESUME SYLLABI</span>
                                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1063,8 +1063,8 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6 animate-fade-in"
                   >
-                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <Users className="w-5 h-5 text-blue-600 dark:text-indigo-400" />
+                    <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                       <span>Cohort-Based Live Batches ({initialBatches.length})</span>
                     </h3>
 
@@ -1074,7 +1074,7 @@ export default function DashboardClient({
                           <Users className="w-8 h-8" />
                         </div>
                         <div className="space-y-1">
-                          <h4 className="text-sm font-extrabold text-[#3A251B] dark:text-zinc-200">No batches available</h4>
+                          <h4 className="text-sm font-extrabold text-slate-900 dark:text-zinc-200">No batches available</h4>
                           <p className="text-xs text-zinc-400">There are no published batches active on the platform right now.</p>
                         </div>
                       </div>
@@ -1099,7 +1099,7 @@ export default function DashboardClient({
                                   <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider select-none ${
                                     isEnrolled
                                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
-                                      : 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/20 dark:text-blue-450 dark:border-blue-500/20'
+                                      : 'bg-teal-50 text-teal-700 border-blue-100 dark:bg-teal-950/20 dark:text-blue-450 dark:border-teal-500/20'
                                   }`}>
                                     {isEnrolled ? 'Enrolled (Live)' : 'Open Enrollment'}
                                   </span>
@@ -1138,7 +1138,7 @@ export default function DashboardClient({
                                   <button
                                     onClick={() => handleBatchRazorpayCheckout(batch)}
                                     disabled={isCheckoutLoading || checkoutLoadingId !== null}
-                                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-350 disabled:border-slate-100 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-blue-605 cursor-pointer text-center flex items-center gap-1.5"
+                                    className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-350 disabled:border-slate-100 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-teal-650 cursor-pointer text-center flex items-center gap-1.5"
                                   >
                                     {isCheckoutLoading ? (
                                       <>
@@ -1168,14 +1168,14 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6"
                   >
-                    <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-blue-600 dark:text-indigo-400" />
+                    <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                       <span>My JEE Performance Dashboard</span>
                     </h3>
 
                     {(!studentAnalytics || Number(studentAnalytics.total_exams) === 0) ? (
                       <div className="p-12 text-center rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md space-y-6 max-w-xl mx-auto animate-fade-in shadow-sm">
-                        <div className="inline-flex p-5 rounded-3xl bg-blue-50 dark:bg-zinc-950 text-blue-600 dark:text-indigo-500 shadow-inner">
+                        <div className="inline-flex p-5 rounded-3xl bg-teal-50 dark:bg-zinc-950 text-teal-600 dark:text-indigo-500 shadow-inner">
                           <BarChart3 className="w-10 h-10 animate-pulse" />
                         </div>
                         <div className="space-y-2">
@@ -1187,7 +1187,7 @@ export default function DashboardClient({
                         <div className="pt-2">
                           <button
                             onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-sm border border-blue-600 cursor-pointer hover:scale-[1.01] transition-all"
+                            className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl shadow-sm border border-teal-600 cursor-pointer hover:scale-[1.01] transition-all"
                           >
                             Take your first Mock Test
                           </button>
@@ -1198,7 +1198,7 @@ export default function DashboardClient({
                         {/* KPI Cards Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 bg-teal-50 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center shrink-0">
                               <BookOpenCheck className="w-6 h-6" />
                             </div>
                             <div>
@@ -1285,7 +1285,7 @@ export default function DashboardClient({
                               </div>
                             </div>
                             
-                            <div className="text-[11px] font-bold text-slate-500 dark:text-[#3A251B]">
+                            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-900">
                               Calculated out of maximum average benchmark scores.
                             </div>
                           </div>
@@ -1296,7 +1296,7 @@ export default function DashboardClient({
                               <h4 className="text-xs font-black text-slate-400 dark:text-zinc-550 uppercase tracking-wider">
                                 Scores progression
                               </h4>
-                              <p className="text-[10px] font-bold text-[#3A251B] mt-0.5">Attempt scores across last 5 tests</p>
+                              <p className="text-[10px] font-bold text-slate-900 mt-0.5">Attempt scores across last 5 tests</p>
                             </div>
 
                             <div className="h-60 w-full pt-6">
@@ -1368,8 +1368,8 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-                      <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                        <Search className="w-5 h-5 text-[#B37E5F] dark:text-indigo-400" />
+                      <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                        <Search className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                         <span>All Available Curriculums ({directory.length})</span>
                       </h3>
                       
@@ -1383,7 +1383,7 @@ export default function DashboardClient({
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search titles, descriptions..."
-                          className="w-full pl-9 pr-4 py-2 bg-white/70 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/80 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#E8C8B5]/50 focus:border-[#E8C8B5] dark:focus:ring-indigo-500/50 dark:focus:border-indigo-500 transition-all text-[#3A251B] dark:text-zinc-100 placeholder:text-zinc-400 shadow-inner"
+                          className="w-full pl-9 pr-4 py-2 bg-white/70 dark:bg-zinc-900/60 border border-slate-200/50 dark:border-zinc-800/80 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 transition-all text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-inner"
                         />
                       </div>
                     </div>
@@ -1418,7 +1418,7 @@ export default function DashboardClient({
                               key={course.id}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-blue-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
+                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
@@ -1492,7 +1492,7 @@ export default function DashboardClient({
                                   <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
                                     <button
                                       onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                                      className="border border-blue-600 hover:bg-blue-50/50 dark:border-blue-500/70 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                      className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 dark:hover:bg-teal-950/20 text-teal-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                     >
                                       EXPLORE
                                     </button>
@@ -1506,7 +1506,7 @@ export default function DashboardClient({
                                       <button
                                         onClick={() => handleEnroll(course.id)}
                                         disabled={loading}
-                                        className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+                                        className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
                                       >
                                         {loading ? (
                                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1518,7 +1518,7 @@ export default function DashboardClient({
                                       <button
                                         onClick={() => handleRazorpayCheckout(course)}
                                         disabled={loading}
-                                        className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/10"
+                                        className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm shadow-teal-500/10"
                                       >
                                         {loading ? (
                                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1550,7 +1550,7 @@ export default function DashboardClient({
                     {/* Header */}
                     <div className="flex justify-between items-center pb-2">
                       <h3 className="text-xl font-black text-slate-900 dark:text-zinc-150 flex items-center gap-2 tracking-tight">
-                        <User className="w-5 h-5 text-blue-600" />
+                        <User className="w-5 h-5 text-teal-600" />
                         <span>Academic Profile Dossier</span>
                       </h3>
                       <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider select-none shadow-sm">
@@ -1560,7 +1560,7 @@ export default function DashboardClient({
 
                     {/* Personal & Contact Overview Card */}
                     <div className="bg-white/60 backdrop-blur-xl shadow-md shadow-zinc-100/50 dark:bg-zinc-900/60 dark:shadow-none rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-md shrink-0 select-none">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-teal-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-md shrink-0 select-none">
                         {displayInitials}
                       </div>
                       <div className="space-y-2 text-center md:text-left flex-1">
@@ -1578,15 +1578,15 @@ export default function DashboardClient({
 
                         {/* Display extra student academic parameters */}
                         {(targetYear || academicBatch || preferredSubject) && (
-                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-blue-600 dark:text-indigo-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
+                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-teal-600 dark:text-teal-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
                             {targetYear && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
+                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
                             )}
                             {academicBatch && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
+                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
                             )}
                             {preferredSubject && (
-                              <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
+                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
                             )}
                           </div>
                         )}
@@ -1596,9 +1596,9 @@ export default function DashboardClient({
                     {/* Academic Performance Metrics Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {[
-                        { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400', icon: Clock },
+                        { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-teal-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-teal-400', icon: Clock },
                         { label: 'Syllabus Covered', value: syllabusProgress, desc: 'Core curricula completion', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400', icon: BookOpenCheck },
-                        { label: 'Practice Assessment Avg', value: testAverage, desc: 'Average mock test score', color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/20 dark:text-blue-400', icon: Award },
+                        { label: 'Practice Assessment Avg', value: testAverage, desc: 'Average mock test score', color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/20 dark:text-teal-400', icon: Award },
                         { label: 'Academic Strength', value: academicStrengths, desc: 'Top performing area', color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/20 dark:text-purple-400', icon: Sparkles }
                       ].map((item, index) => {
                         const IconComponent = item.icon
@@ -1633,11 +1633,11 @@ export default function DashboardClient({
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
                             <span>Syllabus Progress Indicator</span>
-                            <span className="text-blue-600">{syllabusProgress}</span>
+                            <span className="text-teal-600">{syllabusProgress}</span>
                           </div>
                           <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-teal-600 to-indigo-500 rounded-full transition-all duration-500"
                               style={{ width: syllabusProgress.includes('%') ? syllabusProgress : `${syllabusProgress}%` }}
                             />
                           </div>
@@ -1688,7 +1688,7 @@ export default function DashboardClient({
                         <div className="space-y-3.5 relative pl-4 border-l border-zinc-200 dark:border-zinc-800 mt-2">
                           {[
                             { title: 'Stage 1: Foundation Phase', desc: 'Core formulas, equations, and basic vectors.', status: 'COMPLETED', color: 'bg-emerald-500 text-emerald-100 border-emerald-500' },
-                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-blue-600 text-blue-100 border-blue-600 animate-pulse' },
+                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-teal-600 text-blue-100 border-teal-600 animate-pulse' },
                             { title: 'Stage 3: Advanced Curriculums', desc: 'Multi-concept modules and IIT PYQs.', status: 'LOCKED', color: 'bg-slate-200 dark:bg-zinc-800 text-zinc-400 border-transparent' }
                           ].map((stage, idx) => (
                             <div key={idx} className="relative space-y-1">
@@ -1696,7 +1696,7 @@ export default function DashboardClient({
                               <div className="flex justify-between items-center">
                                 <h5 className="text-xs font-bold text-slate-850 dark:text-zinc-200">{stage.title}</h5>
                                 <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                                  stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-teal-50 text-teal-600' : 'bg-slate-50 text-slate-400'
                                 }`}>{stage.status}</span>
                               </div>
                               <p className="text-[10px] text-zinc-400 leading-normal">{stage.desc}</p>
@@ -1867,7 +1867,7 @@ export default function DashboardClient({
                             whileTap={{ scale: 0.99 }}
                             type="submit"
                             disabled={profileLoading}
-                            className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
+                            className="px-6 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
                           >
                             {profileLoading ? 'Updating Dossier...' : 'Save Profile Dossier'}
                           </motion.button>
@@ -1887,7 +1887,7 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <h3 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-150 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
+                      <FileText className="w-5 h-5 text-teal-600" />
                       <span>Invoices Ledger</span>
                     </h3>
 
@@ -1921,7 +1921,7 @@ export default function DashboardClient({
                                 <a 
                                   href="#" 
                                   onClick={(e) => { e.preventDefault(); alert(`Downloading invoice ${invoice.id} in PDF format...`) }}
-                                  className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                  className="text-teal-600 dark:text-teal-400 hover:underline font-semibold"
                                 >
                                   Download PDF
                                 </a>
@@ -1960,7 +1960,7 @@ export default function DashboardClient({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-zinc-900 z-50 shadow-2xl p-6 flex flex-col justify-between md:hidden border-r border-zinc-200/50 dark:border-zinc-800/50"
+              className="fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-zinc-900 z-50 shadow-2xl p-6 flex flex-col justify-between md:hidden border-r border-slate-200/50 dark:border-slate-800/50"
             >
               <div className="space-y-8 flex flex-col h-full justify-between">
                 <div className="space-y-8">
@@ -2002,7 +2002,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_COURSES', 'courses')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_COURSES' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2013,7 +2013,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ROSTER', 'roster')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ROSTER' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2024,7 +2024,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2038,7 +2038,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2049,7 +2049,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2060,7 +2060,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BATCHES', 'batches')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BATCHES' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2071,7 +2071,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ANALYTICS' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2082,7 +2082,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2093,7 +2093,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
-                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2106,9 +2106,9 @@ export default function DashboardClient({
                 </div>
 
                 {/* Drawer Profile Capsule */}
-                <div className="border-t border-zinc-150/40 dark:border-zinc-800/50 pt-5 flex flex-col gap-3">
+                <div className="border-t border-zinc-150/40 dark:border-slate-800/50 pt-5 flex flex-col gap-3">
                   <div className="flex items-center gap-3.5 px-2">
-                    <div className="w-11 h-11 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-extrabold shadow-sm shadow-blue-500/10 shrink-0 select-none">
+                    <div className="w-11 h-11 rounded-full bg-teal-600 flex items-center justify-center text-white font-extrabold shadow-sm shadow-teal-500/10 shrink-0 select-none">
                       {displayName.substring(0, 2).toUpperCase()}
                     </div>
                     <div className="overflow-hidden">
@@ -2141,12 +2141,12 @@ export default function DashboardClient({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-zinc-950 z-50 shadow-2xl p-6 flex flex-col justify-between border-l border-zinc-200/50 dark:border-zinc-800/60"
+              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-zinc-950 z-50 shadow-2xl p-6 flex flex-col justify-between border-l border-slate-200/50 dark:border-zinc-800/60"
             >
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4">
-                  <h3 className="text-lg font-black text-[#3A251B] dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-[#B37E5F] dark:text-indigo-400" />
+                <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-4">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                     <span>Publish New Course</span>
                   </h3>
                   <button 
@@ -2161,7 +2161,7 @@ export default function DashboardClient({
 
                 <form onSubmit={handleCreateCourse} className="space-y-4">
                   <div>
-                    <label htmlFor="course-title" className="block text-[10px] font-bold uppercase tracking-wider text-[#8C766C] dark:text-zinc-400 mb-1.5 ml-2">
+                    <label htmlFor="course-title" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5 ml-2">
                       Course Title
                     </label>
                     <input
@@ -2172,12 +2172,12 @@ export default function DashboardClient({
                       onChange={(e) => setCourseTitle(e.target.value)}
                       placeholder="e.g. Masterclass in Advanced Algorithms"
                       disabled={createLoading}
-                      className="w-full px-4 py-3 bg-[#FAF6F2]/45 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#E8C8B5]/50 focus:border-[#E8C8B5] dark:focus:ring-indigo-500/50 dark:focus:border-indigo-500 font-semibold text-sm text-[#3A251B] dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner"
+                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 font-semibold text-sm text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="course-desc" className="block text-[10px] font-bold uppercase tracking-wider text-[#8C766C] dark:text-zinc-400 mb-1.5 ml-2">
+                    <label htmlFor="course-desc" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5 ml-2">
                       Course Description
                     </label>
                     <textarea
@@ -2187,7 +2187,7 @@ export default function DashboardClient({
                       onChange={(e) => setCourseDesc(e.target.value)}
                       placeholder="Describe the learning objectives, pre-requisites, and outcomes of this course..."
                       disabled={createLoading}
-                      className="w-full px-4 py-3 bg-[#FAF6F2]/45 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#E8C8B5]/50 focus:border-[#E8C8B5] dark:focus:ring-indigo-500/50 dark:focus:border-indigo-500 font-medium text-xs text-[#3A251B] dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner resize-none"
+                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 font-medium text-xs text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner resize-none"
                     />
                   </div>
 
@@ -2218,13 +2218,13 @@ export default function DashboardClient({
                 </form>
               </div>
 
-              <div className="border-t border-zinc-200/50 dark:border-zinc-800/50 pt-4 mt-6">
+              <div className="border-t border-slate-200/50 dark:border-slate-800/50 pt-4 mt-6">
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={handleCreateCourse}
                   disabled={createLoading}
-                  className="w-full flex items-center justify-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-full shadow-md cursor-pointer disabled:opacity-50 transition-all text-xs tracking-wide select-none"
+                  className="w-full flex items-center justify-center py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-full shadow-md cursor-pointer disabled:opacity-50 transition-all text-xs tracking-wide select-none"
                 >
                   {createLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

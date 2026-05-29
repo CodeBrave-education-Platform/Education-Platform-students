@@ -80,6 +80,43 @@ export default async function ExamPage(props) {
     .eq('user_id', user.id)
     .maybeSingle()
 
+  // Securely evaluate correct/incorrect breakdown server-side if already submitted
+  let gradedMetrics = null
+  if (attempt && attempt.submitted_at) {
+    const { data: realQuestions } = await supabase
+      .from('questions')
+      .select('id, correct_option_index, marks_positive, marks_negative')
+      .eq('assessment_id', assessmentId)
+
+    if (realQuestions) {
+      let correctCount = 0
+      let incorrectCount = 0
+      let unattemptedCount = 0
+      const questionStatuses = {}
+
+      realQuestions.forEach((q) => {
+        const submittedOption = attempt.answers_payload?.[q.id]
+        if (submittedOption === undefined || submittedOption === null || submittedOption === -1) {
+          unattemptedCount++
+          questionStatuses[q.id] = 'unattempted'
+        } else if (Number(submittedOption) === q.correct_option_index) {
+          correctCount++
+          questionStatuses[q.id] = 'correct'
+        } else {
+          incorrectCount++
+          questionStatuses[q.id] = 'incorrect'
+        }
+      })
+
+      gradedMetrics = {
+        correctCount,
+        incorrectCount,
+        unattemptedCount,
+        questionStatuses
+      }
+    }
+  }
+
   // 6. Fetch Course details
   const { data: course } = await supabase
     .from('courses')
@@ -97,6 +134,7 @@ export default async function ExamPage(props) {
         attempt={attempt}
         alreadySubmitted={!!attempt.submitted_at}
         user={user}
+        gradedMetrics={gradedMetrics}
       />
     )
   }
