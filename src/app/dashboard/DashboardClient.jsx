@@ -423,15 +423,15 @@ export default function DashboardClient({
 
   // Dynamic Metrics definitions
   const teacherStats = [
-    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-indigo-500 bg-indigo-500/10 dark:bg-indigo-500/20' },
-    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-purple-500 bg-purple-500/10 dark:bg-purple-500/20' },
-    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-pink-500 bg-pink-500/10 dark:bg-pink-500/20' },
+    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
   ]
 
   const studentStats = [
-    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-emerald-500 bg-emerald-500/10 dark:bg-emerald-500/20' },
-    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-indigo-500 bg-indigo-500/10 dark:bg-indigo-500/20' },
-    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-purple-500 bg-purple-500/10 dark:bg-purple-500/20' },
+    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
   ]
 
   const stats = isTeacher ? teacherStats : studentStats
@@ -439,48 +439,56 @@ export default function DashboardClient({
   return (
     <div className="relative min-h-screen w-full bg-slate-50 dark:bg-zinc-950 font-sans transition-colors duration-300">
       
-      {/* Premium accent glows */}
-      <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
+      {/* No background gradients as requested */}
 
-      <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
+      <div className="relative z-10 flex min-h-[calc(100vh-57px)] pt-0 pb-12 w-full max-w-none px-0">
         
-        {/* Sidebar Nav */}
-        <aside className="w-20 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 rounded-[2rem] hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-100px)] sticky top-[80px] my-4 ml-4 shadow-lg shadow-indigo-950/5 dark:shadow-none z-40">
+        {/* Sidebar Nav (Seamless flush connection under sticky navbar) */}
+        <aside className="w-20 bg-white dark:bg-zinc-900 border-r border-zinc-150 dark:border-zinc-800/80 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-57px)] sticky top-[57px] z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'MY_COURSES' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
                   </button>
                   <button 
                     onClick={() => handleTabChange('ROSTER', 'roster')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'ROSTER' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
                   </button>
+                  <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'PROFILE' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
@@ -489,45 +497,58 @@ export default function DashboardClient({
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'MY_LEARNING' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <BookOpenCheck className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
                   </button>
                   <button 
                     onClick={() => handleTabChange('BROWSE', 'browse')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'BROWSE' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <Search className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
                   </button>
+                  <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'PROFILE' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
                   <button 
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] border border-blue-200/40 dark:border-blue-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
+                    {activeTab === 'INVOICES' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-blue-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
                     <FileText className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Invoices</span>
                   </button>
@@ -538,7 +559,7 @@ export default function DashboardClient({
         </aside>
 
         {/* Dashboard Content Area */}
-        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out">
+        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out my-6 mr-6 ml-6">
           
           <header className="p-6 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
             <div className="flex items-center">
@@ -576,18 +597,19 @@ export default function DashboardClient({
 
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
-            {/* Dynamic Banner */}
-            <div className="p-8 rounded-[2.5rem] bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 text-white relative overflow-hidden shadow-2xl shadow-indigo-500/10 dark:shadow-none border border-indigo-500/20 dark:border-indigo-500/10 select-none animate-gradient-shift bg-gradient-size">
-              <div className="absolute -top-[30%] -left-[10%] w-[35rem] h-[35rem] bg-white/10 rounded-full blur-[80px] pointer-events-none animate-pulse" />
-              <div className="absolute -bottom-[20%] -right-[10%] w-[25rem] h-[25rem] bg-indigo-400/20 rounded-full blur-[90px] pointer-events-none" />
-              <div className="relative z-10 max-w-2xl space-y-3">
-                <span className="px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest bg-white/20 rounded-full select-none">
-                  Portal Active
-                </span>
-                <h2 className="text-3xl font-black tracking-tight">
+            {/* Small Welcome Note (No gradients, clean Blue/White styling) */}
+            <div className="p-6 rounded-[1.5rem] bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-950/50 select-none shadow-sm">
+              <div className="max-w-3xl space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    Portal Active
+                  </span>
+                </div>
+                <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-zinc-150">
                   Welcome, {displayName}!
                 </h2>
-                <p className="text-xs font-semibold text-white/90 leading-relaxed max-w-xl">
+                <p className="text-xs font-medium text-slate-550 dark:text-zinc-400 leading-normal">
                   {isTeacher 
                     ? 'Manage your educational offerings, publish modules, track course enrollments, and check rosters instantly.' 
                     : 'Search and enroll in high-caliber educational curricula, view your registered syllabi, and level up your skills.'

@@ -52,7 +52,7 @@ export default function Navbar({ user, profile }) {
   }
 
   return (
-    <nav className="relative w-full border-b border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 px-6 py-3 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
+    <nav className="sticky top-0 w-full border-b border-zinc-100 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
       <Link href="/" className="flex flex-col items-start group">
         <svg className="w-36 h-7" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Custom drawn geometric letter 'A' */}
