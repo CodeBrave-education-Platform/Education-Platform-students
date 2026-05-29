@@ -574,7 +574,7 @@ export default function Home() {
 
   // 2. Main Portal Canvas
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50/30 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950/40 flex items-center justify-center p-4 sm:p-8 font-sans transition-colors duration-300 relative overflow-hidden">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-slate-100/50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 flex items-center justify-center p-4 sm:p-8 font-sans transition-colors duration-300 relative overflow-hidden">
       
       {/* Subtle theme toggler at the top right of canvas */}
       {mounted && (
@@ -592,11 +592,11 @@ export default function Home() {
         key="auth-glass-card"
         animate={shakeCount > 0 ? 'shake' : 'idle'}
         variants={cardVariants}
-        className="w-full max-w-6xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-2xl shadow-blue-900/10 dark:shadow-none rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row min-h-[650px] border border-white dark:border-zinc-800 relative z-10 transition-all duration-300"
+        className="w-full max-w-6xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/5 dark:shadow-none rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row min-h-[650px] border border-slate-200/40 dark:border-zinc-800/80 relative z-10 transition-all duration-300"
       >
         
         {/* Left Section: Interactive Forms */}
-        <section className="w-full md:w-[45%] p-8 sm:p-12 flex flex-col justify-center relative bg-white/50 dark:bg-zinc-900/40 border-r border-slate-100 dark:border-zinc-850">
+        <section className="w-full md:w-[45%] p-8 sm:p-12 flex flex-col justify-center relative bg-white/40 dark:bg-zinc-900/30 border-r border-slate-200/30 dark:border-zinc-800/30">
           
           {/* Logo Brand Header */}
           <div className="flex justify-start mb-6">
@@ -613,7 +613,7 @@ export default function Home() {
                 className="space-y-6"
               >
                 {/* Sleek Pill-Shaped Toggle */}
-                <div className="flex bg-slate-100 dark:bg-zinc-950 rounded-full p-1 w-full border border-slate-200/40 dark:border-zinc-800 shadow-inner select-none">
+                <div className="flex bg-slate-100/80 dark:bg-zinc-950/80 rounded-full p-1 w-full border border-slate-200/40 dark:border-zinc-800/80 shadow-inner select-none">
                   <button
                     type="button"
                     onClick={() => {
@@ -623,8 +623,8 @@ export default function Home() {
                     }}
                     className={`flex-1 text-center py-2.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
                       activeTab === 'signin'
-                        ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                        : 'text-slate-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-zinc-200'
+                        ? 'bg-white dark:bg-zinc-800 text-indigo-650 dark:text-indigo-400 font-bold shadow-md'
+                        : 'text-slate-500 dark:text-zinc-500 hover:text-slate-800 dark:hover:text-zinc-200'
                     }`}
                   >
                     Sign In
@@ -638,8 +638,8 @@ export default function Home() {
                     }}
                     className={`flex-1 text-center py-2.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
                       activeTab === 'register'
-                        ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-450 shadow-sm'
-                        : 'text-slate-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-zinc-200'
+                        ? 'bg-white dark:bg-zinc-800 text-indigo-650 dark:text-indigo-400 font-bold shadow-md'
+                        : 'text-slate-500 dark:text-zinc-500 hover:text-slate-800 dark:hover:text-zinc-200'
                     }`}
                   >
                     Register
@@ -648,10 +648,10 @@ export default function Home() {
 
                 {/* Subtitle context */}
                 <div className="space-y-1">
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-150 tracking-tight">
+                  <h2 className="text-xl font-extrabold text-slate-850 dark:text-zinc-100 tracking-tight leading-snug">
                     {activeTab === 'signin' ? 'Sign in to access your portal' : 'Join ASENTRA Prep'}
                   </h2>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-450 dark:text-zinc-400 font-medium">
                     {activeTab === 'signin' ? 'Welcome back! Enter credentials' : 'Construct an account for JEE/Foundations'}
                   </p>
                 </div>
@@ -661,7 +661,7 @@ export default function Home() {
                   {/* Full Name (Only for registration) */}
                   {activeTab === 'register' && (
                     <div>
-                      <label htmlFor="fullname" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1 ml-2">
+                      <label htmlFor="fullname" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                         Full Name
                       </label>
                       <div className="relative">
@@ -685,7 +685,7 @@ export default function Home() {
                           }}
                           placeholder="Dr. Sarah Jenkins"
                           disabled={loading}
-                          className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
                         />
                       </div>
                     </div>
@@ -693,7 +693,7 @@ export default function Home() {
 
                   {/* Email Address */}
                   <div>
-                    <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1 ml-2">
+                    <label htmlFor="email" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                       Email Address
                     </label>
                     <div className="relative">
@@ -717,7 +717,7 @@ export default function Home() {
                         }}
                         placeholder="email@gmail.com"
                         disabled={loading}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -725,7 +725,7 @@ export default function Home() {
                   {/* Indian Mobile Number (Only for registration) */}
                   {activeTab === 'register' && (
                     <div>
-                      <label htmlFor="phone" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1 ml-2">
+                      <label htmlFor="phone" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                         Indian Mobile Number
                       </label>
                       <div className="relative flex items-center">
@@ -753,7 +753,7 @@ export default function Home() {
                           }}
                           placeholder="9876543210"
                           disabled={loading}
-                          className="w-full pl-16 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 tracking-wider transition-all outline-none"
+                          className="w-full pl-16 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 tracking-wider transition-all outline-none"
                         />
                       </div>
                     </div>
@@ -762,17 +762,17 @@ export default function Home() {
                   {/* Role Selector (Only for registration) */}
                   {activeTab === 'register' && (
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1 ml-2">
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                         Account Role
                       </label>
                       <div className="flex bg-slate-100/60 dark:bg-zinc-950/60 p-1 rounded-xl border border-slate-200/50 dark:border-zinc-800 shadow-inner">
                         <button
                           type="button"
                           onClick={() => setRole('student')}
-                          className={`flex-1 text-center py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                          className={`flex-1 text-center py-1.5 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
                             role === 'student'
-                              ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-450 shadow-sm'
-                              : 'text-slate-400 dark:text-zinc-400'
+                              ? 'bg-white dark:bg-zinc-800 text-indigo-650 dark:text-indigo-400 font-black shadow-md'
+                              : 'text-slate-400 dark:text-zinc-500'
                           }`}
                         >
                           Student
@@ -780,10 +780,10 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => setRole('teacher')}
-                          className={`flex-1 text-center py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                          className={`flex-1 text-center py-1.5 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
                             role === 'teacher'
-                              ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-450 shadow-sm'
-                              : 'text-slate-400 dark:text-zinc-400'
+                              ? 'bg-white dark:bg-zinc-800 text-indigo-650 dark:text-indigo-400 font-black shadow-md'
+                              : 'text-slate-400 dark:text-zinc-500'
                           }`}
                         >
                           Instructor
@@ -795,11 +795,11 @@ export default function Home() {
                   {/* Password Field */}
                   <div>
                     <div className="flex justify-between items-center mb-1 select-none">
-                      <label htmlFor="pass" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 ml-2">
+                      <label htmlFor="pass" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 ml-2">
                         Password
                       </label>
                       {activeTab === 'signin' && (
-                        <a href="#" className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                        <a href="#" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
                           Forgot password?
                         </a>
                       )}
@@ -821,12 +821,12 @@ export default function Home() {
                         }}
                         placeholder="••••••••"
                         disabled={loading}
-                        className="w-full pl-10 pr-10 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
+                        className="w-full pl-10 pr-10 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-650 cursor-pointer"
                       >
                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -836,7 +836,7 @@ export default function Home() {
                   {/* Confirm Password (Only for registration) */}
                   {activeTab === 'register' && (
                     <div>
-                      <label htmlFor="confirmpass" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1 ml-2">
+                      <label htmlFor="confirmpass" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                         Confirm Password
                       </label>
                       <div className="relative">
@@ -856,7 +856,7 @@ export default function Home() {
                           }}
                           placeholder="••••••••"
                           disabled={loading}
-                          className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 transition-all outline-none"
                         />
                       </div>
                     </div>
@@ -894,7 +894,7 @@ export default function Home() {
                     whileTap={{ scale: 0.99 }}
                     type="submit"
                     disabled={loading}
-                    className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none"
+                    className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/15 hover:shadow-indigo-600/30 hover:-translate-y-0.5 active:scale-[0.985] transition-all text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none duration-250"
                   >
                     {loading ? (
                       <Loader2 className="w-4.5 h-4.5 animate-spin" />
@@ -917,7 +917,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleGoogleLogin}
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 font-medium py-3 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50/50 dark:hover:bg-zinc-900 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer transition-all duration-200 ease-out text-xs disabled:opacity-50 select-none"
+                  className="w-full flex items-center justify-center gap-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 font-bold py-3 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50/50 dark:hover:bg-zinc-900 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer transition-all duration-200 ease-out text-xs disabled:opacity-50 select-none"
                 >
                   <svg className="w-4.5 h-4.5" viewBox="0 0 24 24">
                     <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 15.02 1 12 1 7.35 1 3.39 3.65 1.5 7.5l3.96 3.07C6.42 7.51 9 5.04 12 5.04z" />
@@ -938,10 +938,10 @@ export default function Home() {
                 className="space-y-6 flex flex-col justify-center"
               >
                 <div className="text-center space-y-2">
-                  <div className="inline-flex p-3 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-inner">
+                  <div className="inline-flex p-3 rounded-full bg-indigo-500/10 text-indigo-650 dark:text-indigo-400 shadow-inner">
                     <KeyRound className="w-6 h-6 animate-pulse" />
                   </div>
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-150 tracking-tight">Verify Code</h2>
+                  <h2 className="text-xl font-bold text-slate-805 dark:text-zinc-150 tracking-tight">Verify Code</h2>
                   <p className="text-xs text-slate-400">
                     We've sent a 6-digit confirmation code to <span className="font-bold text-slate-700 dark:text-zinc-200">{email}</span>
                   </p>
@@ -949,7 +949,7 @@ export default function Home() {
 
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div>
-                    <label htmlFor="otp" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5 ml-2">
+                    <label htmlFor="otp" className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-450 dark:text-zinc-450 mb-1.5 ml-2">
                       Verification Code
                     </label>
                     <div className="relative">
@@ -977,7 +977,7 @@ export default function Home() {
                         }}
                         placeholder="000000"
                         disabled={loading}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-950/55 rounded-xl text-sm font-bold tracking-widest text-center text-slate-800 dark:text-zinc-100 placeholder:text-slate-350 transition-all outline-none"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl text-sm font-bold tracking-widest text-center text-slate-800 dark:text-zinc-100 placeholder:text-slate-350 transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -1013,7 +1013,7 @@ export default function Home() {
                       whileTap={{ scale: 0.99 }}
                       type="submit"
                       disabled={loading}
-                      className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none"
+                      className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/15 hover:shadow-indigo-600/30 hover:-translate-y-0.5 active:scale-[0.985] transition-all text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none duration-250"
                     >
                       {loading ? (
                         <Loader2 className="w-4.5 h-4.5 animate-spin" />
@@ -1034,7 +1034,7 @@ export default function Home() {
                         setSuccess('')
                       }}
                       disabled={loading}
-                      className="w-full text-center py-2 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                      className="w-full text-center py-2 text-[10px] font-extrabold text-indigo-500 hover:text-indigo-650 transition-colors cursor-pointer"
                     >
                       Change account details
                     </button>
@@ -1047,14 +1047,14 @@ export default function Home() {
         </section>
 
         {/* Right Section: Visual Showcase */}
-        <section className="hidden md:flex w-[55%] relative items-center justify-center p-12 bg-gradient-to-bl from-blue-100/50 to-transparent dark:from-zinc-950 dark:to-transparent">
+        <section className="hidden md:flex w-[55%] relative items-center justify-center p-12 bg-gradient-to-bl from-indigo-100/30 to-transparent dark:from-zinc-950 dark:to-transparent">
           
           {/* Framed Graphic Frame */}
-          <div className="w-full h-full max-w-md rounded-3xl bg-[#F4ECE1]/65 dark:bg-zinc-900/30 shadow-inner flex flex-col items-center justify-center relative overflow-hidden p-6 border border-white/60 dark:border-zinc-800/40">
+          <div className="w-full h-full max-w-md rounded-3xl bg-[#F8F5F0]/80 dark:bg-zinc-900/30 shadow-inner flex flex-col items-center justify-center relative overflow-hidden p-6 border border-white/60 dark:border-zinc-800/40">
             
             {/* Ambient animated blurs inside card */}
-            <div className="absolute w-48 h-48 bg-blue-400/5 dark:bg-indigo-950/20 rounded-full blur-2xl top-10 right-10 pointer-events-none" />
-            <div className="absolute w-56 h-56 bg-indigo-400/5 dark:bg-purple-950/15 rounded-full blur-3xl bottom-10 left-5 pointer-events-none" />
+            <div className="absolute w-48 h-48 bg-indigo-400/5 dark:bg-indigo-950/25 rounded-full blur-2xl top-10 right-10 pointer-events-none" />
+            <div className="absolute w-56 h-56 bg-purple-400/5 dark:bg-purple-950/15 rounded-full blur-3xl bottom-10 left-5 pointer-events-none" />
 
             {/* Graphics container */}
             <div className="relative z-10 w-full flex flex-col items-center text-center space-y-6 select-none">

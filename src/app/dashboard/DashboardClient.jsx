@@ -25,6 +25,51 @@ const getThumbnailUrl = (course) => {
   return defaultThumbs[course.level] || defaultThumbs.foundation
 }
 
+const CourseSkeletonGrid = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {[1, 2, 3].map((idx) => (
+      <div key={idx} className="bg-white/40 dark:bg-zinc-900/40 border border-zinc-205/30 dark:border-zinc-800/40 shadow-sm rounded-[2.5rem] overflow-hidden flex flex-col justify-between p-6 min-h-[480px] animate-pulse">
+        <div className="space-y-4 w-full">
+          <div className="w-full h-40 bg-slate-200/50 dark:bg-zinc-800/50 rounded-2xl animate-pulse" />
+          <div className="h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-2/3 animate-pulse" />
+          <div className="h-3 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-full animate-pulse" />
+          <div className="h-3 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-5/6 animate-pulse" />
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full animate-pulse" />
+              <div className="h-3 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-1/2 animate-pulse" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full animate-pulse" />
+              <div className="h-3 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-1/3 animate-pulse" />
+            </div>
+          </div>
+        </div>
+        <div className="h-10 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-full mt-6 animate-pulse" />
+      </div>
+    ))}
+  </div>
+)
+
+const TableSkeleton = () => (
+  <div className="overflow-x-auto rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md p-6 space-y-4">
+    <div className="h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-1/4 mb-4 animate-pulse" />
+    {[1, 2, 3].map((idx) => (
+      <div key={idx} className="flex justify-between items-center py-4 border-b border-zinc-200/30 dark:border-zinc-800/30 animate-pulse">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full animate-pulse" />
+          <div className="space-y-1">
+            <div className="h-3.5 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-24 animate-pulse" />
+            <div className="h-2 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-36 animate-pulse" />
+          </div>
+        </div>
+        <div className="h-6 bg-slate-200/50 dark:bg-zinc-800/50 rounded-xl w-32 animate-pulse" />
+        <div className="h-3 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-16 animate-pulse" />
+      </div>
+    ))}
+  </div>
+)
+
 export default function DashboardClient({ 
   user, 
   profile, 
@@ -58,7 +103,9 @@ export default function DashboardClient({
 
   // Synchronize state back to browser URL bar in-place (0ms SPA-grade navigation)
   const handleTabChange = (tabName, queryParam) => {
-    setActiveTab(tabName)
+    startTransition(() => {
+      setActiveTab(tabName)
+    })
     setIsMobileMenuOpen(false)
     
     if (typeof window !== 'undefined') {
@@ -73,16 +120,18 @@ export default function DashboardClient({
     const handlePopState = () => {
       const urlParams = new URLSearchParams(window.location.search)
       const tabParam = urlParams.get('tab')
-      if (isTeacher) {
-        if (tabParam === 'roster') setActiveTab('ROSTER')
-        else if (tabParam === 'profile') setActiveTab('PROFILE')
-        else setActiveTab('MY_COURSES')
-      } else {
-        if (tabParam === 'browse') setActiveTab('BROWSE')
-        else if (tabParam === 'invoices') setActiveTab('INVOICES')
-        else if (tabParam === 'profile') setActiveTab('PROFILE')
-        else setActiveTab('MY_LEARNING')
-      }
+      startTransition(() => {
+        if (isTeacher) {
+          if (tabParam === 'roster') setActiveTab('ROSTER')
+          else if (tabParam === 'profile') setActiveTab('PROFILE')
+          else setActiveTab('MY_COURSES')
+        } else {
+          if (tabParam === 'browse') setActiveTab('BROWSE')
+          else if (tabParam === 'invoices') setActiveTab('INVOICES')
+          else if (tabParam === 'profile') setActiveTab('PROFILE')
+          else setActiveTab('MY_LEARNING')
+        }
+      })
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
@@ -397,17 +446,17 @@ export default function DashboardClient({
       <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
         
         {/* Sidebar Nav */}
-        <aside className="w-24 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-900/60 hidden md:flex flex-col gap-6 justify-between py-6 px-2 shrink-0 h-[calc(100vh-62px)] sticky top-[62px] z-40">
+        <aside className="w-20 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 rounded-[2rem] hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-100px)] sticky top-[80px] my-4 ml-4 shadow-lg shadow-indigo-950/5 dark:shadow-none z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
@@ -415,10 +464,10 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('ROSTER', 'roster')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <Users className="w-5 h-5 shrink-0" />
@@ -426,10 +475,10 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <User className="w-5 h-5 shrink-0" />
@@ -440,10 +489,10 @@ export default function DashboardClient({
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <BookOpenCheck className="w-5 h-5 shrink-0" />
@@ -451,10 +500,10 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('BROWSE', 'browse')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <Search className="w-5 h-5 shrink-0" />
@@ -462,10 +511,10 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <User className="w-5 h-5 shrink-0" />
@@ -473,10 +522,10 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
-                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                    className={`w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold' 
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.15)] dark:shadow-[0_0_15px_rgba(59,130,246,0.25)] border border-blue-200/40 dark:border-blue-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     <FileText className="w-5 h-5 shrink-0" />
@@ -528,8 +577,9 @@ export default function DashboardClient({
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
             {/* Dynamic Banner */}
-            <div className="p-8 rounded-[2rem] bg-gradient-to-r from-blue-600 via-indigo-500 to-indigo-600 text-white relative overflow-hidden shadow-xl shadow-blue-500/10 dark:shadow-none">
-              <div className="absolute -top-[50%] -left-[10%] w-[50rem] h-[50rem] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="p-8 rounded-[2.5rem] bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 text-white relative overflow-hidden shadow-2xl shadow-indigo-500/10 dark:shadow-none border border-indigo-500/20 dark:border-indigo-500/10 select-none animate-gradient-shift bg-gradient-size">
+              <div className="absolute -top-[30%] -left-[10%] w-[35rem] h-[35rem] bg-white/10 rounded-full blur-[80px] pointer-events-none animate-pulse" />
+              <div className="absolute -bottom-[20%] -right-[10%] w-[25rem] h-[25rem] bg-indigo-400/20 rounded-full blur-[90px] pointer-events-none" />
               <div className="relative z-10 max-w-2xl space-y-3">
                 <span className="px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest bg-white/20 rounded-full select-none">
                   Portal Active
@@ -553,14 +603,14 @@ export default function DashboardClient({
                 return (
                   <div
                     key={stat.title}
-                    className="p-5 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm flex items-center gap-4 transition-all hover:-y-0.5"
+                    className="p-6 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-500/20 dark:hover:border-indigo-500/30 group cursor-pointer"
                   >
-                    <div className={`p-3.5 rounded-2xl shrink-0 ${stat.color}`}>
+                    <div className={`p-3.5 rounded-2xl shrink-0 ${stat.color} transition-transform duration-300 group-hover:scale-110 shadow-sm`}>
                       <IconComponent className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{stat.title}</p>
-                      <p className="text-xl font-black text-slate-900 dark:text-zinc-100 mt-0.5">{stat.value}</p>
+                      <p className="text-[9px] font-extrabold text-zinc-450 dark:text-zinc-450 uppercase tracking-widest">{stat.title}</p>
+                      <p className="text-2xl font-black text-slate-905 dark:text-zinc-100 mt-0.5 tracking-tight">{stat.value}</p>
                     </div>
                   </div>
                 )
@@ -570,9 +620,24 @@ export default function DashboardClient({
             {/* Main Content Panels */}
             <div className="relative">
               <AnimatePresence mode="wait">
-                
-                {/* 1. TEACHER: My Courses Grid */}
-                {activeTab === 'MY_COURSES' && isTeacher && (
+                {isPending ? (
+                  <motion.div
+                    key="transition-skeleton"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {activeTab === 'ROSTER' || activeTab === 'INVOICES' || activeTab === 'PROFILE' ? (
+                      <TableSkeleton />
+                    ) : (
+                      <CourseSkeletonGrid />
+                    )}
+                  </motion.div>
+                ) : (
+                  <>
+                    {/* 1. TEACHER: My Courses Grid */}
+                    {activeTab === 'MY_COURSES' && isTeacher && (
                   <motion.div
                     key="my-courses-panel"
                     initial={{ opacity: 0, y: 15 }}
@@ -754,16 +819,17 @@ export default function DashboardClient({
                           return (
                             <motion.div 
                               key={enroll.id}
-                              whileHover={{ y: -6 }}
-                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-[2.5rem] overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group min-h-[500px]"
+                              whileHover={{ y: -8, scale: 1.01 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-850/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_20px_50px_rgba(99,102,241,0.12)] hover:border-blue-500/30 dark:hover:border-indigo-500/30 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/20 via-transparent to-transparent z-10" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
                                 <img 
                                   src={thumbUrl} 
                                   alt={course.title}
-                                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
                                   Enrolled
@@ -898,16 +964,17 @@ export default function DashboardClient({
                           return (
                             <motion.div 
                               key={course.id}
-                              whileHover={{ y: -6 }}
-                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] rounded-[2.5rem] overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group min-h-[540px]"
+                              whileHover={{ y: -8, scale: 1.01 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-850/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_20px_50px_rgba(99,102,241,0.12)] hover:border-blue-500/30 dark:hover:border-indigo-500/30 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/20 via-transparent to-transparent z-10" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
                                 <img 
                                   src={thumbUrl} 
                                   alt={course.title}
-                                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                                 />
                                 {enrolled && (
                                   <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
@@ -1372,10 +1439,10 @@ export default function DashboardClient({
                       <span>Invoices Ledger</span>
                     </h3>
 
-                    <div className="overflow-hidden rounded-3xl border border-white dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <div className="overflow-hidden rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.025)]">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-white dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-semibold uppercase tracking-wider text-slate-450 dark:text-zinc-400 select-none">
+                          <tr className="border-b border-zinc-150/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">
                             <th className="px-6 py-4">Invoice ID</th>
                             <th className="px-6 py-4">Course</th>
                             <th className="px-6 py-4">Razorpay Payment ID</th>
@@ -1385,16 +1452,16 @@ export default function DashboardClient({
                             <th className="px-6 py-4 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-zinc-850 text-xs font-medium text-slate-800 dark:text-zinc-200">
+                        <tbody className="divide-y divide-slate-100/60 dark:divide-zinc-850/80 text-xs font-semibold text-slate-800 dark:text-zinc-200">
                           {mockInvoices?.map((invoice) => (
-                            <tr key={invoice.id} className="hover:bg-white/40 dark:hover:bg-zinc-900/20 transition-colors">
-                              <td className="px-6 py-4 font-bold text-slate-900 dark:text-zinc-100">{invoice.id}</td>
-                              <td className="px-6 py-4">{invoice.courseTitle}</td>
-                              <td className="px-6 py-4 font-mono text-[10px] text-slate-500">{invoice.razorpayId}</td>
-                              <td className="px-6 py-4 font-semibold">{invoice.amount}</td>
-                              <td className="px-6 py-4 text-slate-500 dark:text-zinc-400">{new Date(invoice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                            <tr key={invoice.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-950/20 transition-all duration-200">
+                              <td className="px-6 py-4 font-mono font-bold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.id}</td>
+                              <td className="px-6 py-4 font-medium text-slate-800 dark:text-zinc-300">{invoice.courseTitle}</td>
+                              <td className="px-6 py-4 font-mono text-[10px] text-slate-500 dark:text-zinc-550 tracking-wider">{invoice.razorpayId}</td>
+                              <td className="px-6 py-4 font-mono font-extrabold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.amount}</td>
+                              <td className="px-6 py-4 font-mono text-[11px] text-slate-550 dark:text-zinc-400">{new Date(invoice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                               <td className="px-6 py-4 text-right">
-                                <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                                <span className="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.1)] text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
                                   {invoice.status}
                                 </span>
                               </td>
@@ -1414,6 +1481,8 @@ export default function DashboardClient({
                     </div>
                   </motion.div>
                 )}
+              </>
+            )}
 
               </AnimatePresence>
             </div>
@@ -1481,7 +1550,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_COURSES', 'courses')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_COURSES' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold shadow-sm' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1492,7 +1561,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ROSTER', 'roster')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ROSTER' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1503,7 +1572,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1517,8 +1586,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
-                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <BookOpenCheck className="w-5 h-5 shrink-0" />
@@ -1528,8 +1597,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
-                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <Search className="w-5 h-5 shrink-0" />
@@ -1539,7 +1608,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -1550,7 +1619,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
-                              ? 'bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-455 font-bold shadow-sm' 
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-blue-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
