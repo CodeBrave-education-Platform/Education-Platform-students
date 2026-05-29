@@ -443,8 +443,8 @@ export default function DashboardClient({
 
       <div className="relative z-10 flex min-h-[calc(100vh-57px)] pt-0 pb-12 w-full max-w-none px-0">
         
-        {/* Sidebar Nav (Seamless flush connection under sticky navbar) */}
-        <aside className="w-20 bg-white dark:bg-zinc-900 border-r border-zinc-150 dark:border-zinc-800/80 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-57px)] sticky top-[57px] z-40">
+        {/* Sidebar Nav (Seamless flush connection under sticky navbar - Premium Glass theme) */}
+        <aside className="w-20 bg-white/70 dark:bg-zinc-955/70 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800/20 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-57px)] sticky top-[57px] z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
@@ -572,11 +572,11 @@ export default function DashboardClient({
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
                   {isTeacher ? 'Instructor Control Panel' : 'Student Learning Hub'}
                 </h1>
-                <p className="text-xs font-semibold text-zinc-400 mt-0.5">
-                  Dashboard &bull; Signed in as <span className="text-blue-600 dark:text-indigo-405">{user.email}</span>
+                <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-555 mt-1 uppercase tracking-wider">
+                  Dashboard &bull; Signed in as <span className="text-blue-600 dark:text-blue-400 font-bold lowercase">{user.email}</span>
                 </p>
               </div>
             </div>
@@ -597,22 +597,22 @@ export default function DashboardClient({
 
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
-            {/* Small Welcome Note (No gradients, clean Blue/White styling) */}
-            <div className="p-6 rounded-[1.5rem] bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-950/50 select-none shadow-sm">
+            {/* Small Welcome Note (No gradients, premium Blue/White glass theme) */}
+            <div className="p-6 rounded-2xl bg-blue-50/40 dark:bg-blue-955/10 border border-blue-500/10 dark:border-blue-400/10 select-none shadow-sm">
               <div className="max-w-3xl space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-2 select-none">
+                  <span className="w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">
                     Portal Active
                   </span>
                 </div>
-                <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-zinc-150">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
                   Welcome, {displayName}!
                 </h2>
-                <p className="text-xs font-medium text-slate-550 dark:text-zinc-400 leading-normal">
+                <p className="text-xs font-medium text-slate-500 dark:text-zinc-450 leading-relaxed max-w-2xl">
                   {isTeacher 
-                    ? 'Manage your educational offerings, publish modules, track course enrollments, and check rosters instantly.' 
-                    : 'Search and enroll in high-caliber educational curricula, view your registered syllabi, and level up your skills.'
+                    ? 'Welcome to your instructor control panel. Publish modules, track student enrollments, and manage your courses cleanly.' 
+                    : 'Welcome to your student control panel. View your active learning syllabi, explore the course directory, and track your study progress.'
                   }
                 </p>
               </div>
@@ -625,14 +625,14 @@ export default function DashboardClient({
                 return (
                   <div
                     key={stat.title}
-                    className="p-6 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-500/20 dark:hover:border-indigo-500/30 group cursor-pointer"
+                    className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-500/20 dark:hover:border-blue-400/20 group cursor-pointer"
                   >
                     <div className={`p-3.5 rounded-2xl shrink-0 ${stat.color} transition-transform duration-300 group-hover:scale-110 shadow-sm`}>
                       <IconComponent className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-extrabold text-zinc-450 dark:text-zinc-450 uppercase tracking-widest">{stat.title}</p>
-                      <p className="text-2xl font-black text-slate-905 dark:text-zinc-100 mt-0.5 tracking-tight">{stat.value}</p>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">{stat.title}</p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-zinc-100 mt-0.5 tracking-tight">{stat.value}</p>
                     </div>
                   </div>
                 )
@@ -843,7 +843,7 @@ export default function DashboardClient({
                               key={enroll.id}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-850/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_20px_50px_rgba(99,102,241,0.12)] hover:border-blue-500/30 dark:hover:border-indigo-500/30 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
+                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-blue-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
@@ -988,7 +988,7 @@ export default function DashboardClient({
                               key={course.id}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-850/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_20px_50px_rgba(99,102,241,0.12)] hover:border-blue-500/30 dark:hover:border-indigo-500/30 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
+                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-blue-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="w-full h-48 overflow-hidden relative shrink-0">
@@ -1461,7 +1461,7 @@ export default function DashboardClient({
                       <span>Invoices Ledger</span>
                     </h3>
 
-                    <div className="overflow-hidden rounded-[2rem] border border-zinc-200/50 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.025)]">
+                    <div className="overflow-hidden rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b border-zinc-150/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">
