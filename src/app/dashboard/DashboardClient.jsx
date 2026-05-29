@@ -912,6 +912,7 @@ export default function DashboardClient({
                                     </button>
                                     
                                     <button
+                                      onClick={() => router.push(`/courses/${course.id}`)}
                                       className="bg-blue-600 hover:bg-blue-755 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                     >
                                       <span>RESUME SYLLABI</span>

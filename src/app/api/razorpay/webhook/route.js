@@ -116,6 +116,51 @@ export async function POST(request) {
       }
     }
 
+    // 6. Handle payment refund/revocation events (refund.created / payment.refunded)
+    if (body.event === 'refund.created' || body.event === 'payment.refunded') {
+      const refundEntity = body.payload?.refund?.entity
+      const paymentEntity = body.payload?.payment?.entity
+      const paymentId = refundEntity?.payment_id || paymentEntity?.id
+
+      if (!paymentId) {
+        console.error('Webhook Error: Missing payment ID reference in refund webhook payload')
+        return NextResponse.json({ error: 'Missing payment ID in refund payload' }, { status: 400 })
+      }
+
+      console.log(`Processing refund/revocation for payment ID: ${paymentId}`)
+
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase environment variables are missing on the server.')
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+      try {
+        // Invoke database transaction function to mathematically sever access
+        const { data: success, error: rpcError } = await supabase.rpc('execute_enrollment_revocation', {
+          _payment_id: paymentId
+        })
+
+        if (rpcError) {
+          throw new Error(rpcError.message || JSON.stringify(rpcError))
+        }
+
+        if (success) {
+          console.log(`ACID Enrollment successfully revoked in database for payment ${paymentId}`)
+          return NextResponse.json({ success: true, message: 'Enrollment revoked successfully' })
+        } else {
+          console.warn(`Revocation RPC executed but returned false for payment ${paymentId} (No corresponding payment record found in invoices)`)
+          return NextResponse.json({ success: true, message: 'Revocation acknowledged: payment record not found.' })
+        }
+      } catch (dbErr) {
+        console.error(`CRITICAL: Database transaction failed during revocation for Payment ID: ${paymentId}. Error:`, dbErr)
+        return NextResponse.json({ error: 'Database revocation transaction failed', details: dbErr.message }, { status: 500 })
+      }
+    }
+
     // Gracefully handle other events
     return NextResponse.json({ success: true, message: `Event ${body.event} received and acknowledged` })
 
