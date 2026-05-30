@@ -37,6 +37,9 @@ export default function AuthForm({
   setFocusedInput
 }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [agreed, setAgreed] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   // Standard input focus styles
   const inputContainerClass = "w-full flex flex-col gap-1 text-left relative"
@@ -411,6 +414,36 @@ export default function AuthForm({
               )}
             </AnimatePresence>
 
+            {/* Privacy & Terms Checkbox Checklist */}
+            <div className="flex items-start gap-2.5 my-4 select-none text-left">
+              <input
+                id="agreeCheckbox"
+                type="checkbox"
+                required
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-slate-350 bg-slate-50 text-teal-600 focus:ring-teal-500 focus:ring-2 focus:ring-offset-0 cursor-pointer accent-teal-600 shrink-0"
+              />
+              <label htmlFor="agreeCheckbox" className="text-xs font-semibold text-slate-500 leading-tight">
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="text-teal-650 hover:text-teal-700 underline font-extrabold cursor-pointer focus:outline-none bg-transparent border-none p-0"
+                >
+                  Terms & Conditions
+                </button>{' '}
+                and{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(true)}
+                  className="text-teal-650 hover:text-teal-700 underline font-extrabold cursor-pointer focus:outline-none bg-transparent border-none p-0"
+                >
+                  Privacy Policy
+                </button>.
+              </label>
+            </div>
+
             {/* Submit Button */}
             <motion.button
               whileTap={{ scale: 0.98 }}
@@ -468,6 +501,98 @@ export default function AuthForm({
           </button>
         </div>
       )}
+
+      {/* TERMS & CONDITIONS MODAL OVERLAY */}
+      <AnimatePresence>
+        {showTerms && (
+          <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white max-w-lg w-full rounded-3xl p-6 md:p-8 border border-slate-200 shadow-2xl flex flex-col justify-between max-h-[80vh]"
+            >
+              <div className="text-left">
+                <h3 className="text-base font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-teal-600" />
+                  <span>Terms & Conditions</span>
+                </h3>
+                
+                <div className="overflow-y-auto pr-2 mt-4 space-y-4 max-h-[50vh] text-xs text-slate-600 leading-relaxed font-semibold">
+                  <p>
+                    <strong>1. Single-User License:</strong> Access credentials represent a highly restricted, single-user academic session license. Simultaneous logins or sharing passwords with third parties will trigger automated session revocation.
+                  </p>
+                  <p>
+                    <strong>2. Test Center Integrity:</strong> Assessment timelines and mock grading scores are driven by authoritative server-side cryptographic checks. Any attempt to modify local timers or scrape questions is a violation of academic integrity.
+                  </p>
+                  <p>
+                    <strong>3. Transaction & Billing:</strong> Transaction pricing, live batch tuition, and Razorpay payment procedures are fully binding. Refunds are subject to the platform’s standard SLA guidelines.
+                  </p>
+                  <p>
+                    <strong>4. Prohibited Activities:</strong> The use of automated scripts, crawlers, or scrapers to extract video lectures, exam payload questions, or student directories is strictly forbidden.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(false)}
+                  className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer text-center"
+                >
+                  Acknowledge & Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* PRIVACY POLICY MODAL OVERLAY */}
+      <AnimatePresence>
+        {showPrivacy && (
+          <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white max-w-lg w-full rounded-3xl p-6 md:p-8 border border-slate-200 shadow-2xl flex flex-col justify-between max-h-[80vh]"
+            >
+              <div className="text-left">
+                <h3 className="text-base font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-teal-600" />
+                  <span>Privacy Policy</span>
+                </h3>
+                
+                <div className="overflow-y-auto pr-2 mt-4 space-y-4 max-h-[50vh] text-xs text-slate-600 leading-relaxed font-semibold">
+                  <p>
+                    <strong>1. Collected Telemetry:</strong> We collect personal details (full name, email, 10-digit Indian phone number) and performance analytics (mock test marks, time logs) solely to personalize study directories.
+                  </p>
+                  <p>
+                    <strong>2. Password & Data Security:</strong> User credentials are protected using industry-standard cryptographic hashes (SHA-256/bcrypt) and stored under Supabase Row-Level Security (RLS) configurations.
+                  </p>
+                  <p>
+                    <strong>3. Zero Data Sharing:</strong> Your performance transcripts, exam scores, and personal records will never be sold, leased, or shared with third-party tracking conglomerates.
+                  </p>
+                  <p>
+                    <strong>4. Compliance Guidelines:</strong> Completely compliant with local digital personal data protection acts. Session cookies are utilized solely to keep user sessions authorized.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(false)}
+                  className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer text-center"
+                >
+                  Acknowledge & Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </section>
   )
