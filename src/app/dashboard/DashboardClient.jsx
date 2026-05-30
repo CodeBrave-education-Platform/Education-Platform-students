@@ -1257,7 +1257,7 @@ export default function DashboardClient({
                             </div>
                             
                             <div className="relative w-48 h-48 flex items-center justify-center my-6">
-                              <ResponsiveContainer width="100%" height="100%">
+                              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <RadialBarChart 
                                   cx="50%" 
                                   cy="50%" 
@@ -1300,7 +1300,7 @@ export default function DashboardClient({
                             </div>
 
                             <div className="h-60 w-full pt-6">
-                              <ResponsiveContainer width="100%" height="100%">
+                              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <BarChart 
                                   data={studentAnalytics?.recent_scores ? [...studentAnalytics.recent_scores].reverse() : []}
                                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
