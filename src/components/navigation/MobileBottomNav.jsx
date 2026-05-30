@@ -49,19 +49,19 @@ export default function MobileBottomNav() {
     },
     {
       label: 'My Batches',
-      href: '/batches',
+      href: '/dashboard?tab=batches',
       icon: Users,
       active: isActive('/batches'),
     },
     {
       label: 'Performance',
-      href: '/analytics',
+      href: '/dashboard?tab=analytics',
       icon: TrendingUp,
       active: isActive('/analytics'),
     },
     {
       label: 'Profile',
-      href: '/profile',
+      href: '/dashboard?tab=profile',
       icon: User,
       active: isActive('/profile'),
     },

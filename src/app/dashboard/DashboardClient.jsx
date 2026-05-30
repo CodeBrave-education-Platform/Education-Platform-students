@@ -125,11 +125,9 @@ export default function DashboardClient({
     }
   }
 
-  // React to browser back/forward buttons (Popstate event synchronization)
+  // React to browser back/forward buttons & client-side route search parameter changes
   React.useEffect(() => {
-    const handlePopState = () => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const tabParam = urlParams.get('tab')
+    const syncTab = (tabParam) => {
       startTransition(() => {
         if (isTeacher) {
           if (tabParam === 'roster') setActiveTab('ROSTER')
@@ -145,9 +143,19 @@ export default function DashboardClient({
         }
       })
     }
+
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      syncTab(urlParams.get('tab'))
+    }
+
+    // Sync whenever Next.js searchParams updates (Link clicks, route changes)
+    const tabParam = searchParams.get('tab')
+    syncTab(tabParam)
+
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [isTeacher])
+  }, [searchParams, isTeacher])
 
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
