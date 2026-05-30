@@ -54,7 +54,7 @@ export default async function LearnCoursePage(props) {
   if (enrollError || !enrollment) {
     // Gracefully render unauthorized block card in the page
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-800 animate-fade-in">
+      <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-6 text-slate-800 animate-fade-in">
         <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200/60 shadow-lg text-center space-y-6">
           <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-teal-650 border border-teal-100 shadow-inner">
             <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -101,7 +101,7 @@ export default async function LearnCoursePage(props) {
 
   if (!lessons || lessons.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-800">
+      <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-6 text-slate-800">
         <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200/60 shadow-lg text-center space-y-6">
           <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-500 border border-slate-200 shadow-inner">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

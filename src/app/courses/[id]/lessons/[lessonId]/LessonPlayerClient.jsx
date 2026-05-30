@@ -171,9 +171,9 @@ export default function LessonPlayerClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 animate-fade-in flex flex-col">
+    <div className="min-h-[100dvh] bg-slate-50 text-slate-800 animate-fade-in flex flex-col">
       {/* Premium Sticky Course Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm px-4 md:px-8 py-4">
+      <header className="relative md:sticky md:top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
@@ -221,13 +221,13 @@ export default function LessonPlayerClient({
       </header>
 
       {/* Main Focus Mode Grid */}
-      <main className="max-w-7xl w-full mx-auto p-4 md:p-8 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-7xl w-full mx-auto p-4 md:p-8 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 overflow-x-hidden">
         
         {/* Left Side: Aspect-Ratio Video Player & Dynamic Interactive Tab Sheet */}
         <section className="lg:col-span-2 space-y-6">
           
           {/* Custom HTML5 Video Player Canvas */}
-          <div className="w-full aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-md border border-slate-250/20 relative">
+          <div className="sticky top-0 z-40 w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20 lg:relative">
             <video
               key={activeVideoUrl}
               src={activeVideoUrl}

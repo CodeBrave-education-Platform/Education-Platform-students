@@ -262,7 +262,7 @@ export default function ExamClient({
     const percentage = Math.max(0, Math.round((scoreVal / maxPossible) * 100))
 
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in flex flex-col items-center justify-center">
+      <div className="min-h-[100dvh] bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in flex flex-col items-center justify-center">
         <div className="max-w-3xl w-full bg-white p-6 md:p-8 rounded-3xl border border-slate-200/60 shadow-lg space-y-8">
           
           {/* Header Score Info Card */}
@@ -397,7 +397,7 @@ export default function ExamClient({
   const currentQSelected = selectedAnswers[currentQ?.id]
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 animate-fade-in flex flex-col select-none relative">
+    <div className="min-h-[100dvh] bg-slate-50 text-slate-800 animate-fade-in flex flex-col select-none relative">
       
       {/* 1. Interactive CAD Submission loader overlay when submitting answers */}
       {isSubmitting && (

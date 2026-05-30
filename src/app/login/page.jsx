@@ -16,7 +16,7 @@ function LoginRedirect() {
   }, [router, searchParams])
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans select-none">
+    <div className="min-h-[100dvh] bg-slate-100 flex items-center justify-center font-sans select-none">
       <div className="text-center space-y-3">
         <span className="text-3xl font-extrabold tracking-[0.2em] text-slate-900 animate-pulse select-none uppercase">
           ASENTRA
@@ -32,7 +32,7 @@ function LoginRedirect() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans select-none">
+      <div className="min-h-[100dvh] bg-slate-100 flex items-center justify-center font-sans select-none">
         <div className="text-center space-y-3">
           <span className="text-3xl font-extrabold tracking-[0.2em] text-slate-900 animate-pulse select-none uppercase">
             ASENTRA

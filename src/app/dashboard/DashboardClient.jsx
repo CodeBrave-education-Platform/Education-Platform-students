@@ -534,14 +534,14 @@ export default function DashboardClient({
   const stats = isTeacher ? teacherStats : studentStats
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-50 dark:bg-zinc-950 font-sans transition-colors duration-300">
+    <div className="relative min-h-[100dvh] w-full bg-slate-50 dark:bg-zinc-950 font-sans transition-colors duration-300">
       
       {/* No background gradients as requested */}
 
-      <div className="relative z-10 flex min-h-[calc(100vh-57px)] pt-0 pb-12 w-full max-w-none px-0">
+      <div className="relative z-10 flex min-h-[calc(100dvh-57px)] pt-0 pb-12 w-full max-w-none px-0">
         
         {/* Sidebar Nav (Seamless flush connection under sticky navbar - Premium Glass theme) */}
-        <aside className="w-20 bg-white/70 dark:bg-zinc-955/70 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800/20 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100vh-57px)] sticky top-[57px] z-40">
+        <aside className="w-20 bg-white/70 dark:bg-zinc-955/70 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800/20 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100dvh-57px)] sticky top-[57px] z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
@@ -684,7 +684,7 @@ export default function DashboardClient({
         </aside>
 
         {/* Dashboard Content Area */}
-        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out my-6 mr-6 ml-6">
+        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-fade-in-scroll transition-all duration-500 ease-in-out my-2 mx-2 md:my-6 md:mr-6 md:ml-6 pb-20 md:pb-6">
           
           <header className="p-6 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
             <div className="flex items-center">
@@ -1891,7 +1891,7 @@ export default function DashboardClient({
                       <span>Invoices Ledger</span>
                     </h3>
 
-                    <div className="overflow-hidden rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm">
+                    <div className="overflow-x-auto rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b border-zinc-150/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">

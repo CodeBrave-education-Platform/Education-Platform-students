@@ -9,7 +9,7 @@ export default function Error({ error, reset }) {
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
+    <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Glow orbs */}
       <div className="absolute w-[400px] h-[400px] bg-red-500/5 dark:bg-red-500/10 rounded-full blur-3xl -top-10 pointer-events-none" />
       <div className="absolute w-[400px] h-[400px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl -bottom-10 pointer-events-none" />

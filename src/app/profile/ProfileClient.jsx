@@ -101,16 +101,16 @@ export default function ProfileClient({ user, profile }) {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-slate-50 dark:bg-zinc-950 font-sans transition-colors duration-300">
+    <div className="relative min-h-[100dvh] w-full bg-slate-50 dark:bg-zinc-950 font-sans transition-colors duration-300">
       
       {/* Premium accent glows */}
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex min-h-screen pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
+      <div className="relative z-10 flex min-h-[100dvh] pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
         
         {/* Sidebar Nav (Unified Shell UI) */}
-        <aside className="w-24 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-900/60 hidden md:flex flex-col gap-6 justify-between py-6 px-2 shrink-0 h-[calc(100vh-62px)] sticky top-[62px] z-40">
+        <aside className="w-24 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-900/60 hidden md:flex flex-col gap-6 justify-between py-6 px-2 shrink-0 h-[calc(100dvh-62px)] sticky top-[62px] z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
@@ -172,7 +172,7 @@ export default function ProfileClient({ user, profile }) {
         </aside>
 
         {/* Unified Main Area */}
-        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] transition-all duration-500 ease-in-out">
+        <main className="flex-1 flex flex-col overflow-x-hidden bg-white/30 dark:bg-zinc-900/30 rounded-[2rem] border-none shadow-[0_8px_30px_rgb(0,0,0,0.015)] transition-all duration-500 ease-in-out my-2 mx-2 md:my-6 md:mr-6 pb-20 md:pb-6">
           
           <header className="p-6 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md flex justify-between items-center">
             <div className="flex items-center">

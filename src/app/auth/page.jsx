@@ -239,7 +239,7 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 flex items-center justify-center p-4 sm:p-8 font-sans select-none relative overflow-hidden">
+    <main className="min-h-[100dvh] bg-slate-100 flex items-center justify-center p-4 sm:p-8 font-sans select-none relative overflow-x-hidden">
       
       {/* Decorative clean geometry */}
       <div className="absolute top-0 right-0 w-80 h-80 rounded-full border border-slate-200/40 pointer-events-none" />

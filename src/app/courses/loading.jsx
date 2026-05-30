@@ -4,7 +4,7 @@ import * as React from 'react'
 
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
       <div className="relative flex flex-col items-center gap-6">
         {/* Animated background glow orbs */}
         <div className="absolute w-40 h-40 bg-blue-500/10 dark:bg-blue-500/20 rounded-full blur-3xl -top-10 animate-pulse pointer-events-none" />

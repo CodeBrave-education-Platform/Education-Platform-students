@@ -27,7 +27,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden font-sans select-none text-slate-800 flex flex-col justify-between">
+    <div className="min-h-[100dvh] bg-slate-50 overflow-x-hidden font-sans select-none text-slate-800 flex flex-col justify-between">
       
       <div>
         {/* 1. THE LIVE TELEMETRY TICKER */}

@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in">
+    <div className="min-h-[100dvh] bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Navigation Breadcrumb Skeleton */}
         <div className="flex items-center gap-2">

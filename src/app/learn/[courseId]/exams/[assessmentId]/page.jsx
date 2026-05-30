@@ -51,7 +51,7 @@ export default async function ExamPage(props) {
 
   if (qError || !questions) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-slate-800 animate-fade-in">
+      <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-6 text-slate-800 animate-fade-in">
         <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200/60 shadow-lg text-center space-y-6">
           <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto text-red-600 border border-red-100 shadow-inner">
             <HelpCircle className="w-8 h-8" />
@@ -144,7 +144,7 @@ export default async function ExamPage(props) {
   const totalMarks = totalQuestions * 4
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in flex flex-col items-center justify-center">
+    <div className="min-h-[100dvh] bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in flex flex-col items-center justify-center">
       <div className="max-w-2xl w-full bg-white p-6 md:p-8 rounded-3xl border border-slate-200/60 shadow-lg space-y-6">
         
         {/* Header Breadcrumbs */}
