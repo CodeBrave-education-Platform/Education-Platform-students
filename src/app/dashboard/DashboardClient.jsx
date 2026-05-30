@@ -550,7 +550,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -564,7 +564,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ROSTER', 'roster')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -579,7 +579,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -596,7 +596,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -610,7 +610,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BROWSE', 'browse')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -624,7 +624,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BATCHES', 'batches')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'BATCHES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -638,7 +638,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'ANALYTICS' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -653,7 +653,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -667,7 +667,7 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-blue-200/40 dark:border-teal-500/20' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
@@ -2002,7 +2002,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_COURSES', 'courses')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_COURSES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2013,7 +2013,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ROSTER', 'roster')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ROSTER' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2024,7 +2024,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2038,7 +2038,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2049,7 +2049,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2060,7 +2060,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BATCHES', 'batches')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BATCHES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2071,7 +2071,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ANALYTICS' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2082,7 +2082,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2093,7 +2093,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.2)] border border-blue-200/40 dark:border-teal-500/20' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
