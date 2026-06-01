@@ -7,7 +7,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 py-12 px-6 select-none font-sans relative z-10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
         
         {/* Brand details */}
         <div className="space-y-4">
@@ -97,18 +97,6 @@ export default function Footer() {
               </span>
             </li>
           </ul>
-        </div>
-
-        {/* Security & System Info */}
-        <div className="space-y-3">
-          <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest">Gateway Security</h4>
-          <p className="text-[10px] leading-relaxed text-slate-550">
-            Secure transactional routing protected by standard SHA-256 cryptographic validations. Active RLS locks prevent local injection. Database telemetry aggregates performance matrices strictly server-side.
-          </p>
-          <div className="flex items-center gap-1.5 text-[9px] font-mono bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-800 text-teal-400 w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>SSL HIGH-SECURITY CLIENT</span>
-          </div>
         </div>
 
       </div>

@@ -285,18 +285,12 @@ export default function HeroInteractive({ user }) {
         {/* Left Side: Solid Editorial Content */}
         <div className="w-full lg:w-1/2 flex flex-col items-start space-y-6 lg:space-y-8">
           
-          {/* Subtle micro pill badge */}
-          <div className="inline-flex items-center gap-2 bg-slate-200/60 text-slate-800 border border-slate-350 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase select-none shadow-sm">
-            <Shield className="w-3.5 h-3.5 text-slate-600" />
-            <span>NTA ONLINE JEE PORTAL</span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
             Your Future is Being <span className="text-teal-600">Engineered</span> Today.
           </h1>
 
           <p className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
-            Step into the next generation of academic engineering. Harness rigorous cohort schedules, direct feedback loops, and highly realistic exam environments designed to maximize percentile outcome.
+            Train on realistic NTA mock tests, rigid cohort schedules, and sub-second database analytics to verify your percentile rank.
           </p>
 
           {/* Bullet proofs */}
@@ -319,8 +313,8 @@ export default function HeroInteractive({ user }) {
               <Link href="/dashboard" className="inline-block w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-xl shadow-md transition-colors text-base inline-flex items-center justify-center gap-2.5 cursor-pointer"
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-xl shadow-md transition-colors text-base inline-flex items-center justify-center gap-2.5 cursor-pointer tactile-press"
                 >
                   <span>Enter Your Portal</span>
                   <ArrowRight className="w-4 h-4" />
@@ -330,8 +324,8 @@ export default function HeroInteractive({ user }) {
               <Link href="/login" className="inline-block w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-xl shadow-md transition-colors text-base inline-flex items-center justify-center gap-2.5 cursor-pointer"
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-4 rounded-xl shadow-md transition-colors text-base inline-flex items-center justify-center gap-2.5 cursor-pointer tactile-press"
                 >
                   <span>Start Learning for Free</span>
                   <ArrowRight className="w-4 h-4" />
@@ -357,7 +351,7 @@ export default function HeroInteractive({ user }) {
                   <div
                     key={item.id}
                     onMouseEnter={() => setActiveFeature(item.id)}
-                    className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                    className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border tactile-press ${
                       isActive 
                         ? 'bg-slate-900 border-slate-950 text-white shadow-md' 
                         : 'bg-slate-50 hover:bg-slate-100/70 border-slate-200/60 text-slate-700'

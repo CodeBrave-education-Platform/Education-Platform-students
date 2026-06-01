@@ -1,0 +1,42 @@
+name: Secure Supabase Weekly Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight UTC
+  workflow_dispatch: # Allow administrators to trigger backups on-demand
+
+jobs:
+  backup:
+    name: Database Backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run Secure pg_dump to offsite gz archive
+        env:
+          DB_CONN: ${{ secrets.SUPABASE_DB_CONNECTION_STRING }}
+        run: |
+          if [ -z "$DB_CONN" ]; then
+            echo "Error: SUPABASE_DB_CONNECTION_STRING GitHub Secret is missing. Operational backup halted."
+            exit 1
+          fi
+          
+          # Date stamps matching weekly audit schedule
+          BACKUP_DATE=$(date +'%Y-%m-%d')
+          
+          # Perform plain text SQL dump, compress with gzip to minimize asset footprints, and mask output logs
+          pg_dump "$DB_CONN" -F p | gzip > "supabase-backup-${BACKUP_DATE}.sql.gz"
+
+      - name: Upload Compressed SQL Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-database-backup
+          path: supabase-backup-*.sql.gz
+          retention-days: 30 # Securely retain offsite for exactly 30 days

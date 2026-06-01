@@ -83,7 +83,7 @@ export default function ProfileClient({ user, profile }) {
 
       if (error) throw error
 
-      setProfileSuccess('Academic Dossier successfully updated!')
+      setProfileSuccess('Academic Profile successfully updated!')
       
       startTransition(() => {
         router.refresh()
@@ -117,20 +117,20 @@ export default function ProfileClient({ user, profile }) {
                 <>
                   <button 
                     onClick={() => router.push('/dashboard?tab=courses')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium tactile-press"
                   >
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard?tab=roster')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium tactile-press"
                   >
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
                   </button>
                   <button 
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold tactile-press"
                   >
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -140,27 +140,27 @@ export default function ProfileClient({ user, profile }) {
                 <>
                   <button 
                     onClick={() => router.push('/dashboard?tab=learning')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium tactile-press"
                   >
                     <BookOpenCheck className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard?tab=browse')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium tactile-press"
                   >
                     <Search className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
                   </button>
                   <button 
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold tactile-press"
                   >
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard?tab=invoices')}
-                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium"
+                    className="w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 group text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-800/40 font-medium tactile-press"
                   >
                     <FileText className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Invoices</span>
@@ -185,7 +185,7 @@ export default function ProfileClient({ user, profile }) {
               </button>
               <div>
                 <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">
-                  Academic Profile Dossier
+                  Academic Profile Info
                 </h1>
                 <p className="text-xs font-semibold text-zinc-400 mt-0.5">
                   View and manage your academic parameters &middot; Persisted securely
@@ -249,7 +249,7 @@ export default function ProfileClient({ user, profile }) {
 
             {/* Performance Indicators Grid */}
             <div className="space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-2">Academic Dossier Indicators</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-2">Academic Profile Indicators</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-indigo-400', icon: Clock },
@@ -372,10 +372,10 @@ export default function ProfileClient({ user, profile }) {
 
             </div>
 
-            {/* Dossier Updating Form Card */}
+            {/* Profile Updating Form Card */}
             <div className="bg-white/60 backdrop-blur-xl shadow-sm dark:bg-zinc-900/60 rounded-[2rem] p-8 space-y-6 transition-all duration-300">
               <div>
-                <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-250">Update Academic Dossier Details</h4>
+                <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-250">Update Academic Profile Details</h4>
                 <p className="text-[11px] text-slate-400 dark:text-zinc-450 mt-1 font-semibold leading-relaxed">
                   Modify your display name, stream focus, and contact details. Updated parameters will synchronize seamlessly across your profile cards and metrics in real-time.
                 </p>
@@ -510,7 +510,7 @@ export default function ProfileClient({ user, profile }) {
 
                 {/* 4. Advanced Performance Metrics (NEW fields) */}
                 <div className="space-y-3 pt-2">
-                  <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Advanced Dossier Parameters</h5>
+                  <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Advanced Profile Parameters</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Weekly Practice Tests</label>
@@ -591,7 +591,7 @@ export default function ProfileClient({ user, profile }) {
                     disabled={profileLoading}
                     className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
                   >
-                    {profileLoading ? 'Updating Dossier...' : 'Save Profile Dossier'}
+                    {profileLoading ? 'Updating Profile...' : 'Save Profile Details'}
                   </motion.button>
                 </div>
               </form>

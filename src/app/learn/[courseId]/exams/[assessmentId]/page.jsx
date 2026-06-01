@@ -1,6 +1,7 @@
 import React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { redisGet, redisSet } from '@/utils/redis'
 import ExamClient from './ExamClient'
 import { startAssessmentAttemptAction } from './actions'
 import { BookOpen, Clock, FileText, ChevronRight, HelpCircle, ArrowLeft } from 'lucide-react'
@@ -33,14 +34,26 @@ export default async function ExamPage(props) {
   }
 
   // 3. Fetch assessment configurations
-  const { data: assessment, error: assessmentError } = await supabase
-    .from('assessments')
-    .select('*')
-    .eq('id', assessmentId)
-    .maybeSingle()
+  let assessment = null
+  const cached = await redisGet(`asentra:exam:${assessmentId}`)
+  if (cached) {
+    assessment = typeof cached === 'string' ? JSON.parse(cached) : cached
+    console.log(`[REDIS CACHE] Assessment cache hit for: ${assessmentId}`)
+  }
 
-  if (assessmentError || !assessment) {
-    redirect('/dashboard?error=assessment-not-found')
+  if (!assessment) {
+    const { data, error: assessmentError } = await supabase
+      .from('assessments')
+      .select('*')
+      .eq('id', assessmentId)
+      .maybeSingle()
+    
+    if (assessmentError || !data) {
+      redirect('/dashboard?error=assessment-not-found')
+    }
+    assessment = data
+
+    await redisSet(`asentra:exam:${assessmentId}`, JSON.stringify(assessment), { ex: 3600 })
   }
 
   // 4. Fetch questions from the secure BLIND student_questions view (correct_option_index is dropped)

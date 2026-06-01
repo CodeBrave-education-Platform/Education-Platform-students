@@ -50,17 +50,10 @@ export default function ExamClient({
   
   // Track final saved answers submitted to the DB
   const [savedAnswers, setSavedAnswers] = useState(attempt.answers_payload || {})
-  
-  // Track status for each question
-  // Statuses: 'not_visited', 'answered', 'unanswered', 'marked_for_review'
   const [statuses, setStatuses] = useState(() => {
     const initialStatuses = {}
-    questions.forEach((q, idx) => {
-      if (attempt.submitted_at) {
-        initialStatuses[q.id] = attempt.answers_payload?.[q.id] !== undefined ? 'answered' : 'unanswered'
-      } else {
-        initialStatuses[q.id] = idx === 0 ? 'unanswered' : 'not_visited'
-      }
+    questions.forEach((q) => {
+      initialStatuses[q.id] = attempt.answers_payload?.[q.id] !== undefined ? 'answered' : 'unanswered'
     })
     return initialStatuses
   })
@@ -77,6 +70,120 @@ export default function ExamClient({
   const durationMs = assessment.duration_minutes * 60 * 1000
   const endAtTime = startedAtTime + durationMs
   const [timeLeft, setTimeLeft] = useState(0)
+
+  // Progressive PWA Offline Engine states
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
+  const [pendingSync, setPendingSync] = useState(false)
+
+  // Lightweight IndexedDB helper wrappers
+  const openOfflineDB = () => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined') return reject(new Error('Window context missing'))
+      const request = indexedDB.open('asentra-offline-db', 2)
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result
+        if (!db.objectStoreNames.contains('exams')) {
+          db.createObjectStore('exams', { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains('answers')) {
+          db.createObjectStore('answers', { keyPath: 'id' })
+        }
+      }
+      request.onsuccess = (e) => resolve(e.target.result)
+      request.onerror = (e) => reject(e.target.error)
+    })
+  }
+
+  const saveOfflineData = async (storeName, id, data) => {
+    try {
+      const db = await openOfflineDB()
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite')
+        const store = tx.objectStore(storeName)
+        store.put({ id, ...data })
+        tx.oncomplete = () => resolve(true)
+        tx.onerror = () => reject(tx.error)
+      })
+    } catch (err) {
+      console.error('IndexedDB save failed:', err)
+    }
+  }
+
+  const getOfflineData = async (storeName, id) => {
+    try {
+      const db = await openOfflineDB()
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readonly')
+        const store = tx.objectStore(storeName)
+        const request = store.get(id)
+        request.onsuccess = (e) => resolve(e.target.result)
+        request.onerror = () => reject(request.error)
+      })
+    } catch (err) {
+      console.error('IndexedDB get failed:', err)
+      return null
+    }
+  }
+
+  // Pre-fetch exam structure and recover pre-cached local states on initial load
+  useEffect(() => {
+    const cacheAssessmentOffline = async () => {
+      await saveOfflineData('exams', assessment.id, {
+        assessment,
+        questions,
+        courseId: course.id
+      })
+      
+      // Load previously saved answers to prevent crash data loss
+      const cachedAnswers = await getOfflineData('answers', attempt.id)
+      if (cachedAnswers && cachedAnswers.payload) {
+        setSavedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
+        setSelectedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
+        setStatuses(prev => {
+          const updated = { ...prev }
+          Object.keys(cachedAnswers.payload).forEach(qId => {
+            updated[qId] = 'answered'
+          })
+          return updated
+        })
+      }
+    }
+
+    cacheAssessmentOffline()
+  }, [assessment, questions, course, attempt])
+
+  // Sync state modifications dynamically to IndexedDB answers store
+  useEffect(() => {
+    if (Object.keys(savedAnswers).length > 0) {
+      saveOfflineData('answers', attempt.id, { payload: savedAnswers })
+    }
+  }, [savedAnswers, attempt])
+
+  // Manage offline notifications and background auto-sync triggers
+  useEffect(() => {
+    const handleOnlineStatusChange = async () => {
+      if (navigator.onLine) {
+        setIsOfflineMode(false)
+        const offlineAnswers = await getOfflineData('answers', attempt.id)
+        if (offlineAnswers && offlineAnswers.payload && pendingSync) {
+          console.log('[IndexedDB ENGINE] Connectivity restored. Auto-synchronizing offline replies...')
+          setPendingSync(false)
+          await performGradingSubmission(offlineAnswers.payload)
+        }
+      } else {
+        setIsOfflineMode(true)
+      }
+    }
+
+    window.addEventListener('online', handleOnlineStatusChange)
+    window.addEventListener('offline', handleOnlineStatusChange)
+    setIsOfflineMode(!navigator.onLine)
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatusChange)
+      window.removeEventListener('offline', handleOnlineStatusChange)
+    }
+  }, [attempt, pendingSync])
 
   // Initialize countdown timer
   useEffect(() => {
@@ -191,6 +298,15 @@ export default function ExamClient({
   }
 
   const performGradingSubmission = async (answersToSubmit) => {
+    // Check offline state
+    if (typeof window !== 'undefined' && !navigator.onLine) {
+      await saveOfflineData('answers', attempt.id, { payload: answersToSubmit })
+      setPendingSync(true)
+      alert('[OFFLINE MODE] You are currently offline. Your exam progress and answers have been safely queued in IndexedDB. Submission will automatically synchronize once internet connectivity is restored.')
+      setIsSubmitting(false)
+      return
+    }
+
     setIsSubmitting(true)
     setLoadingProgress(5)
     setLoadingMessage('Initializing Secure Database Handshake...')
@@ -207,7 +323,7 @@ export default function ExamClient({
         if (prev === 20) setLoadingMessage('Downloading Blind Answer Keys securely...')
         if (prev === 45) setLoadingMessage('Evaluating Physics Multi-Choice Vectors...')
         if (prev === 70) setLoadingMessage('Computing Chemistry Entropy and Markings...')
-        if (prev === 85) setLoadingMessage('Finalizing Zero-Trust Dossier and AIR estimate...')
+        if (prev === 85) setLoadingMessage('Finalizing Zero-Trust Record and AIR estimate...')
         
         return prev + 1
       })
@@ -329,7 +445,7 @@ export default function ExamClient({
             <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-800 text-xs leading-relaxed">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>
-                <b>Note:</b> Submission was processed after the allowed JEE testing window expired. Standard grading has been archived in dossiers.
+                <b>Note:</b> Submission was processed after the allowed JEE testing window expired. Standard grading has been archived in academic records.
               </span>
             </div>
           )}
@@ -338,7 +454,7 @@ export default function ExamClient({
           <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 space-y-4">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
               <Activity className="w-4 h-4 text-teal-600" />
-              Secure Graded Submission Dossier
+              Secure Graded Submission Record
             </h3>
             <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
               {questions.map((q, idx) => {
@@ -471,16 +587,32 @@ export default function ExamClient({
             </h1>
           </div>
 
-          {/* JEE authoritative countdown timer */}
-          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-4 py-2.5 rounded-2xl shrink-0 shadow-inner">
-            <Clock className="w-4.5 h-4.5 text-teal-600 shrink-0" />
-            <div className="text-right">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">
-                Time Remaining
-              </span>
-              <span className="text-sm font-black text-slate-800 font-mono">
-                {formatTimer(timeLeft)}
-              </span>
+          {/* Offline/Online connection status banner */}
+          <div className="flex items-center gap-3 shrink-0">
+            {isOfflineMode && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-extrabold select-none animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                <span>Offline Mode</span>
+              </div>
+            )}
+            {pendingSync && !isOfflineMode && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl text-xs font-extrabold select-none">
+                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-ping" />
+                <span>Syncing replies...</span>
+              </div>
+            )}
+
+            {/* JEE authoritative countdown timer */}
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-4 py-2.5 rounded-2xl shadow-inner">
+              <Clock className="w-4.5 h-4.5 text-teal-600 shrink-0" />
+              <div className="text-right">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">
+                  Time Remaining
+                </span>
+                <span className="text-sm font-black text-slate-800 font-mono">
+                  {formatTimer(timeLeft)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

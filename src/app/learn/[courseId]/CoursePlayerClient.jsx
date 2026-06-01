@@ -24,7 +24,7 @@ import {
   AlertCircle,
   Tv,
   ExternalLink,
-  Award as AwardIcon
+  Activity
 } from 'lucide-react'
 
 export default function CoursePlayerClient({
@@ -38,11 +38,30 @@ export default function CoursePlayerClient({
   user
 }) {
   const router = useRouter()
+  const videoRef = useRef(null)
   const searchParams = useSearchParams()
   
   // Read active lesson from URL search parameter '?lesson='
   const activeLessonId = searchParams.get('lesson')
   const currentLesson = lessons.find((l) => l.id === activeLessonId) || lessons[0]
+
+  const isYouTubeUrl = currentLesson?.video_url?.includes('youtube.com') || currentLesson?.video_url?.includes('youtu.be')
+  
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('youtube.com/embed/')) return url;
+    let videoId = '';
+    if (url.includes('youtube.com/watch')) {
+      const urlParts = url.split('?')[1];
+      if (urlParts) {
+        const urlParams = new URLSearchParams(urlParts);
+        videoId = urlParams.get('v');
+      }
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : url;
+  }
 
   // Optimistic tracking state for progress checkmarks
   const [completedSet, setCompletedSet] = useState(new Set(initialCompletedLessonIds))
@@ -57,6 +76,217 @@ export default function CoursePlayerClient({
   const [newDoubt, setNewDoubt] = useState('')
   const [isPostingDoubt, setIsPostingDoubt] = useState(false)
   const doubtsEndRef = useRef(null)
+
+  // Live Classroom & Dynamic Polling Synchronizer states
+  const [classroomState, setClassroomState] = useState(null)
+  const [votedOption, setVotedOption] = useState(null)
+  const [isVoting, setIsVoting] = useState(false)
+  const [voteError, setVoteError] = useState('')
+
+  useEffect(() => {
+    let active = true
+    let pollInterval = null
+
+    const fetchClassroomState = async () => {
+      try {
+        const res = await fetch('/api/live/classroom')
+        if (res.ok) {
+          const data = await res.json()
+          if (active && data.classroomState) {
+            setClassroomState(data.classroomState)
+            // Synchronize local voted status if server says they voted
+            if (data.classroomState.livePoll?.hasVoted && votedOption === null) {
+              // Guess or retrieve local vote if available (or mark as -1 if just general verification)
+              setVotedOption(-1)
+            }
+          }
+        }
+      } catch (err) {
+        // Silent connection fallback to avoid console noise when offline
+        console.warn('Classroom telemetry is currently offline:', err.message)
+      }
+    }
+
+    fetchClassroomState()
+    pollInterval = setInterval(fetchClassroomState, 5000)
+
+    return () => {
+      active = false
+      if (pollInterval) {
+        clearInterval(pollInterval)
+      }
+    }
+  }, [activeTab])
+
+  const handleVotePoll = async (pollId, optionIndex) => {
+    if (isVoting) return
+    setIsVoting(true)
+    setVoteError('')
+    try {
+      const res = await fetch('/api/live/classroom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submit_poll',
+          pollId,
+          optionIndex
+        })
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setVotedOption(optionIndex)
+        // Immediately fetch updated results
+        const stateRes = await fetch('/api/live/classroom')
+        if (stateRes.ok) {
+          const stateData = await stateRes.json()
+          setClassroomState(stateData.classroomState)
+        }
+      } else {
+        setVoteError(data.error || 'Failed to submit vote')
+        // Automatically clear rate-limit warning after 4s
+        setTimeout(() => setVoteError(''), 4000)
+      }
+    } catch (err) {
+      setVoteError('Network error submitting vote')
+      console.error(err)
+    } finally {
+      setIsVoting(false)
+    }
+  }
+
+  // Secure HLS segment loader with DRM and anti-recording hooks
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    let hlsInstance = null
+    const activeVideoUrl = currentLesson.video_url
+
+    const initializeSecureStream = async () => {
+      try {
+        // Step 1: Exchange cryptographic short-lived streaming token
+        const tokenRes = await fetch('/api/video/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: course.id,
+            lessonId: currentLesson.id
+          })
+        })
+
+        const tokenData = await tokenRes.json()
+        if (!tokenRes.ok || !tokenData.token) {
+          console.error('Secure video token acquisition failed:', tokenData.error)
+          videoElement.src = activeVideoUrl
+          return
+        }
+
+        const videoToken = tokenData.token
+
+        // Step 2: Initialize Hls.js stream if supported by the browser
+        const Hls = (await import('hls.js')).default
+        
+        if (Hls.isSupported()) {
+          if (hlsInstance) {
+            hlsInstance.destroy()
+          }
+
+          hlsInstance = new Hls({
+            // Inject bearer token into fragmented HLS segment network requests
+            xhrSetup: function (xhr, url) {
+              xhr.setRequestHeader('Authorization', `Bearer ${videoToken}`)
+            },
+            maxBufferLength: 30, // Max buffer length in seconds (saves bandwidth and improves load speed)
+            maxMaxBufferLength: 60,
+            enableWorker: true, // Use background Web Worker for segment transmuxing to offload main thread
+            lowLatencyMode: true // Enables progressive chunk loading for ultra-fast startup times
+          })
+
+          hlsInstance.loadSource(activeVideoUrl)
+          hlsInstance.attachMedia(videoElement)
+
+          hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  hlsInstance.startLoad()
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  hlsInstance.recoverMediaError()
+                  break;
+                default:
+                  videoElement.src = activeVideoUrl
+                  break;
+              }
+            }
+          })
+        } 
+        // Fallback for native HLS (Safari / iOS)
+        else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+          videoElement.src = `${activeVideoUrl}?token=${videoToken}`
+        } 
+        // Direct MP4 fallback
+        else {
+          videoElement.src = activeVideoUrl
+        }
+      } catch (err) {
+        console.error('HLS stream initialization error:', err)
+        videoElement.src = activeVideoUrl
+      }
+    }
+
+    initializeSecureStream()
+
+    // 4. DRM Piracy Prevention Event Listeners
+    const handleContextMenu = (e) => {
+      e.preventDefault()
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('')
+        alert('[DRM GUARD] Screenshot captures are strictly forbidden.')
+        e.preventDefault()
+      }
+      if (
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+        (e.ctrlKey && e.shiftKey && e.key === 'i') ||
+        (e.metaKey && e.altKey && e.key === 'i') || 
+        (e.metaKey && e.altKey && e.key === 'I')
+      ) {
+        alert('[DRM GUARD] Developer inspect options are disabled in focus mode.')
+        e.preventDefault()
+      }
+      if (
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.metaKey && e.altKey && e.key === 'c')
+      ) {
+        e.preventDefault()
+      }
+    }
+
+    const handleBlur = () => {
+      if (videoElement && !videoElement.paused) {
+        videoElement.pause()
+        console.warn('[DRM GUARD] Context focus lost. Playback automatically paused.')
+      }
+    }
+
+    videoElement.addEventListener('contextmenu', handleContextMenu)
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('blur', handleBlur)
+
+    return () => {
+      if (hlsInstance) {
+        hlsInstance.destroy()
+      }
+      if (videoElement) {
+        videoElement.removeEventListener('contextmenu', handleContextMenu)
+      }
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('blur', handleBlur)
+    }
+  }, [currentLesson, course])
 
   // 1. Silent URL Redirection/Update if lesson param is missing
   useEffect(() => {
@@ -283,16 +513,25 @@ export default function CoursePlayerClient({
         {/* Left Side: Widescreen Video Player & Dynamic Tabs switcher */}
         <section className="lg:col-span-2 space-y-6">
           
-          {/* Custom HTML5 Video Player Canvas */}
-          <div className="sticky top-0 z-40 w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20 lg:relative">
-            <video
-              key={currentLesson.video_url}
-              src={currentLesson.video_url}
-              controls
-              autoPlay
-              className="w-full h-full object-contain"
-              poster="/academic_prosperity_1779866712293.png"
-            />
+          <div className="relative w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20">
+            {isYouTubeUrl ? (
+              <iframe
+                src={getYouTubeEmbedUrl(currentLesson.video_url)}
+                title={currentLesson.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full object-cover select-none"
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                controls
+                autoPlay
+                className="w-full h-full object-contain select-none"
+                poster="/academic_prosperity_1779866712293.png"
+              />
+            )}
           </div>
 
           {/* Premium Tablet & Mobile Optimized Tabbed Interface Panel */}
@@ -370,7 +609,7 @@ export default function CoursePlayerClient({
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
-                <AwardIcon className="w-4 h-4 shrink-0" />
+                <Award className="w-4 h-4 shrink-0" />
                 <span>Test Center</span>
               </button>
 
@@ -516,7 +755,7 @@ export default function CoursePlayerClient({
                         <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 hidden sm:block" />
                         <div className="flex-1 text-center sm:text-left">
                           <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                            Secure Dossier Vault
+                            Secure Resource Vault
                           </h4>
                           <p className="text-[11px] font-bold text-emerald-650 mt-1">
                             Attachments are dynamically signed for 60 seconds to safeguard proprietary academy resources.
@@ -629,6 +868,134 @@ export default function CoursePlayerClient({
               {/* 🎥 NEW TAB 5: LIVE CLASSES SCHEDULE */}
               {activeTab === 'LIVE' && (
                 <div className="space-y-6">
+                  {/* Real-Time Classroom Cohort Overlay */}
+                  <div className="bg-slate-900 text-white rounded-3xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden border border-slate-800 select-none">
+                    {/* Background grid lines */}
+                    <div 
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '20px 20px'
+                      }}
+                      className="absolute inset-0 z-0 pointer-events-none"
+                    />
+
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                          </span>
+                          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                            Live Synchronized Classroom
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-black text-slate-100 mt-1 leading-none">
+                          {classroomState?.activeCohort || 'ASENTRA-Beta-Cohort-2026'}
+                        </h3>
+                      </div>
+
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs font-extrabold text-slate-300 shadow-inner">
+                        <Activity className="w-3.5 h-3.5 text-emerald-450 animate-pulse shrink-0" />
+                        <span>{classroomState?.activeUsersCount || 142} Students Online</span>
+                      </div>
+                    </div>
+
+                    {/* Active Live Poll Card */}
+                    {classroomState?.livePoll ? (
+                      <div className="relative z-10 bg-slate-800/40 border border-slate-800 rounded-2xl p-5 md:p-6 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                          <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                            Classroom Quick-Poll (Updates every 30s)
+                          </span>
+                          
+                          {/* 30s Poll cycle timer bar */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono font-black text-slate-400">
+                              Time Left: {classroomState.livePoll.timeLeftSeconds || 0}s
+                            </span>
+                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-teal-500 transition-all duration-1000 ease-linear"
+                                style={{ width: `${((classroomState.livePoll.timeLeftSeconds || 0) / 30) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <h4 className="text-sm md:text-base font-extrabold text-slate-200 leading-snug">
+                          {classroomState.livePoll.question}
+                        </h4>
+
+                        {/* Rate Limit Alert Message */}
+                        {voteError && (
+                          <div className="p-3 bg-rose-950/45 border border-rose-900/60 text-rose-300 rounded-xl text-xs font-bold animate-pulse flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                            <span>{voteError}</span>
+                          </div>
+                        )}
+
+                        <div className="space-y-2.5 pt-1">
+                          {classroomState.livePoll.options.map((opt, idx) => {
+                            const isVoted = votedOption === idx || classroomState.livePoll.hasVoted
+                            const totalVotes = classroomState.livePoll.totalVotes || 1
+                            const voteCount = classroomState.livePoll.results?.[idx] || 0
+                            const percentage = Math.round((voteCount / totalVotes) * 100)
+
+                            if (isVoted) {
+                              return (
+                                <div 
+                                  key={idx}
+                                  className="relative p-3.5 bg-slate-900/40 border border-slate-800/80 rounded-xl text-xs md:text-sm font-bold flex flex-col justify-between overflow-hidden"
+                                >
+                                  {/* Progress bar fill background */}
+                                  <div 
+                                    className="absolute left-0 top-0 bottom-0 bg-teal-950/40 border-r border-teal-900/40 transition-all duration-500 ease-out"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                  <div className="relative z-10 flex items-center justify-between gap-3 text-slate-300">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                                        votedOption === idx 
+                                          ? 'bg-teal-500 text-white' 
+                                          : 'bg-slate-800 text-slate-400'
+                                      }`}>
+                                        {['A', 'B', 'C', 'D'][idx]}
+                                      </span>
+                                      <span>{opt}</span>
+                                    </div>
+                                    <span className="font-mono text-teal-400">{percentage}% ({voteCount} votes)</span>
+                                  </div>
+                                </div>
+                              )
+                            }
+
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => handleVotePoll(classroomState.livePoll.id, idx)}
+                                disabled={isVoting}
+                                className="w-full text-left p-3.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-305 hover:text-white rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
+                              >
+                                <span className="w-5 h-5 rounded-full border border-slate-700 bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-black">
+                                  {['A', 'B', 'C', 'D'][idx]}
+                                </span>
+                                <span>{opt}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative z-10 p-6 bg-slate-800/20 border border-slate-800 rounded-2xl text-center text-slate-500 text-xs italic">
+                        Connecting to cohort session...
+                      </div>
+                    )}
+                  </div>
+
                   <div className="border-l-4 border-emerald-500 bg-emerald-50/40 p-4 rounded-r-2xl border-t border-r border-b border-emerald-100/60">
                     <h3 className="text-xs font-black text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
                       <Tv className="w-4 h-4" />
@@ -719,7 +1086,7 @@ export default function CoursePlayerClient({
                 <div className="space-y-6">
                   <div className="border-l-4 border-teal-500 bg-teal-50/40 p-4 rounded-r-2xl border-t border-r border-b border-teal-100/60">
                     <h3 className="text-xs font-black text-teal-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <AwardIcon className="w-4 h-4" />
+                      <Award className="w-4 h-4" />
                       JEE Assessment Test Center
                     </h3>
                     <p className="text-[11px] font-bold text-teal-650 mt-1">

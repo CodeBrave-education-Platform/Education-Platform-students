@@ -18,11 +18,15 @@ export default async function Home() {
   // Retrieve user profile if session exists
   let profile = null
   if (user) {
-    const { data: prof } = await supabase
+    const { data: prof, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
+    
+    if (error) {
+      console.error('[LANDING PAGE] Error fetching profile:', error)
+    }
     profile = prof
   }
 
@@ -38,9 +42,9 @@ export default async function Home() {
           <Navbar user={user} profile={profile} />
         ) : (
           /* Beautiful Public Guest Glass Navbar matching structure of standard Navbar */
-          <nav className="sticky top-0 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-6 py-3.5 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
+          <nav className="sticky top-0 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3.5 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
             <Link href="/" className="flex items-center group">
-              <svg className="w-36 h-7 text-slate-900" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-28 sm:w-36 h-6 sm:h-7 text-slate-900" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {/* Geometric letter 'A' */}
                 <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
@@ -70,8 +74,8 @@ export default async function Home() {
                 <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
               </svg>
             </Link>
-
-            <div className="flex items-center gap-6">
+ 
+            <div className="flex items-center gap-3.5 sm:gap-6">
               <Link 
                 href="/login" 
                 className="text-slate-600 hover:text-slate-900 font-bold text-xs tracking-wider uppercase transition-colors duration-150"
@@ -80,7 +84,7 @@ export default async function Home() {
               </Link>
               <Link 
                 href="/login?tab=register" 
-                className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors"
+                className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 sm:px-5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors"
               >
                 Register
               </Link>

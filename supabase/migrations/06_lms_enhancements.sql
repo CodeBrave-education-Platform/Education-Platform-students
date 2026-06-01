@@ -48,7 +48,7 @@ update public.lessons
 set 
   reading_material = '<h3>2. Principles of Linear Equations</h3><p>A linear equation is an equation between two variables that gives a straight line when plotted on a graph. The standard form of a linear equation in one variable is: ax + b = 0.</p><h4>Solving Steps:</h4><ol><li>Simplify both sides of the equation by removing group brackets and combining like terms.</li><li>Isolate the variable term on one side of the equation using addition or subtraction properties.</li><li>Solve for the variable using multiplication or division properties.</li><li>Always verify your solved root by substituting it back into the original equation.</li></ol>',
   assignment_title = 'Linear Equation Balance Challenges',
-  assignment_description = 'Solve the balance exercises. Find the value of x for the given systems and verify your answers. Show each isolation step in your dossier.',
+  assignment_description = 'Solve the balance exercises. Find the value of x for the given systems and verify your answers. Show each isolation step in your notes.',
   assignment_url = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 where order_index = 2;
 

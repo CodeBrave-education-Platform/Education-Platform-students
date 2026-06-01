@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { redisGet, redisSet } from '@/utils/redis'
 import DashboardClient from './DashboardClient'
 import Navbar from '@/components/Navbar'
 
@@ -17,11 +18,15 @@ export default async function DashboardPage(props) {
   }
 
   // Retrieve matching profile
-  let { data: profile } = await supabase
+  let { data: profile, error: fetchError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
+
+  if (fetchError) {
+    console.error('[DASHBOARD PAGE] Error fetching profile:', fetchError)
+  }
 
   // Graceful fallback if profile wasn't created yet (e.g., fast OAuth completion)
   if (!profile) {
@@ -87,13 +92,27 @@ export default async function DashboardPage(props) {
     initialEnrollments = enrollsData || []
 
     // 2. Fetch all courses in the platform (with instructor full name) for browsing
-    const { data: coursesData, error: coursesError } = await supabase
-      .from('courses')
-      .select('*, profiles(full_name)')
-      .order('created_at', { ascending: false })
+    let coursesData = null
+    const cached = await redisGet('asentra:course:catalog')
+    if (cached) {
+      coursesData = typeof cached === 'string' ? JSON.parse(cached) : cached
+      console.log('[REDIS CACHE] Course catalog cache hit!')
+    }
+
+    if (!coursesData) {
+      const { data, error: coursesError } = await supabase
+        .from('courses')
+        .select('*, profiles(full_name)')
+        .order('created_at', { ascending: false })
       
-    if (coursesError) {
-      console.error('DASHBOARD COURSES FETCH ERROR:', JSON.stringify(coursesError), 'MSG:', coursesError.message, 'CODE:', coursesError.code)
+      if (coursesError) {
+        console.error('DASHBOARD COURSES FETCH ERROR:', JSON.stringify(coursesError), 'MSG:', coursesError.message, 'CODE:', coursesError.code)
+      }
+      coursesData = data || []
+
+      if (coursesData.length > 0) {
+        await redisSet('asentra:course:catalog', JSON.stringify(coursesData), { ex: 3600 })
+      }
     }
     allCourses = coursesData || []
   }

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import CourseDetailsClient from './CourseDetailsClient'
 
 export default async function CourseDetailPage(props) {
   const params = await props.params
@@ -12,8 +13,26 @@ export default async function CourseDetailPage(props) {
     redirect('/login')
   }
 
-  // 2. Authorization: Check enrollment status for courseId
-  const { data: enrollment, error: enrollError } = await supabase
+  // 2. Fetch course information
+  const { data: course, error: courseError } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('id', courseId)
+    .single()
+
+  if (courseError || !course) {
+    redirect('/dashboard')
+  }
+
+  // 3. Fetch all lessons sorted by order_index
+  const { data: lessons, error: lessonsError } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('course_id', courseId)
+    .order('order_index', { ascending: true })
+
+  // 4. Authorization: Check enrollment status for courseId
+  const { data: enrollment } = await supabase
     .from('enrollments')
     .select('id, status')
     .eq('user_id', user.id)
@@ -21,24 +40,12 @@ export default async function CourseDetailPage(props) {
     .eq('status', 'active')
     .maybeSingle()
 
-  if (enrollError || !enrollment) {
-    redirect('/dashboard?unauthorized=true')
-  }
-
-  // 3. Fetch first lesson sorted by order_index
-  const { data: firstLesson, error: lessonError } = await supabase
-    .from('lessons')
-    .select('id')
-    .eq('course_id', courseId)
-    .order('order_index', { ascending: true })
-    .limit(1)
-    .maybeSingle()
-
-  if (lessonError || !firstLesson) {
-    // If no lessons exist yet, we will redirect them to their specific default placeholder page
-    redirect(`/learn/${courseId}?lesson=default`)
-  }
-
-  // 4. Redirect to the focus mode lesson player of the first lesson
-  redirect(`/learn/${courseId}?lesson=${firstLesson.id}`)
+  return (
+    <CourseDetailsClient
+      course={course}
+      lessons={lessons || []}
+      initialEnrolled={!!enrollment}
+      user={user}
+    />
+  )
 }

@@ -52,9 +52,9 @@ export default function Navbar({ user, profile }) {
   }
 
   return (
-    <nav className="sticky top-0 w-full border-b border-zinc-100 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
+    <nav className="sticky top-0 w-full border-b border-zinc-105 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between transition-all duration-300 shadow-sm z-50 select-none">
       <Link href="/" className="flex flex-col items-start group">
-        <svg className="w-36 h-7" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-28 sm:w-36 h-6 sm:h-7" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Custom drawn geometric letter 'A' */}
           <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
           <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" className="text-slate-950 dark:text-slate-100 transition-colors duration-300" />
@@ -85,15 +85,15 @@ export default function Navbar({ user, profile }) {
         </svg>
       </Link>
 
-      <div className="flex items-center gap-4 relative">
+      <div className="flex items-center gap-3 sm:gap-4 relative">
         {/* Interactive User profile pill capsule matching image 2 (without hard borders) */}
         <div ref={dropdownRef} className="relative">
           <button 
             type="button"
             onClick={toggleDropdown}
-            className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100/80 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 px-4 py-2 rounded-full cursor-pointer select-none transition-all outline-none border-none shadow-sm"
+            className="flex items-center gap-2 sm:gap-3 bg-slate-50 hover:bg-slate-100/80 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full cursor-pointer select-none transition-all outline-none border-none shadow-sm"
           >
-            <div className="w-8 h-8 rounded-full bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center text-white font-extrabold text-[10px] sm:text-xs shadow-sm shrink-0">
               {displayInitials}
             </div>
             <div className="hidden sm:block text-left">
@@ -114,7 +114,6 @@ export default function Navbar({ user, profile }) {
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account</p>
                 <p className="text-xs font-semibold text-slate-800 dark:text-zinc-250 truncate mt-0.5">{user.email}</p>
               </div>
-
               <Link
                 href="/profile"
                 onClick={() => setIsDropdownOpen(false)}

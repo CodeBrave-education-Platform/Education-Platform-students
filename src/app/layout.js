@@ -29,6 +29,23 @@ export default function RootLayout({ children }) {
             <MobileBottomNav />
           </Suspense>
         </ThemeProvider>
+
+        {/* Secure inline PWA Service Worker registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('ASENTRA Service Worker registered under scope:', reg.scope);
+                  }).catch(function(err) {
+                    console.warn('ASENTRA Service Worker registration failed:', err);
+                  });
+                });
+              }
+            `
+          }}
+        />
       </body>
     </html>
   );

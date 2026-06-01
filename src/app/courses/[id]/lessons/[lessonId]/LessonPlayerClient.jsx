@@ -33,6 +33,7 @@ export default function LessonPlayerClient({
   user
 }) {
   const router = useRouter()
+  const videoRef = useRef(null)
   const [completedSet, setCompletedSet] = useState(new Set(initialCompletedLessonIds))
   const [isUpdating, setIsUpdating] = useState(false)
   const [activeVideoUrl, setActiveVideoUrl] = useState(currentLesson.video_url)
@@ -52,6 +53,143 @@ export default function LessonPlayerClient({
     setActiveVideoUrl(currentLesson.video_url)
     setDoubts(initialDoubts)
   }, [currentLesson, initialDoubts])
+
+  // Secure HLS segment loader with DRM and anti-recording hooks
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+
+    let hlsInstance = null
+
+    const initializeSecureStream = async () => {
+      try {
+        // Step 1: Exchange cryptographic short-lived streaming token
+        const tokenRes = await fetch('/api/video/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId: course.id,
+            lessonId: currentLesson.id
+          })
+        })
+
+        const tokenData = await tokenRes.json()
+        if (!tokenRes.ok || !tokenData.token) {
+          console.error('Secure video token acquisition failed:', tokenData.error)
+          // Fallback to direct URL if token exchange is pending or restricted
+          videoElement.src = activeVideoUrl
+          return
+        }
+
+        const videoToken = tokenData.token
+
+        // Step 2: Initialize Hls.js stream if supported by the browser
+        const Hls = (await import('hls.js')).default
+        
+        if (Hls.isSupported()) {
+          if (hlsInstance) {
+            hlsInstance.destroy()
+          }
+
+          hlsInstance = new Hls({
+            // Inject bearer token into fragmented HLS segment network requests
+            xhrSetup: function (xhr, url) {
+              xhr.setRequestHeader('Authorization', `Bearer ${videoToken}`)
+            },
+            maxBufferLength: 30, // Max buffer length in seconds (saves bandwidth and improves load speed)
+            maxMaxBufferLength: 60,
+            enableWorker: true, // Use background Web Worker for segment transmuxing to offload main thread
+            lowLatencyMode: true // Enables progressive chunk loading for ultra-fast startup times
+          })
+
+          hlsInstance.loadSource(activeVideoUrl)
+          hlsInstance.attachMedia(videoElement)
+
+          hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  hlsInstance.startLoad()
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  hlsInstance.recoverMediaError()
+                  break;
+                default:
+                  videoElement.src = activeVideoUrl
+                  break;
+              }
+            }
+          })
+        } 
+        // Fallback for native HLS (Safari / iOS)
+        else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+          videoElement.src = `${activeVideoUrl}?token=${videoToken}`
+        } 
+        // Direct MP4 fallback
+        else {
+          videoElement.src = activeVideoUrl
+        }
+      } catch (err) {
+        console.error('HLS stream initialization error:', err)
+        videoElement.src = activeVideoUrl
+      }
+    }
+
+    initializeSecureStream()
+
+    // 4. DRM Piracy Prevention Event Listeners
+    const handleContextMenu = (e) => {
+      e.preventDefault()
+    }
+
+    const handleKeyDown = (e) => {
+      // PrintScreen block
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('')
+        alert('[DRM GUARD] Screenshot captures are strictly forbidden.')
+        e.preventDefault()
+      }
+      // Inspect combinations block
+      if (
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+        (e.ctrlKey && e.shiftKey && e.key === 'i') ||
+        (e.metaKey && e.altKey && e.key === 'i') || 
+        (e.metaKey && e.altKey && e.key === 'I')
+      ) {
+        alert('[DRM GUARD] Developer inspect options are disabled in focus mode.')
+        e.preventDefault()
+      }
+      if (
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.metaKey && e.altKey && e.key === 'c')
+      ) {
+        e.preventDefault()
+      }
+    }
+
+    const handleBlur = () => {
+      if (videoElement && !videoElement.paused) {
+        videoElement.pause()
+        console.warn('[DRM GUARD] Context focus lost. Playback automatically paused.')
+      }
+    }
+
+    // Attach listeners
+    videoElement.addEventListener('contextmenu', handleContextMenu)
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('blur', handleBlur)
+
+    return () => {
+      if (hlsInstance) {
+        hlsInstance.destroy()
+      }
+      if (videoElement) {
+        videoElement.removeEventListener('contextmenu', handleContextMenu)
+      }
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('blur', handleBlur)
+    }
+  }, [activeVideoUrl, currentLesson, course])
 
   // Scroll to bottom of doubts thread when new doubt is posted
   useEffect(() => {
@@ -229,11 +367,10 @@ export default function LessonPlayerClient({
           {/* Custom HTML5 Video Player Canvas */}
           <div className="sticky top-0 z-40 w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20 lg:relative">
             <video
-              key={activeVideoUrl}
-              src={activeVideoUrl}
+              ref={videoRef}
               controls
               autoPlay
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain select-none"
               poster="/academic_prosperity_1779866712293.png"
             />
           </div>
@@ -437,10 +574,10 @@ export default function LessonPlayerClient({
                         <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 hidden sm:block" />
                         <div className="flex-1 text-center sm:text-left">
                           <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                            Submit to Dossier Portfolio
+                            Submit to Academic Portfolio
                           </h4>
                           <p className="text-[11px] font-bold text-emerald-650 mt-1">
-                            Resolve equations on paper, capture steps, and preserve them in your dossier archive.
+                            Resolve equations on paper, capture steps, and preserve them in your academic archive.
                           </p>
                         </div>
                         {currentLesson.assignment_url && (

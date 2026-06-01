@@ -1,32 +1,8 @@
 import React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { unstable_cache } from 'next/cache'
+import { redisGet, redisSet } from '@/utils/redis'
 import CoursePlayerClient from './CoursePlayerClient'
-
-// High-Performance Edge Caching: Dynamic course-specific edge cache to prevent cross-course pollution
-const getCachedLessons = (courseId) => unstable_cache(
-  async () => {
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-    const { data: lessons, error } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('order_index', { ascending: true })
-
-    if (error) {
-      console.error('Database Cache Query failed for course lessons:', error)
-      throw error
-    }
-    return lessons
-  },
-  [`course-lessons-catalog-v6-${courseId}`],
-  { revalidate: 1, tags: [`lessons-${courseId}`] }
-)()
 
 export default async function LearnCoursePage(props) {
   const params = await props.params
@@ -77,27 +53,14 @@ export default async function LearnCoursePage(props) {
     )
   }
 
-  // 3. Fetch course curriculum lessons using the dynamic Edge cache handler (with live fallback if empty)
-  let lessons = []
-  try {
-    lessons = await getCachedLessons(courseId)
-    if (!lessons || lessons.length === 0) {
-      const { data: liveLessons } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('course_id', courseId)
-        .order('order_index', { ascending: true })
-      lessons = liveLessons || []
-    }
-  } catch (err) {
-    console.error('LMS Player Edge cache retrieval failed. Falling back to live query:', err)
-    const { data: liveLessons } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('order_index', { ascending: true })
-    lessons = liveLessons || []
-  }
+  // 3. Fetch course curriculum lessons directly from Supabase (sub-second queries with 0 rendering hangs)
+  const { data: dbLessons } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('course_id', courseId)
+    .order('order_index', { ascending: true })
+  
+  const lessons = dbLessons || []
 
   if (!lessons || lessons.length === 0) {
     return (
@@ -124,42 +87,35 @@ export default async function LearnCoursePage(props) {
     )
   }
 
-  // 4. Fetch course details
-  const { data: course } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('id', courseId)
-    .single()
+  // 4. Check Redis cache first for course details to bypass DB hits
+  let course = null
+  const cached = await redisGet(`asentra:course:${courseId}`)
+  if (cached) {
+    course = typeof cached === 'string' ? JSON.parse(cached) : cached
+    console.log(`[REDIS CACHE] Course detail cache hit for: ${courseId}`)
+  }
 
-  // 5. Fetch user progress for lessons in this course
-  const { data: progressList } = await supabase
-    .from('user_progress')
-    .select('lesson_id')
-    .eq('user_id', user.id)
-
-  const completedLessonIds = progressList?.map(p => p.lesson_id) || []
-
-  // 6. Fetch doubts of initial/active lesson
   const targetInitialId = initialLessonId || lessons[0].id
-  const { data: initialDoubts } = await supabase
-    .from('lesson_doubts')
-    .select('*, profiles(full_name, email)')
-    .eq('lesson_id', targetInitialId)
-    .order('created_at', { ascending: true })
 
-  // 7. Fetch live sessions for this course
-  const { data: liveSessions } = await supabase
-    .from('live_sessions')
-    .select('*')
-    .eq('course_id', courseId)
-    .order('scheduled_start', { ascending: true })
+  // 5. Fetch remaining dynamic datasets in parallel to eliminate query waterfalls
+  const [courseResult, progressListResult, initialDoubtsResult, liveSessionsResult, assessmentsResult] = await Promise.all([
+    course ? Promise.resolve({ data: course }) : supabase.from('courses').select('*').eq('id', courseId).single(),
+    supabase.from('user_progress').select('lesson_id').eq('user_id', user.id),
+    supabase.from('lesson_doubts').select('*, profiles(full_name, email)').eq('lesson_id', targetInitialId).order('created_at', { ascending: true }),
+    supabase.from('live_sessions').select('*').eq('course_id', courseId).order('scheduled_start', { ascending: true }),
+    supabase.from('assessments').select('*').eq('course_id', courseId).order('scheduled_start', { ascending: true })
+  ])
 
-  // 8. Fetch scheduled assessments (mock exams and quizzes)
-  const { data: assessments } = await supabase
-    .from('assessments')
-    .select('*')
-    .eq('course_id', courseId)
-    .order('scheduled_start', { ascending: true })
+  // Extract query results safely
+  if (!course && courseResult.data) {
+    course = courseResult.data
+    await redisSet(`asentra:course:${courseId}`, JSON.stringify(course), { ex: 3600 })
+  }
+
+  const completedLessonIds = progressListResult.data?.map(p => p.lesson_id) || []
+  const initialDoubts = initialDoubtsResult.data || []
+  const liveSessions = liveSessionsResult.data || []
+  const assessments = assessmentsResult.data || []
 
   return (
     <CoursePlayerClient

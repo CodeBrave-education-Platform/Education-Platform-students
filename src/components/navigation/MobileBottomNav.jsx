@@ -8,7 +8,7 @@ import { Home, Users, TrendingUp, User } from 'lucide-react'
 export default function MobileBottomNav() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const tab = searchParams.get('tab')
+  const tab = searchParams ? searchParams.get('tab') : null
 
   // List of paths/routes where the bottom navigation bar must be hidden
   const hideOnPaths = ['/', '/login', '/auth']
@@ -22,7 +22,7 @@ export default function MobileBottomNav() {
   // Helper function to check if a navigation button is active
   const isActive = (route) => {
     if (route === '/dashboard') {
-      return pathname === '/dashboard' && !tab
+      return pathname === '/dashboard' && (!tab || tab === 'courses' || tab === 'learning')
     }
     if (route === '/batches') {
       return pathname === '/batches' || (pathname === '/dashboard' && tab === 'batches')
@@ -76,7 +76,7 @@ export default function MobileBottomNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center justify-center flex-1 py-2 text-center transition-all duration-300 cursor-pointer select-none ${
+              className={`flex flex-col items-center justify-center flex-1 py-2 text-center transition-all duration-300 cursor-pointer select-none tactile-press ${
                 item.active ? activeClass : inactiveClass
               }`}
             >
@@ -91,3 +91,4 @@ export default function MobileBottomNav() {
     </div>
   )
 }
+

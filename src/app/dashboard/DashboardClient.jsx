@@ -93,69 +93,31 @@ export default function DashboardClient({
   const supabase = createClient()
   const [isPending, startTransition] = useTransition()
 
-  // Local reactive state for active tab to achieve 0ms transition latency between dashboard sections
+  // Dynamic computed tab states (0ms SPA-grade rendering with zero state-synchronizer effects)
   const isTeacher = profile.role === 'teacher'
-  const [activeTab, setActiveTab] = useState(() => {
-    const tabParam = searchParams.get('tab')
+  const tabParam = searchParams ? searchParams.get('tab') : null
+
+  const getActiveTab = () => {
     if (isTeacher) {
       if (tabParam === 'roster') return 'ROSTER'
       if (tabParam === 'profile') return 'PROFILE'
-      return 'MY_COURSES' // default
+      return 'MY_COURSES'
     } else {
       if (tabParam === 'browse') return 'BROWSE'
       if (tabParam === 'invoices') return 'INVOICES'
       if (tabParam === 'profile') return 'PROFILE'
       if (tabParam === 'batches') return 'BATCHES'
       if (tabParam === 'analytics') return 'ANALYTICS'
-      return 'MY_LEARNING' // default
-    }
-  })
-
-  // Synchronize state back to browser URL bar in-place (0ms SPA-grade navigation)
-  const handleTabChange = (tabName, queryParam) => {
-    startTransition(() => {
-      setActiveTab(tabName)
-    })
-    setIsMobileMenuOpen(false)
-    
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href)
-      url.searchParams.set('tab', queryParam)
-      window.history.pushState(null, '', url.toString())
+      return 'MY_LEARNING'
     }
   }
 
-  // React to browser back/forward buttons & client-side route search parameter changes
-  React.useEffect(() => {
-    const syncTab = (tabParam) => {
-      startTransition(() => {
-        if (isTeacher) {
-          if (tabParam === 'roster') setActiveTab('ROSTER')
-          else if (tabParam === 'profile') setActiveTab('PROFILE')
-          else setActiveTab('MY_COURSES')
-        } else {
-          if (tabParam === 'browse') setActiveTab('BROWSE')
-          else if (tabParam === 'invoices') setActiveTab('INVOICES')
-          else if (tabParam === 'profile') setActiveTab('PROFILE')
-          else if (tabParam === 'batches') setActiveTab('BATCHES')
-          else if (tabParam === 'analytics') setActiveTab('ANALYTICS')
-          else setActiveTab('MY_LEARNING')
-        }
-      })
-    }
+  const activeTab = getActiveTab()
 
-    const handlePopState = () => {
-      const urlParams = new URLSearchParams(window.location.search)
-      syncTab(urlParams.get('tab'))
-    }
-
-    // Sync whenever Next.js searchParams updates (Link clicks, route changes)
-    const tabParam = searchParams.get('tab')
-    syncTab(tabParam)
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [searchParams, isTeacher])
+  const handleTabChange = (tabName, queryParam) => {
+    setIsMobileMenuOpen(false)
+    router.replace(`/dashboard?tab=${queryParam}`, { scroll: false })
+  }
 
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
@@ -556,7 +518,7 @@ export default function DashboardClient({
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'MY_COURSES' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -570,7 +532,7 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('ROSTER', 'roster')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'ROSTER' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -585,7 +547,7 @@ export default function DashboardClient({
                   <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'PROFILE' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -602,7 +564,7 @@ export default function DashboardClient({
                 <>
                   <button 
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'MY_LEARNING' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -616,7 +578,7 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('BROWSE', 'browse')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'BROWSE' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -630,7 +592,7 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('BATCHES', 'batches')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'BATCHES' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -644,7 +606,7 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('ANALYTICS', 'analytics')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'ANALYTICS' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -659,7 +621,7 @@ export default function DashboardClient({
                   <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'PROFILE' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -673,7 +635,7 @@ export default function DashboardClient({
                   </button>
                   <button 
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] group ${
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'INVOICES' 
                         ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
                         : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
@@ -979,12 +941,13 @@ export default function DashboardClient({
                               className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
-                              <div className="w-full h-48 overflow-hidden relative shrink-0">
+                              <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
                                 <img 
                                   src={thumbUrl} 
                                   alt={course.title}
-                                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                                  loading="lazy"
+                                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
                                   Enrolled
@@ -1041,11 +1004,11 @@ export default function DashboardClient({
                                       onClick={() => handleTabChange('PROFILE', 'profile')}
                                       className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 dark:hover:bg-teal-950/20 text-teal-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                     >
-                                      MY DOSSIER
+                                      MY PROFILE
                                     </button>
                                     
                                     <button
-                                      onClick={() => router.push(`/courses/${course.id}`)}
+                                      onClick={() => router.push(`/learn/${course.id}`)}
                                       className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                     >
                                       <span>RESUME SYLLABI</span>
@@ -1429,12 +1392,13 @@ export default function DashboardClient({
                               className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
-                              <div className="w-full h-48 overflow-hidden relative shrink-0">
+                              <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
                                 <img 
                                   src={thumbUrl} 
                                   alt={course.title}
-                                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                                  loading="lazy"
+                                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                                 />
                                 {enrolled && (
                                   <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
@@ -1475,18 +1439,18 @@ export default function DashboardClient({
 
                                 {/* Cost Row & Action Buttons */}
                                 <div className="space-y-4 pt-1">
-                                  <div className="space-y-0.5 border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
-                                    <div className="flex items-center gap-2 flex-wrap select-none">
-                                      <span className="text-xl font-black text-slate-900 dark:text-zinc-100">
+                                  <div className="border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
+                                    <div className="flex flex-wrap items-baseline gap-3 mt-4 mb-2 select-none">
+                                      <span className="text-2xl font-bold text-slate-900 dark:text-zinc-100">
                                         {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
                                       </span>
                                       {!isFree && originalPrice > course.price && (
                                         <>
-                                          <span className="text-[10px] font-semibold text-slate-400 line-through mt-0.5">
+                                          <span className="text-sm font-medium text-slate-400 line-through">
                                             ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
                                           </span>
-                                          <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-black tracking-wide border border-emerald-100/10">
-                                            Discount of {Math.round(((originalPrice - course.price) / originalPrice) * 100)}% applied
+                                          <span className="text-xs font-bold text-emerald-700 bg-emerald-100/50 px-2 py-1 rounded-md tracking-wide">
+                                            {Math.round(((originalPrice - course.price) / originalPrice) * 100)}% OFF
                                           </span>
                                         </>
                                       )}
@@ -1496,46 +1460,52 @@ export default function DashboardClient({
                                     </p>
                                   </div>
 
-                                  {/* Dual CTAs Grid */}
-                                  <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
-                                    <button
-                                      onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                                      className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 dark:hover:bg-teal-950/20 text-teal-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
-                                    >
-                                      EXPLORE
-                                    </button>
-                                    
-                                    {enrolled ? (
-                                      <div className="flex items-center justify-center gap-1 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider select-none">
-                                        <CheckCircle2 className="w-3.5 h-3.5 animate-pulse" />
-                                        <span>Registered</span>
-                                      </div>
-                                    ) : isFree ? (
-                                      <button
-                                        onClick={() => handleEnroll(course.id)}
-                                        disabled={loading}
-                                        className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
-                                      >
-                                        {loading ? (
-                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                        ) : (
-                                          <span>ENROLL FREE</span>
-                                        )}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() => handleRazorpayCheckout(course)}
-                                        disabled={loading}
-                                        className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm shadow-teal-500/10"
-                                      >
-                                        {loading ? (
-                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                        ) : (
-                                          <span>BUY NOW</span>
-                                        )}
-                                      </button>
-                                    )}
-                                  </div>
+                                   {/* Refactored High-Conversion Button Hierarchy */}
+                                   <div className="flex flex-col mt-5 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
+                                     {enrolled ? (
+                                       <button
+                                         onClick={() => handleTabChange('MY_LEARNING', 'learning')}
+                                         className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition-colors select-none cursor-pointer flex items-center justify-center"
+                                       >
+                                         Go to Dashboard
+                                       </button>
+                                     ) : (
+                                       <>
+                                         {isFree ? (
+                                           <button
+                                             onClick={() => handleEnroll(course.id)}
+                                             disabled={loading}
+                                             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
+                                           >
+                                             {loading ? (
+                                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                             ) : (
+                                               <span>Enroll Free</span>
+                                             )}
+                                           </button>
+                                         ) : (
+                                           <button
+                                             onClick={() => handleRazorpayCheckout(course)}
+                                             disabled={loading}
+                                             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
+                                           >
+                                             {loading ? (
+                                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                             ) : (
+                                               <span>Buy Now</span>
+                                             )}
+                                           </button>
+                                         )}
+                                         
+                                         <button
+                                            onClick={() => router.push(`/courses/${course.id}`)}
+                                            className="w-full text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 py-2 transition-colors select-none cursor-pointer"
+                                          >
+                                            View Course Details &rarr;
+                                          </button>
+                                       </>
+                                     )}
+                                   </div>
                                 </div>
                               </div>
                             </motion.div>
@@ -1559,7 +1529,7 @@ export default function DashboardClient({
                     <div className="flex justify-between items-center pb-2">
                       <h3 className="text-xl font-black text-slate-900 dark:text-zinc-150 flex items-center gap-2 tracking-tight">
                         <User className="w-5 h-5 text-teal-600" />
-                        <span>Academic Profile Dossier</span>
+                        <span>Academic Profile Info</span>
                       </h3>
                       <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider select-none shadow-sm">
                         Verified Student Account
@@ -1720,7 +1690,7 @@ export default function DashboardClient({
                       <div>
                         <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-200">Update Profile Details</h4>
                         <p className="text-[11px] text-slate-400 dark:text-zinc-400 mt-1 font-semibold">
-                          Modify your display name, stream focus, and contact details. New fields let you securely update your student dossier indicators in real-time.
+                          Modify your display name, stream focus, and contact details. New fields let you securely update your student profile indicators in real-time.
                         </p>
                       </div>
 
@@ -1794,9 +1764,9 @@ export default function DashboardClient({
                           </div>
                         </div>
 
-                        {/* NEW: Extended Dossier Parameters Section */}
+                        {/* NEW: Extended Profile Parameters Section */}
                         <div className="pt-4 border-t border-zinc-100 dark:border-zinc-850/80 space-y-4">
-                          <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-350">Academic Dossier Indicators</h5>
+                          <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-350">Academic Profile Indicators</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                               <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Daily Study hours</label>
@@ -1877,7 +1847,7 @@ export default function DashboardClient({
                             disabled={profileLoading}
                             className="px-6 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
                           >
-                            {profileLoading ? 'Updating Dossier...' : 'Save Profile Dossier'}
+                            {profileLoading ? 'Updating Profile...' : 'Save Profile Details'}
                           </motion.button>
                         </div>
                       </form>

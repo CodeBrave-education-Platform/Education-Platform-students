@@ -371,7 +371,7 @@ export default function AuthVisual({ focusedInput }) {
           Engineering the Future.
         </h1>
         <p className="text-slate-500 mt-3.5 text-xs font-semibold leading-relaxed">
-          Access India's most advanced high-fidelity IIT-JEE curriculum, live telemetry, and zero-latency mock exams.
+          Access India&apos;s most advanced high-fidelity IIT-JEE curriculum, live telemetry, and zero-latency mock exams.
         </p>
       </div>
 
