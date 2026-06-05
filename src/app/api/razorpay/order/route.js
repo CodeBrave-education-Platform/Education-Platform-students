@@ -3,13 +3,20 @@ import Razorpay from 'razorpay'
 import { createClient } from '@/utils/supabase/server'
 import { orderRateLimit } from '@/utils/rate-limit'
 
-// Initialize Razorpay instance securely on the server-side
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-})
+export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export async function POST(request) {
+  // Build-time & runtime configuration check
+  if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    return NextResponse.json({ error: "Configuration Deferred" }, { status: 503 })
+  }
+
+  // Defer initialization until the route is actually invoked
+  const razorpay = new Razorpay({
+    key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  })
   try {
     // 1. Enforce Serverless Rate Limiting via Upstash Redis to prevent abuse/DDoS
     const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
