@@ -46,3 +46,11 @@ next-env.d.ts
 /temp_skills
 /temp_pbakaus
 /temp_taste
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
