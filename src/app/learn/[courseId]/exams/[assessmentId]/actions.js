@@ -45,7 +45,7 @@ export async function gradeAssessmentAction(courseId, assessmentId, attemptId, a
     // Retrieve configured assessment details
     const { data: assessment, error: assessmentError } = await supabase
       .from('assessments')
-      .select('duration_minutes')
+      .select('duration_minutes, end_window')
       .eq('id', assessmentId)
       .single()
 
@@ -53,9 +53,41 @@ export async function gradeAssessmentAction(courseId, assessmentId, attemptId, a
       throw new Error('Assessment configurations not found')
     }
 
-    // Define 60-second grace window to compensate for network transit delays
-    const allowedMs = (assessment.duration_minutes * 60 * 1000) + 60000 
+    // Server-Authoritative Time Gate: Check end_window with grace period
+    if (assessment.end_window) {
+      const endWindowTime = new Date(assessment.end_window).getTime()
+      const gracePeriodMs = 60000 // 60 seconds grace period
+      if (submittedAt.getTime() > endWindowTime + gracePeriodMs) {
+        return {
+          success: false,
+          error: 'Assessment submission window has closed. Submission rejected.'
+        }
+      }
+    }
+
+    // Define 30-second grace window to compensate for network transit delays
+    const allowedMs = (assessment.duration_minutes * 60 * 1000) + 30000 
     const timeExceeded = elapsedMs > allowedMs
+
+    if (timeExceeded) {
+      // SAGA AUTO-CLOSE: Force-submit the test with a penalty of 0 marks for late tampering/submission
+      await supabase
+        .from('assessment_attempts')
+        .update({
+          submitted_at: submittedAt.toISOString(),
+          score: 0,
+          answers_payload: { ...answers, _system_flagged_late: true }
+        })
+        .eq('id', attemptId)
+
+      revalidatePath(`/learn/${courseId}/exams/${assessmentId}`)
+
+      return {
+        success: false,
+        error: 'Submission rejected: Assessment completion window has expired.',
+        timeExceeded: true
+      }
+    }
 
     // 4. Secure Database grading (Correct answers are NEVER exposed to the React client)
     const { data: realQuestions, error: questionsError } = await supabase
@@ -171,6 +203,32 @@ export async function startAssessmentAttemptAction(courseId, assessmentId) {
       }
     }
 
+    // Retrieve start_window and end_window to validate temporal access locks
+    const { data: assessment, error: assErr } = await supabase
+      .from('assessments')
+      .select('start_window, end_window')
+      .eq('id', assessmentId)
+      .single()
+
+    if (assErr || !assessment) {
+      throw new Error('Assessment configurations not found')
+    }
+
+    const nowTime = new Date().getTime()
+    if (assessment.start_window) {
+      const startWindowTime = new Date(assessment.start_window).getTime()
+      if (nowTime < startWindowTime) {
+        throw new Error('Assessment is locked. The start window has not opened yet.')
+      }
+    }
+
+    if (assessment.end_window) {
+      const endWindowTime = new Date(assessment.end_window).getTime()
+      if (nowTime > endWindowTime) {
+        throw new Error('Assessment window has closed.')
+      }
+    }
+
     // Start a new secure attempt
     const { data: newAttempt, error: insertError } = await supabase
       .from('assessment_attempts')
@@ -199,4 +257,11 @@ export async function startAssessmentAttemptAction(courseId, assessmentId) {
       error: err.message || 'Failed to start attempt'
     }
   }
+}
+
+/**
+ * Server-authoritative time sync action
+ */
+export async function getServerTimeAction() {
+  return new Date().toISOString()
 }

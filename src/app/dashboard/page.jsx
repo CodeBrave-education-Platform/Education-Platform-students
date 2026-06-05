@@ -30,7 +30,7 @@ export default async function DashboardPage(props) {
 
   // Graceful fallback if profile wasn't created yet (e.g., fast OAuth completion)
   if (!profile) {
-    const defaultName = user.email.split('@')[0]
+    const defaultName = user.email?.split('@')[0] || 'Student'
     const defaultRole = 'student'
     
     const { data: newProfile, error: profileError } = await supabase
@@ -144,6 +144,26 @@ export default async function DashboardPage(props) {
 
   const phoneNumber = user.user_metadata?.phone_number || user.phone || 'Not Provided'
 
+  let dbInvoices = []
+  if (role !== 'teacher') {
+    const { data: invoicesData } = await supabase
+      .from('invoices')
+      .select('*, courses(title), batches(title)')
+      .order('invoice_date', { ascending: false })
+
+    if (invoicesData) {
+      dbInvoices = invoicesData.map(inv => ({
+        id: inv.id.slice(0, 8).toUpperCase(),
+        courseTitle: inv.courses?.title || inv.batches?.title || 'Hybrid Cohort Batch Access',
+        razorpayId: inv.razorpay_payment_id,
+        amount: inv.amount_paid === 0 ? 'Free' : `₹${inv.amount_paid.toLocaleString('en-IN')}`,
+        currency: inv.currency || 'INR',
+        date: inv.invoice_date,
+        status: inv.status === 'captured' ? 'Paid' : (inv.status || 'Paid')
+      }))
+    }
+  }
+
   const mockInvoices = [
     {
       id: 'inv-1001',
@@ -165,6 +185,8 @@ export default async function DashboardPage(props) {
     }
   ]
 
+  const finalInvoices = [...dbInvoices, ...mockInvoices]
+
   return (
     <>
       <Navbar user={user} profile={profile} />
@@ -174,7 +196,7 @@ export default async function DashboardPage(props) {
         initialCourses={initialCourses}
         initialEnrollments={initialEnrollments}
         allCourses={allCourses}
-        mockInvoices={mockInvoices}
+        mockInvoices={finalInvoices}
         phoneNumber={phoneNumber}
         checkoutCourseId={checkoutCourseId}
         initialBatches={initialBatches}

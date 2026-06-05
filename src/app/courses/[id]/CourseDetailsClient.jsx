@@ -12,15 +12,56 @@ import {
 } from 'lucide-react'
 import Footer from '@/components/Footer'
 
-const getThumbnailUrl = (course) => {
-  if (course.thumbnail_url) return course.thumbnail_url
-  
+const getDefaultThumbnail = (level) => {
   const defaultThumbs = {
     foundation: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80',
     mains: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
     advanced: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80'
+  };
+  return defaultThumbs[level] || defaultThumbs.foundation;
+}
+
+const getThumbnailUrl = (course) => {
+  if (!course || !course.thumbnail_url || course.thumbnail_url.trim() === '') {
+    return getDefaultThumbnail(course?.level);
   }
-  return defaultThumbs[course.level] || defaultThumbs.foundation
+
+  let url = course.thumbnail_url.trim();
+
+  // Normalize absolute URLs without protocol (e.g. www.bing.com -> https://www.bing.com)
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('data:')) {
+    if (url.includes('.') && !url.includes(' ')) {
+      url = 'https://' + url;
+    }
+  }
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const u = new URL(url);
+      let mediaUrl = null;
+      for (const [key, value] of u.searchParams.entries()) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey === 'mediaurl' || lowerKey === 'imgurl' || lowerKey === 'imageurl') {
+          mediaUrl = value;
+          break;
+        }
+      }
+      if (mediaUrl) {
+        return decodeURIComponent(mediaUrl);
+      }
+    } catch (e) {}
+    return url;
+  }
+
+  if (url.startsWith('/') || url.startsWith('data:')) {
+    return url;
+  }
+
+  return getDefaultThumbnail(course.level);
+}
+
+const handleImageError = (e, level) => {
+  e.target.src = getDefaultThumbnail(level);
 }
 
 export default function CourseDetailsClient({ course, lessons, initialEnrolled, user }) {
@@ -68,6 +109,11 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
 
   // handle Razorpay checkout
   const handleRazorpayCheckout = async () => {
+    const price = course.price !== undefined && course.price !== null ? Number(course.price) : 0
+    if (price === 0 || isNaN(price)) {
+      await handleEnroll()
+      return
+    }
     setLoading(true)
     setErrorMsg('')
     try {
@@ -106,13 +152,32 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
         handler: async function (response) {
           try {
             setLoading(true)
-            alert('Payment Successful! Securing enrollment. Redirecting to your classroom...')
+            
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                courseId: course.id,
+                amount: orderData.amount
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (!verifyRes.ok || verifyData.error) {
+              throw new Error(verifyData.error || 'Payment verification failed.')
+            }
+
+            alert('Payment Successful! Welcome to the classroom.')
             setEnrolled(true)
             startTransition(() => {
               router.refresh()
             })
           } catch (err) {
             console.error('Enrollment state transition error:', err)
+            alert(err.message || 'Verification failed. Please contact support.')
           } finally {
             setLoading(false)
           }
@@ -296,6 +361,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
                   src={thumbUrl} 
                   alt={course.title}
                   loading="lazy"
+                  onError={(e) => handleImageError(e, course.level)}
                   className="w-full h-full object-cover object-center"
                 />
                 {enrolled && (

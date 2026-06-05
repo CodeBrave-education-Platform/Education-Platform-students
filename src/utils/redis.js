@@ -1,9 +1,11 @@
 import { Redis } from "@upstash/redis"
 
+const cleanEnvVar = (val) => val ? val.replace(/^['"]|['"]$/g, '') : val;
+
 // Create a single shared serverless Redis instance using env configuration
 export const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN
+  url: cleanEnvVar(process.env.UPSTASH_REDIS_REST_URL),
+  token: cleanEnvVar(process.env.UPSTASH_REDIS_REST_TOKEN)
 })
 
 // Protected Redis GET with 1200ms timeout

@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { redisGet, redisSet, redisDel } from '@/utils/redis'
+import { getCorsHeaders } from '@/utils/security'
+
+function corsResponse(request, response) {
+  const headers = getCorsHeaders(request)
+  Object.entries(headers).forEach(([key, val]) => {
+    response.headers.set(key, val)
+  })
+  return response
+}
 
 // Module-level in-memory state tracking to simulate high-throughput cohort classroom overlay
 // Real-world clusters would use Upstash Redis, but this establishes local in-memory isolation for rate limits and active polls
@@ -19,7 +28,7 @@ function checkRateLimit(userId) {
   return true
 }
 
-export async function GET(request) {
+async function baseGET(request) {
   try {
     const supabase = await createClient()
 
@@ -125,7 +134,7 @@ export async function GET(request) {
   }
 }
 
-export async function POST(request) {
+async function basePOST(request) {
   try {
     const supabase = await createClient()
 
@@ -278,7 +287,7 @@ export async function POST(request) {
         success: true,
         doubt: {
           ...data,
-          profiles: profile || { full_name: user.email.split('@')[0], email: user.email }
+          profiles: profile || { full_name: user.email?.split('@')[0] || 'Student', email: user.email }
         }
       })
     }
@@ -294,4 +303,18 @@ export async function POST(request) {
       { status: 500 }
     )
   }
+}
+
+export async function OPTIONS(request) {
+  return NextResponse.json({}, { headers: getCorsHeaders(request) })
+}
+
+export async function GET(request) {
+  const response = await baseGET(request)
+  return corsResponse(request, response)
+}
+
+export async function POST(request) {
+  const response = await basePOST(request)
+  return corsResponse(request, response)
 }

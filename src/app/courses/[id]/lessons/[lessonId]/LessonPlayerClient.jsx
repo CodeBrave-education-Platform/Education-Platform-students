@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import { useTokenRefresh } from '@/hooks/useTokenRefresh'
 import { 
   Play, 
   CheckCircle2, 
@@ -32,6 +33,9 @@ export default function LessonPlayerClient({
   initialDoubts,
   user
 }) {
+  // Activate background silent token refresh observer
+  useTokenRefresh()
+
   const router = useRouter()
   const videoRef = useRef(null)
   const [completedSet, setCompletedSet] = useState(new Set(initialCompletedLessonIds))

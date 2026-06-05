@@ -18,16 +18,56 @@ import {
   RadialBarChart, RadialBar
 } from 'recharts'
 
-const getThumbnailUrl = (course) => {
-  if (course.thumbnail_url) return course.thumbnail_url
-  
-  // Dynamic academic fallback covers matching course difficulty level
+const getDefaultThumbnail = (level) => {
   const defaultThumbs = {
     foundation: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80',
     mains: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
     advanced: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80'
+  };
+  return defaultThumbs[level] || defaultThumbs.foundation;
+}
+
+const getThumbnailUrl = (course) => {
+  if (!course || !course.thumbnail_url || course.thumbnail_url.trim() === '') {
+    return getDefaultThumbnail(course?.level);
   }
-  return defaultThumbs[course.level] || defaultThumbs.foundation
+
+  let url = course.thumbnail_url.trim();
+
+  // Normalize absolute URLs without protocol (e.g. www.bing.com -> https://www.bing.com)
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('data:')) {
+    if (url.includes('.') && !url.includes(' ')) {
+      url = 'https://' + url;
+    }
+  }
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const u = new URL(url);
+      let mediaUrl = null;
+      for (const [key, value] of u.searchParams.entries()) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey === 'mediaurl' || lowerKey === 'imgurl' || lowerKey === 'imageurl') {
+          mediaUrl = value;
+          break;
+        }
+      }
+      if (mediaUrl) {
+        return decodeURIComponent(mediaUrl);
+      }
+    } catch (e) {}
+    return url;
+  }
+
+  if (url.startsWith('/') || url.startsWith('data:')) {
+    return url;
+  }
+
+  return getDefaultThumbnail(course.level);
+}
+
+const handleImageError = (e, level) => {
+  e.target.src = getDefaultThumbnail(level);
 }
 
 const CourseSkeletonGrid = () => (
@@ -92,12 +132,20 @@ export default function DashboardClient({
   const searchParams = useSearchParams()
   const supabase = createClient()
   const [isPending, startTransition] = useTransition()
+  const [localTab, setLocalTab] = useState(null)
+
+  const tabParam = searchParams ? searchParams.get('tab') : null
+
+  // Sync localTab back to null when route transition resolves
+  React.useEffect(() => {
+    setLocalTab(null)
+  }, [tabParam])
 
   // Dynamic computed tab states (0ms SPA-grade rendering with zero state-synchronizer effects)
   const isTeacher = profile.role === 'teacher'
-  const tabParam = searchParams ? searchParams.get('tab') : null
 
   const getActiveTab = () => {
+    if (localTab) return localTab
     if (isTeacher) {
       if (tabParam === 'roster') return 'ROSTER'
       if (tabParam === 'profile') return 'PROFILE'
@@ -108,6 +156,7 @@ export default function DashboardClient({
       if (tabParam === 'profile') return 'PROFILE'
       if (tabParam === 'batches') return 'BATCHES'
       if (tabParam === 'analytics') return 'ANALYTICS'
+      if (tabParam === 'exams') return 'EXAMS'
       return 'MY_LEARNING'
     }
   }
@@ -116,7 +165,10 @@ export default function DashboardClient({
 
   const handleTabChange = (tabName, queryParam) => {
     setIsMobileMenuOpen(false)
-    router.replace(`/dashboard?tab=${queryParam}`, { scroll: false })
+    setLocalTab(tabName)
+    startTransition(() => {
+      router.replace(`/dashboard?tab=${queryParam}`, { scroll: false })
+    })
   }
 
   // Data states (locally updated for real-time reactivity)
@@ -124,6 +176,91 @@ export default function DashboardClient({
   const [enrollments, setEnrollments] = useState(initialEnrollments)
   const [batchEnrollments, setBatchEnrollments] = useState(initialBatchEnrollments)
   const [directory, setDirectory] = useState(allCourses)
+
+  const [selectedCohortBatch, setSelectedCohortBatch] = useState(null)
+  const [cohortLiveSessions, setCohortLiveSessions] = useState([])
+  const [cohortExams, setCohortExams] = useState([])
+  const [cohortFiles, setCohortFiles] = useState([])
+  const [loadingCohort, setLoadingCohort] = useState(false)
+
+  const [myExams, setMyExams] = useState([])
+  const [loadingMyExams, setLoadingMyExams] = useState(false)
+
+  React.useEffect(() => {
+    if (!selectedCohortBatch) return
+
+    const fetchCohortData = async () => {
+      setLoadingCohort(true)
+      try {
+        const [liveRes, examRes, fileRes] = await Promise.all([
+          supabase
+            .from('live_sessions')
+            .select('*')
+            .eq('batch_id', selectedCohortBatch.id)
+            .order('scheduled_start', { ascending: true }),
+          supabase
+            .from('assessments')
+            .select('*')
+            .eq('batch_id', selectedCohortBatch.id)
+            .order('start_window', { ascending: true }),
+          supabase
+            .from('course_files')
+            .select('*')
+            .eq('batch_id', selectedCohortBatch.id)
+            .order('created_at', { ascending: true })
+        ])
+
+        if (liveRes.error) throw liveRes.error
+        if (examRes.error) throw examRes.error
+        if (fileRes.error) throw fileRes.error
+
+        setCohortLiveSessions(liveRes.data || [])
+        setCohortExams(examRes.data || [])
+        setCohortFiles(fileRes.data || [])
+      } catch (err) {
+        console.error('Error fetching cohort data:', err)
+      } finally {
+        setLoadingCohort(false)
+      }
+    }
+
+    fetchCohortData()
+  }, [selectedCohortBatch])
+
+  React.useEffect(() => {
+    if (activeTab !== 'EXAMS' || isTeacher) return
+
+    const fetchMyExams = async () => {
+      setLoadingMyExams(true)
+      try {
+        const courseIds = enrollments.map(e => e.course_id)
+        const enrolledBatchIds = batchEnrollments.map(b => b.batch_id)
+        
+        let query = supabase.from('assessments').select('*, courses(title)')
+        
+        if (courseIds.length > 0 && enrolledBatchIds.length > 0) {
+          query = query.or(`course_id.in.(${courseIds.join(',')}),batch_id.in.(${enrolledBatchIds.join(',')})`)
+        } else if (courseIds.length > 0) {
+          query = query.in('course_id', courseIds)
+        } else if (enrolledBatchIds.length > 0) {
+          query = query.in('batch_id', enrolledBatchIds)
+        } else {
+          setMyExams([])
+          return;
+        }
+
+        const { data, error } = await query.order('start_window', { ascending: true, nullsFirst: false })
+        if (error) throw error
+        setMyExams(data || [])
+      } catch (err) {
+        console.error('Error fetching student scheduled exams:', err)
+      } finally {
+        setLoadingMyExams(false)
+      }
+    }
+
+    fetchMyExams()
+  }, [activeTab, enrollments, batchEnrollments, isTeacher])
 
   // Interactive Search Query
   const [searchQuery, setSearchQuery] = useState('')
@@ -242,6 +379,18 @@ export default function DashboardClient({
 
       if (error) throw error
 
+      // Insert free invoice for courses
+      await supabase
+        .from('invoices')
+        .insert({
+          user_id: user.id,
+          course_id: courseId,
+          amount_paid: 0,
+          currency: 'INR',
+          status: 'captured',
+          razorpay_payment_id: `free_enroll_${Date.now()}`
+        }).select().maybeSingle()
+
       // Update local enrollments list instantly
       setEnrollments(prev => [newEnroll, ...prev])
 
@@ -259,6 +408,11 @@ export default function DashboardClient({
 
   // Handle Secure Razorpay checkout and enrollment directly inside the student dashboard
   const handleRazorpayCheckout = async (course) => {
+    const price = course.price !== undefined && course.price !== null ? Number(course.price) : 0
+    if (price === 0 || isNaN(price)) {
+      await handleEnroll(course.id)
+      return
+    }
     setCheckoutLoadingId(course.id)
     try {
       // Step A: Fetch order creation parameters from secure server-side API
@@ -297,12 +451,29 @@ export default function DashboardClient({
           courseId: course.id
         },
         // Step C: Razorpay payment transaction completed handler
-        handler: function (response) {
+        handler: async function (response) {
           try {
             setCheckoutLoadingId(course.id)
             
             // Professional background provisioning alert
-            alert('Payment Successful! We are securing your enrollment and provisioning your course access. You are being redirected to your learning dashboard.')
+            alert('Payment Successful! Securing enrollment. Please wait...')
+            
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                courseId: course.id,
+                amount: orderData.amount
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (!verifyRes.ok || verifyData.error) {
+              throw new Error(verifyData.error || 'Payment verification failed.')
+            }
             
             // Upsert enrollment in local state instantly for 0ms reactive UI update
             const newEnroll = {
@@ -324,7 +495,8 @@ export default function DashboardClient({
               router.refresh()
             })
           } catch (err) {
-            console.error('Optimistic enrollment transition error:', err)
+            console.error('Enrollment verification error:', err)
+            alert(err.message || 'Verification failed. Please contact support.')
           } finally {
             setCheckoutLoadingId(null)
           }
@@ -346,8 +518,49 @@ export default function DashboardClient({
     }
   }
 
+  const handleBatchEnroll = async (batch) => {
+    setCheckoutLoadingId(batch.id)
+    try {
+      const paymentId = `free_enroll_${Date.now()}`
+      const { data, error } = await supabase
+        .rpc('execute_atomic_batch_onboarding', {
+          _user_id: user.id,
+          _batch_id: batch.id,
+          _payment_id: paymentId,
+          _amount: 0
+        })
+
+      if (error) throw error
+      if (!data) throw new Error('Failed to enroll in cohort batch via transaction.')
+
+      // Upsert enrollment in local state instantly for 0ms reactive UI update
+      const newBatchEnroll = {
+        id: paymentId,
+        user_id: user.id,
+        batch_id: batch.id,
+        status: 'active',
+        enrolled_at: new Date().toISOString()
+      }
+      setBatchEnrollments(prev => [newBatchEnroll, ...prev])
+      alert('Enrollment Successful! Welcome to the cohort batch.')
+      startTransition(() => {
+        router.refresh()
+      })
+    } catch (err) {
+      console.error('Batch Enrollment Error:', err)
+      alert(err.message || 'Failed to enroll in cohort batch. Please try again.')
+    } finally {
+      setCheckoutLoadingId(null)
+    }
+  }
+
   // Handle Secure Razorpay checkout for Hybrid cohort-based Batches
   const handleBatchRazorpayCheckout = async (batch) => {
+    const price = batch.price !== undefined && batch.price !== null ? Number(batch.price) : 0
+    if (price === 0 || isNaN(price)) {
+      await handleBatchEnroll(batch)
+      return
+    }
     setCheckoutLoadingId(batch.id)
     try {
       // Step A: Fetch order creation parameters from secure server-side API
@@ -386,12 +599,29 @@ export default function DashboardClient({
           batchId: batch.id
         },
         // Step C: Razorpay payment transaction completed handler
-        handler: function (response) {
+        handler: async function (response) {
           try {
             setCheckoutLoadingId(batch.id)
             
             // Professional background provisioning alert
-            alert('Payment Successful! We are securing your cohort seat and provisioning your batch access. Redirecting you shortly...')
+            alert('Payment Successful! Securing cohort seat. Please wait...')
+            
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                batchId: batch.id,
+                amount: orderData.amount
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (!verifyRes.ok || verifyData.error) {
+              throw new Error(verifyData.error || 'Batch payment verification failed.')
+            }
             
             // Upsert enrollment in local state instantly for 0ms reactive UI update
             const newBatchEnroll = {
@@ -408,7 +638,8 @@ export default function DashboardClient({
               router.refresh()
             })
           } catch (err) {
-            console.error('Optimistic batch enrollment transition error:', err)
+            console.error('Batch enrollment verification error:', err)
+            alert(err.message || 'Verification failed. Please contact support.')
           } finally {
             setCheckoutLoadingId(null)
           }
@@ -462,10 +693,7 @@ export default function DashboardClient({
 
       setProfileSuccess('Profile details successfully updated!')
       
-      // Sync payment phone pre-fill reactively
-      if (profilePhone.trim()) {
-        setPaymentPhone(profilePhone.trim())
-      }
+
 
       // Trigger a server-side route refresh to sync state
       startTransition(() => {
@@ -483,7 +711,7 @@ export default function DashboardClient({
     }
   }
 
-  const displayName = profileName || user.email.split('@')[0]
+  const displayName = profileName || user.email?.split('@')[0] || 'Student'
   const displayPhone = profilePhone || 'Not Provided'
   const displayRole = isTeacher ? 'Instructor' : 'Student'
   const displayInitials = displayName.substring(0, 2).toUpperCase()
@@ -603,6 +831,20 @@ export default function DashboardClient({
                     )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Batches</span>
+                  </button>
+                  <button 
+                    onClick={() => handleTabChange('EXAMS', 'exams')}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
+                      activeTab === 'EXAMS' 
+                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                    }`}
+                  >
+                    {activeTab === 'EXAMS' && (
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                    )}
+                    <Award className="w-5 h-5 shrink-0" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Exams</span>
                   </button>
                   <button 
                     onClick={() => handleTabChange('ANALYTICS', 'analytics')}
@@ -787,12 +1029,12 @@ export default function DashboardClient({
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {courses.map((course) => {
+                        {courses.map((course, idx) => {
                           // Find enrollment count
                           const studentCount = enrollments.filter(e => e.course_id === course.id).length
                           return (
                             <motion.div
-                              key={course.id}
+                              key={course.id || `course_${idx}`}
                               whileHover={{ y: -4 }}
                               className="p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
                             >
@@ -858,8 +1100,8 @@ export default function DashboardClient({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200/30 dark:divide-zinc-800/30 text-xs font-semibold text-slate-900 dark:text-zinc-200">
-                            {enrollments.map((enroll) => (
-                              <tr key={enroll.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-950/20 transition-all">
+                            {enrollments.map((enroll, idx) => (
+                              <tr key={enroll.id || `enroll_tr_${idx}`} className="hover:bg-slate-50/50 dark:hover:bg-zinc-955/20 transition-all">
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center font-bold text-slate-700 dark:text-teal-400">
@@ -925,17 +1167,15 @@ export default function DashboardClient({
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {enrollments.map((enroll) => {
+                        {enrollments.filter(e => e.courses).map((enroll, idx) => {
                           const course = enroll.courses
-                          if (!course) return null
-                          
                           const thumbUrl = getThumbnailUrl(course)
                           const aspirantInfo = course.aspirant_info || (course.level === 'advanced' ? 'For JEE Advanced Aspirants' : 'For IIT-JEE Aspirants')
                           const batchInfo = course.batch_info || 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
 
                           return (
                             <motion.div 
-                              key={enroll.id}
+                              key={enroll.id || `enroll_div_${idx}`}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
                               className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
@@ -947,6 +1187,7 @@ export default function DashboardClient({
                                   src={thumbUrl} 
                                   alt={course.title}
                                   loading="lazy"
+                                  onError={(e) => handleImageError(e, course.level)}
                                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
@@ -1051,7 +1292,7 @@ export default function DashboardClient({
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {initialBatches.map((batch) => {
+                        {initialBatches.map((batch, idx) => {
                           const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
                           const formattedDate = new Date(batch.start_date).toLocaleDateString(undefined, {
                             month: 'long',
@@ -1062,7 +1303,7 @@ export default function DashboardClient({
 
                           return (
                             <div 
-                              key={batch.id} 
+                              key={batch.id || `batch_${idx}`} 
                               className="bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/85 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between p-6 min-h-[300px]"
                             >
                               <div className="space-y-4">
@@ -1099,11 +1340,11 @@ export default function DashboardClient({
                                 </div>
                                 {isEnrolled ? (
                                   <button
-                                    disabled
-                                    className="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-950/30 dark:border-emerald-500/25 dark:text-emerald-450 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                                    onClick={() => setSelectedCohortBatch(batch)}
+                                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm border border-emerald-650"
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>Active Cohort</span>
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
+                                    <span>Enter Cohort Console</span>
                                   </button>
                                 ) : (
                                   <button
@@ -1122,6 +1363,86 @@ export default function DashboardClient({
                                   </button>
                                 )}
                               </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* 🏆 Scheduled Exams Tab Panel */}
+                {activeTab === 'EXAMS' && !isTeacher && (
+                  <motion.div
+                    key="exams-panel"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-6"
+                  >
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-150 tracking-tight flex items-center gap-2">
+                        <Award className="w-5 h-5 text-teal-600 dark:text-teal-450" />
+                        <span>My Scheduled Exams & CBT Mock Tests</span>
+                      </h3>
+                      <p className="text-xs text-zinc-450 mt-1 font-semibold">Examine and start active multiple-choice tests scheduled for your enrolled courses and batch cohorts.</p>
+                    </div>
+
+                    {loadingMyExams ? (
+                      <div className="flex justify-center items-center py-16">
+                        <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+                      </div>
+                    ) : myExams.length === 0 ? (
+                      <div className="text-center text-zinc-455 text-xs py-16 bg-white/40 dark:bg-zinc-900/40 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl">
+                        No scheduled exams or mock tests are active for your profile at this time.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {myExams.map(exam => {
+                          const now = Date.now()
+                          const start = exam.start_window ? new Date(exam.start_window).getTime() : null
+                          const end = exam.end_window ? new Date(exam.end_window).getTime() : null
+                          const isUpcoming = start && now < start
+                          const isClosed = end && now > end
+                          const isActive = !isUpcoming && !isClosed
+
+                          return (
+                            <div key={exam.id} className="bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/80 p-5 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider select-none border ${
+                                    isUpcoming
+                                      ? 'bg-amber-50 text-amber-700 border-amber-250 dark:bg-amber-950/20 dark:text-amber-450 dark:border-amber-500/20'
+                                      : isClosed
+                                      ? 'bg-rose-50 text-rose-700 border-rose-250 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-500/20'
+                                      : 'bg-emerald-50 text-emerald-700 border-emerald-250 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
+                                  }`}>
+                                    {isUpcoming ? 'Locked (Upcoming)' : isClosed ? 'Closed' : 'Active Test'}
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-550">
+                                    Duration: {exam.duration_minutes} Mins
+                                  </span>
+                                </div>
+                                
+                                <h4 className="text-sm font-extrabold text-slate-800 dark:text-zinc-150 leading-snug line-clamp-2">
+                                  {exam.title}
+                                </h4>
+
+                                <div className="text-[10px] text-slate-450 dark:text-zinc-500 space-y-0.5 font-bold">
+                                  {exam.courses?.title && <div>Course: {exam.courses.title}</div>}
+                                  {exam.start_window && <div>Opens: {new Date(exam.start_window).toLocaleString()}</div>}
+                                  {exam.end_window && <div>Closes: {new Date(exam.end_window).toLocaleString()}</div>}
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => router.push(`/learn/${exam.course_id}/exams/${exam.id}`)}
+                                disabled={!isActive}
+                                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-355 disabled:border-slate-100 dark:disabled:bg-zinc-850 dark:disabled:border-zinc-800 dark:disabled:text-zinc-650 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition cursor-pointer text-center border border-teal-650"
+                              >
+                                {isUpcoming ? 'Test Locked' : isClosed ? 'Test Closed' : 'Enter Test Center'}
+                              </button>
                             </div>
                           )
                         })}
@@ -1372,7 +1693,7 @@ export default function DashboardClient({
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredDirectory.map((course) => {
+                        {filteredDirectory.map((course, idx) => {
                           const enrolled = checkIsEnrolled(course.id)
                           const loading = enrollLoadingId === course.id || checkoutLoadingId === course.id
                           const isFree = Number(course.price) === 0
@@ -1386,7 +1707,7 @@ export default function DashboardClient({
 
                           return (
                             <motion.div 
-                              key={course.id}
+                              key={course.id || `course_dir_${idx}`}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
                               className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
@@ -1398,6 +1719,7 @@ export default function DashboardClient({
                                   src={thumbUrl} 
                                   alt={course.title}
                                   loading="lazy"
+                                  onError={(e) => handleImageError(e, course.level)}
                                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                                 />
                                 {enrolled && (
@@ -1883,8 +2205,8 @@ export default function DashboardClient({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100/60 dark:divide-zinc-850/80 text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                          {mockInvoices?.map((invoice) => (
-                            <tr key={invoice.id} className="hover:bg-slate-50/60 dark:hover:bg-zinc-950/20 transition-all duration-200">
+                          {mockInvoices?.map((invoice, idx) => (
+                            <tr key={invoice.id || invoice.razorpayId || `inv_${idx}`} className="hover:bg-slate-50/60 dark:hover:bg-zinc-950/20 transition-all duration-200">
                               <td className="px-6 py-4 font-mono font-bold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.id}</td>
                               <td className="px-6 py-4 font-medium text-slate-800 dark:text-zinc-300">{invoice.courseTitle}</td>
                               <td className="px-6 py-4 font-mono text-[10px] text-slate-500 dark:text-zinc-550 tracking-wider">{invoice.razorpayId}</td>
@@ -2044,6 +2366,17 @@ export default function DashboardClient({
                         >
                           <Users className="w-5 h-5 shrink-0" />
                           <span>Batches Cohorts</span>
+                        </button>
+                        <button 
+                          onClick={() => handleTabChange('EXAMS', 'exams')}
+                          className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                            activeTab === 'EXAMS' 
+                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                          }`}
+                        >
+                          <Award className="w-5 h-5 shrink-0" />
+                          <span>Scheduled Exams</span>
                         </button>
                         <button 
                           onClick={() => handleTabChange('ANALYTICS', 'analytics')}
@@ -2210,6 +2543,187 @@ export default function DashboardClient({
                     <span>Publish Course to Platform</span>
                   )}
                 </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* COHORT CONSOLE DRAWER MODAL */}
+      <AnimatePresence>
+        {selectedCohortBatch && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedCohortBatch(null)}
+              className="fixed inset-0 bg-black z-40"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-full max-w-2xl bg-white dark:bg-zinc-950 z-50 shadow-2xl p-6 flex flex-col justify-between border-l border-slate-200/50 dark:border-zinc-800/60 overflow-y-auto custom-scrollbar"
+            >
+              <div className="space-y-6 flex-1 flex flex-col min-h-0">
+                <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-4 shrink-0">
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-teal-650 dark:text-teal-400" />
+                      <span>Cohort Console: {selectedCohortBatch.title}</span>
+                    </h3>
+                    <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">
+                      View live streams, scheduled cohort mock exams, and vault materials.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedCohortBatch(null)}
+                    className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {loadingCohort ? (
+                  <div className="flex-1 flex justify-center items-center py-20">
+                    <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
+                    
+                    {/* Live Coordination Room */}
+                    <div className="space-y-3">
+                      <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
+                        <Calendar className="w-4 h-4 text-indigo-650" />
+                        <span>Live Coordinator Room</span>
+                      </h4>
+                      {cohortLiveSessions.length === 0 ? (
+                        <p className="text-[11px] font-bold text-slate-400 italic pl-2">No live classes scheduled for this cohort batch.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {cohortLiveSessions.map(session => {
+                            const isLive = session.status === 'live'
+                            const isEnded = session.status === 'ended'
+                            return (
+                              <div key={session.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none">{session.title}</h5>
+                                    {isLive && (
+                                      <span className="px-1.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-600 rounded text-[8px] font-black uppercase animate-pulse">
+                                        LIVE
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[9px] text-slate-455 mt-1 font-bold">
+                                    Start: {new Date(session.scheduled_start).toLocaleString()} &bull; Duration: {session.duration_minutes}m
+                                  </p>
+                                </div>
+                                {!isEnded && (
+                                  <a
+                                    href={session.meeting_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 shrink-0"
+                                  >
+                                    Join Class
+                                  </a>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Scheduled Exams */}
+                    <div className="space-y-3">
+                      <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
+                        <Award className="w-4 h-4 text-teal-650" />
+                        <span>Scheduled Cohort Assessments</span>
+                      </h4>
+                      {cohortExams.length === 0 ? (
+                        <p className="text-[11px] font-bold text-slate-400 italic pl-2">No exams scheduled for this cohort batch.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {cohortExams.map(exam => {
+                            const now = Date.now()
+                            const start = exam.start_window ? new Date(exam.start_window).getTime() : null
+                            const end = exam.end_window ? new Date(exam.end_window).getTime() : null
+                            const isUpcoming = start && now < start
+                            const isClosed = end && now > end
+                            const isActive = !isUpcoming && !isClosed
+
+                            return (
+                              <div key={exam.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none">{exam.title}</h5>
+                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border ${
+                                      isUpcoming
+                                        ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-450 dark:border-amber-500/20'
+                                        : isClosed
+                                        ? 'bg-rose-50 text-rose-700 border-rose-250 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-500/20'
+                                        : 'bg-emerald-50 text-emerald-700 border-emerald-250 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
+                                    }`}>
+                                      {isUpcoming ? 'Locked' : isClosed ? 'Closed' : 'Active'}
+                                    </span>
+                                  </div>
+                                  <p className="text-[9px] text-slate-455 dark:text-zinc-500 mt-1 font-bold">
+                                    Opens: {exam.start_window ? new Date(exam.start_window).toLocaleString() : 'Anytime'} &bull; Closes: {exam.end_window ? new Date(exam.end_window).toLocaleString() : 'Anytime'}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    setSelectedCohortBatch(null)
+                                    router.push(`/learn/${exam.course_id}/exams/${exam.id}`)
+                                  }}
+                                  disabled={!isActive}
+                                  className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs shrink-0 cursor-pointer border border-teal-650"
+                                >
+                                  {isUpcoming ? 'Upcoming' : isClosed ? 'Closed' : 'Enter Exam'}
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Materials Vault */}
+                    <div className="space-y-3">
+                      <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
+                        <FileText className="w-4 h-4 text-emerald-650" />
+                        <span>Materials Vault</span>
+                      </h4>
+                      {cohortFiles.length === 0 ? (
+                        <p className="text-[11px] font-bold text-slate-400 italic pl-2">No learning files uploaded to this cohort vault.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {cohortFiles.map(file => (
+                            <div key={file.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
+                              <div className="min-w-0">
+                                <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none truncate max-w-[280px]">{file.file_name}</h5>
+                                <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {new Date(file.created_at).toLocaleDateString()}</p>
+                              </div>
+                              <a
+                                href={`/api/downloads?file=${encodeURIComponent(file.file_path)}&batchId=${encodeURIComponent(selectedCohortBatch.id)}`}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 shrink-0 border border-emerald-650"
+                              >
+                                Download
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

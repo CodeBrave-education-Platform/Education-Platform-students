@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import crypto from 'crypto'
+import { verifyWebhookSignature } from '@/utils/crypto'
 import Razorpay from 'razorpay'
 import { createClient } from '@supabase/supabase-js'
 
@@ -22,15 +22,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing webhook signature' }, { status: 400 })
     }
 
-    // 3. Cryptographically verify signature using the local secret
+    // 3. Cryptographically verify signature using the local secret with constant-time check
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'your_webhook_secret_here'
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(rawBody)
-      .digest('hex')
+    const isValid = await verifyWebhookSignature(rawBody, signature, webhookSecret)
 
-    if (expectedSignature !== signature) {
-      console.error('Webhook Error: Cryptographic signature mismatch. Expected:', expectedSignature, 'Got:', signature)
+    if (!isValid) {
+      console.error('Webhook Error: Cryptographic signature mismatch.')
       return NextResponse.json({ error: 'Signature verification failed' }, { status: 400 })
     }
 
@@ -74,17 +71,16 @@ export async function POST(request) {
 
       try {
         if (batchId) {
-          // Direct insert for batch enrollment (upserting to avoid duplicate errors on retry)
-          const { error: batchErr } = await supabase
-            .from('batch_enrollments')
-            .upsert({
-              user_id: userId,
-              batch_id: batchId,
-              status: 'active'
-            }, { onConflict: 'user_id,batch_id' })
+          // Call Postgres Stored Procedure (RPC) atomically for batch onboarding
+          const { data, error: rpcError } = await supabase.rpc('execute_atomic_batch_onboarding', {
+            _user_id: userId,
+            _batch_id: batchId,
+            _payment_id: paymentId,
+            _amount: amountPaid
+          })
 
-          if (batchErr) {
-            throw batchErr
+          if (rpcError) {
+            throw new Error(rpcError.message || JSON.stringify(rpcError))
           }
 
           console.log(`ACID Student Batch Onboarding completed successfully in database for payment ${paymentId}`)

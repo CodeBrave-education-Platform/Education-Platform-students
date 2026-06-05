@@ -45,7 +45,7 @@ export default function ProfileClient({ user, profile }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const isTeacher = profile.role === 'teacher'
-  const displayName = profileName || user.email.split('@')[0]
+  const displayName = profileName || user.email?.split('@')[0] || 'Student'
   const displayPhone = profilePhone || 'Not Provided'
   const displayRole = isTeacher ? 'Instructor' : 'Student'
   const displayInitials = displayName.substring(0, 2).toUpperCase()

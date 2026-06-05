@@ -101,7 +101,7 @@ export default async function LearnCoursePage(props) {
   const [courseResult, progressListResult, initialDoubtsResult, liveSessionsResult, assessmentsResult] = await Promise.all([
     course ? Promise.resolve({ data: course }) : supabase.from('courses').select('*').eq('id', courseId).single(),
     supabase.from('user_progress').select('lesson_id').eq('user_id', user.id),
-    supabase.from('lesson_doubts').select('*, profiles(full_name, email)').eq('lesson_id', targetInitialId).order('created_at', { ascending: true }),
+    supabase.from('lesson_doubts').select('*, profiles(full_name, email, role)').eq('lesson_id', targetInitialId).order('created_at', { ascending: true }),
     supabase.from('live_sessions').select('*').eq('course_id', courseId).order('scheduled_start', { ascending: true }),
     supabase.from('assessments').select('*').eq('course_id', courseId).order('scheduled_start', { ascending: true })
   ])

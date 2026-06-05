@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import { useTokenRefresh } from '@/hooks/useTokenRefresh'
+import { useWriteBehindQueue } from '@/hooks/useWriteBehindQueue'
 import { 
   Play, 
   CheckCircle2, 
@@ -37,45 +39,113 @@ export default function CoursePlayerClient({
   assessments,
   user
 }) {
+  // Activate background silent token refresh observer
+  useTokenRefresh()
+
   const router = useRouter()
-  const videoRef = useRef(null)
   const searchParams = useSearchParams()
+
+
   
   // Read active lesson from URL search parameter '?lesson='
   const activeLessonId = searchParams.get('lesson')
   const currentLesson = lessons.find((l) => l.id === activeLessonId) || lessons[0]
 
-  const isYouTubeUrl = currentLesson?.video_url?.includes('youtube.com') || currentLesson?.video_url?.includes('youtu.be')
-  
-  const getYouTubeEmbedUrl = (url) => {
-    if (!url) return '';
-    if (url.includes('youtube.com/embed/')) return url;
-    let videoId = '';
+  // Find if there is an assessment linked to the current active lesson
+  const linkedAssessment = assessments.find(a => a.lesson_id === currentLesson.id)
+
+  // Helper to extract the 11-character YouTube video ID
+  const getYouTubeIdFromUrl = (url) => {
+    if (!url) return ''
+    if (url.includes('youtube.com/embed/')) {
+      return url.split('youtube.com/embed/')[1]?.split('?')[0] || ''
+    }
+    let videoId = ''
     if (url.includes('youtube.com/watch')) {
-      const urlParts = url.split('?')[1];
+      const urlParts = url.split('?')[1]
       if (urlParts) {
-        const urlParams = new URLSearchParams(urlParts);
-        videoId = urlParams.get('v');
+        const urlParams = new URLSearchParams(urlParts)
+        videoId = urlParams.get('v')
       }
     } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      videoId = url.split('youtu.be/')[1]?.split('?')[0]
     }
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : url;
+    return videoId || ''
   }
 
-  // Optimistic tracking state for progress checkmarks
-  const [completedSet, setCompletedSet] = useState(new Set(initialCompletedLessonIds))
-  const debounceTimeoutRef = useRef(null)
+  // Dynamic floating watermark position coordinates
+  const [watermarkPos, setWatermarkPos] = useState({ top: '20%', left: '20%' })
+
+  useEffect(() => {
+    const shiftWatermark = () => {
+      const randomTop = Math.floor(Math.random() * 80) + 10 // 10% to 90%
+      const randomLeft = Math.floor(Math.random() * 70) + 10 // 10% to 80%
+      setWatermarkPos({ top: `${randomTop}%`, left: `${randomLeft}%` })
+    }
+    
+    shiftWatermark()
+    const watermarkInterval = setInterval(shiftWatermark, 12000) // update randomly every 12 seconds
+    
+    return () => clearInterval(watermarkInterval)
+  }, [])
+
+  // Hardened Write-Behind Queue for student progress completions
+  const [completedSet, handleToggleProgress] = useWriteBehindQueue(user.id, course.id, initialCompletedLessonIds)
   
   // Interactive navigation tabs
   // Options: 'NOTES', 'READING', 'ASSIGNMENT', 'DOUBTS', 'LIVE', 'EXAMS', 'SYLLABUS'
   const [activeTab, setActiveTab] = useState('NOTES')
+  const [isTabPending, startTabTransition] = useTransition()
+
+  const handleTabChange = (tabName) => {
+    startTabTransition(() => {
+      setActiveTab(tabName)
+    })
+  }
   
   // Live doubt forum state
   const [doubts, setDoubts] = useState(initialDoubts)
   const [newDoubt, setNewDoubt] = useState('')
   const [isPostingDoubt, setIsPostingDoubt] = useState(false)
+  const [replyingToDoubt, setReplyingToDoubt] = useState(null)
   const doubtsEndRef = useRef(null)
+
+  // Group doubts into root questions and replies
+  const { rootDoubts, repliesByParent } = React.useMemo(() => {
+    const roots = []
+    const replies = {}
+    
+    doubts.forEach(d => {
+      if (d.parent_id) {
+        if (!replies[d.parent_id]) {
+          replies[d.parent_id] = []
+        }
+        replies[d.parent_id].push(d)
+      } else {
+        roots.push(d)
+      }
+    })
+    
+    // Sort replies chronologically
+    Object.keys(replies).forEach(parentId => {
+      replies[parentId].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    })
+    
+    return { rootDoubts: roots, repliesByParent: replies }
+  }, [doubts])
+
+  const renderRoleBadge = (role) => {
+    if (!role) return null
+    const roleLower = role.toLowerCase()
+    if (['admin', 'teacher', 'instructor'].includes(roleLower)) {
+      return (
+        <span className="ml-2 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-650 text-[9px] font-black uppercase tracking-wider border border-indigo-100 select-none">
+          Instructor
+        </span>
+      )
+    }
+    return null
+  }
 
   // Live Classroom & Dynamic Polling Synchronizer states
   const [classroomState, setClassroomState] = useState(null)
@@ -84,6 +154,12 @@ export default function CoursePlayerClient({
   const [voteError, setVoteError] = useState('')
 
   useEffect(() => {
+    // Zero-Request Mitigation: Only trigger classroom state syncing when on the active LIVE tab
+    if (activeTab !== 'LIVE') {
+      setClassroomState(null)
+      return
+    }
+
     let active = true
     let pollInterval = null
 
@@ -94,10 +170,14 @@ export default function CoursePlayerClient({
           const data = await res.json()
           if (active && data.classroomState) {
             setClassroomState(data.classroomState)
-            // Synchronize local voted status if server says they voted
-            if (data.classroomState.livePoll?.hasVoted && votedOption === null) {
-              // Guess or retrieve local vote if available (or mark as -1 if just general verification)
-              setVotedOption(-1)
+            
+            // Local Telemetry Verification: Read the client's voted option from LocalStorage to avoid database overhead
+            const localVoteKey = `asentra:poll:voted:${data.classroomState.livePoll.id}`
+            const localVoteIdx = localStorage.getItem(localVoteKey)
+            if (localVoteIdx !== null) {
+              setVotedOption(Number(localVoteIdx))
+            } else {
+              setVotedOption(null)
             }
           }
         }
@@ -108,7 +188,8 @@ export default function CoursePlayerClient({
     }
 
     fetchClassroomState()
-    pollInterval = setInterval(fetchClassroomState, 5000)
+    // Debounce active polling further to 8 seconds to prevent Cloudflare request exhaustion
+    pollInterval = setInterval(fetchClassroomState, 8000)
 
     return () => {
       active = false
@@ -132,11 +213,31 @@ export default function CoursePlayerClient({
           optionIndex
         })
       })
+      
+      if (res.status === 404) {
+        // Cache-Bypass Verification: Fetch with no-cache headers to retrieve live database recovery status
+        const stateRes = await fetch(`/api/live/classroom?t=${Date.now()}`, {
+          headers: { 'Cache-Control': 'no-cache' }
+        })
+        if (stateRes.ok) {
+          const stateData = await stateRes.json()
+          setClassroomState(stateData.classroomState)
+        }
+        setVoteError('Poll session expired. Updated to active poll.')
+        setTimeout(() => setVoteError(''), 4000)
+        return
+      }
+
       const data = await res.json()
       if (res.ok && data.success) {
+        // Instantly save state to LocalStorage
+        localStorage.setItem(`asentra:poll:voted:${pollId}`, optionIndex.toString())
         setVotedOption(optionIndex)
-        // Immediately fetch updated results
-        const stateRes = await fetch('/api/live/classroom')
+        
+        // Cache-Bypass Verification: Force retrieval of dynamic database calculation on next render loop
+        const stateRes = await fetch(`/api/live/classroom?t=${Date.now()}`, {
+          headers: { 'Cache-Control': 'no-cache' }
+        })
         if (stateRes.ok) {
           const stateData = await stateRes.json()
           setClassroomState(stateData.classroomState)
@@ -154,90 +255,8 @@ export default function CoursePlayerClient({
     }
   }
 
-  // Secure HLS segment loader with DRM and anti-recording hooks
+  // DRM Piracy Prevention Event Listeners (PrintScreen, context menu blocks)
   useEffect(() => {
-    const videoElement = videoRef.current
-    if (!videoElement) return
-
-    let hlsInstance = null
-    const activeVideoUrl = currentLesson.video_url
-
-    const initializeSecureStream = async () => {
-      try {
-        // Step 1: Exchange cryptographic short-lived streaming token
-        const tokenRes = await fetch('/api/video/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            courseId: course.id,
-            lessonId: currentLesson.id
-          })
-        })
-
-        const tokenData = await tokenRes.json()
-        if (!tokenRes.ok || !tokenData.token) {
-          console.error('Secure video token acquisition failed:', tokenData.error)
-          videoElement.src = activeVideoUrl
-          return
-        }
-
-        const videoToken = tokenData.token
-
-        // Step 2: Initialize Hls.js stream if supported by the browser
-        const Hls = (await import('hls.js')).default
-        
-        if (Hls.isSupported()) {
-          if (hlsInstance) {
-            hlsInstance.destroy()
-          }
-
-          hlsInstance = new Hls({
-            // Inject bearer token into fragmented HLS segment network requests
-            xhrSetup: function (xhr, url) {
-              xhr.setRequestHeader('Authorization', `Bearer ${videoToken}`)
-            },
-            maxBufferLength: 30, // Max buffer length in seconds (saves bandwidth and improves load speed)
-            maxMaxBufferLength: 60,
-            enableWorker: true, // Use background Web Worker for segment transmuxing to offload main thread
-            lowLatencyMode: true // Enables progressive chunk loading for ultra-fast startup times
-          })
-
-          hlsInstance.loadSource(activeVideoUrl)
-          hlsInstance.attachMedia(videoElement)
-
-          hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-            if (data.fatal) {
-              switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  hlsInstance.startLoad()
-                  break;
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  hlsInstance.recoverMediaError()
-                  break;
-                default:
-                  videoElement.src = activeVideoUrl
-                  break;
-              }
-            }
-          })
-        } 
-        // Fallback for native HLS (Safari / iOS)
-        else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-          videoElement.src = `${activeVideoUrl}?token=${videoToken}`
-        } 
-        // Direct MP4 fallback
-        else {
-          videoElement.src = activeVideoUrl
-        }
-      } catch (err) {
-        console.error('HLS stream initialization error:', err)
-        videoElement.src = activeVideoUrl
-      }
-    }
-
-    initializeSecureStream()
-
-    // 4. DRM Piracy Prevention Event Listeners
     const handleContextMenu = (e) => {
       e.preventDefault()
     }
@@ -265,28 +284,14 @@ export default function CoursePlayerClient({
       }
     }
 
-    const handleBlur = () => {
-      if (videoElement && !videoElement.paused) {
-        videoElement.pause()
-        console.warn('[DRM GUARD] Context focus lost. Playback automatically paused.')
-      }
-    }
-
-    videoElement.addEventListener('contextmenu', handleContextMenu)
     window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('blur', handleBlur)
+    window.addEventListener('contextmenu', handleContextMenu)
 
     return () => {
-      if (hlsInstance) {
-        hlsInstance.destroy()
-      }
-      if (videoElement) {
-        videoElement.removeEventListener('contextmenu', handleContextMenu)
-      }
       window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('blur', handleBlur)
+      window.removeEventListener('contextmenu', handleContextMenu)
     }
-  }, [currentLesson, course])
+  }, [])
 
   // 1. Silent URL Redirection/Update if lesson param is missing
   useEffect(() => {
@@ -303,7 +308,7 @@ export default function CoursePlayerClient({
       const supabase = createClient()
       const { data, error } = await supabase
         .from('lesson_doubts')
-        .select('*, profiles(full_name, email)')
+        .select('*, profiles(full_name, email, role)')
         .eq('lesson_id', currentLesson.id)
         .order('created_at', { ascending: true })
 
@@ -341,61 +346,7 @@ export default function CoursePlayerClient({
     ? Math.round((completedSet.size / lessons.length) * 100) 
     : 0
 
-  // 3. Optimistic Completion Tracking with 500ms Anti-Spam Debounce
-  const handleToggleProgress = (lessonId) => {
-    const isCompleted = completedSet.has(lessonId)
-    const newCompleted = new Set(completedSet)
-
-    if (isCompleted) {
-      newCompleted.delete(lessonId)
-    } else {
-      newCompleted.add(lessonId)
-    }
-
-    // Optimistic Update
-    setCompletedSet(newCompleted)
-
-    // Clear any existing debounce timer
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current)
-    }
-
-    // Register debounced network write (500ms window)
-    debounceTimeoutRef.current = setTimeout(async () => {
-      const supabase = createClient()
-      try {
-        if (isCompleted) {
-          const { error } = await supabase
-            .from('user_progress')
-            .delete()
-            .eq('user_id', user.id)
-            .eq('lesson_id', lessonId)
-
-          if (error) throw error
-        } else {
-          const { error } = await supabase
-            .from('user_progress')
-            .insert({
-              user_id: user.id,
-              lesson_id: lessonId
-            })
-
-          if (error) throw error
-        }
-      } catch (err) {
-        console.error('Failed to sync progress on Supabase:', err)
-        setCompletedSet((prev) => {
-          const reverted = new Set(prev)
-          if (isCompleted) {
-            reverted.add(lessonId)
-          } else {
-            reverted.delete(lessonId)
-          }
-          return reverted
-        })
-      }
-    }, 500)
-  }
+  // Progress completions are handled atomically via the useWriteBehindQueue hook.
 
   const handlePostDoubt = async (e) => {
     e.preventDefault()
@@ -404,18 +355,25 @@ export default function CoursePlayerClient({
 
     const supabase = createClient()
     const mockProfile = {
-      full_name: user.user_metadata?.full_name || user.email.split('@')[0],
-      email: user.email
+      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student',
+      email: user.email,
+      role: user.user_metadata?.role || 'student'
     }
 
     try {
+      const payload = {
+        lesson_id: currentLesson.id,
+        user_id: user.id,
+        content: newDoubt.trim()
+      }
+
+      if (replyingToDoubt) {
+        payload.parent_id = replyingToDoubt.id
+      }
+
       const { data, error } = await supabase
         .from('lesson_doubts')
-        .insert({
-          lesson_id: currentLesson.id,
-          user_id: user.id,
-          content: newDoubt.trim()
-        })
+        .insert(payload)
         .select()
         .single()
 
@@ -427,6 +385,7 @@ export default function CoursePlayerClient({
       }
       setDoubts((prev) => [...prev, appendedDoubt])
       setNewDoubt('')
+      setReplyingToDoubt(null)
     } catch (err) {
       console.error('Failed to post doubt thread:', err)
     } finally {
@@ -445,7 +404,7 @@ export default function CoursePlayerClient({
 
       if (error) throw error
 
-      setDoubts((prev) => prev.filter((d) => d.id !== doubtId))
+      setDoubts((prev) => prev.filter((d) => d.id !== doubtId && d.parent_id !== doubtId))
     } catch (err) {
       console.error('Failed to delete doubt thread:', err)
     }
@@ -514,24 +473,29 @@ export default function CoursePlayerClient({
         <section className="lg:col-span-2 space-y-6">
           
           <div className="relative w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20">
-            {isYouTubeUrl ? (
-              <iframe
-                src={getYouTubeEmbedUrl(currentLesson.video_url)}
-                title={currentLesson.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full object-cover select-none"
-              />
-            ) : (
-              <video
-                ref={videoRef}
-                controls
-                autoPlay
-                className="w-full h-full object-contain select-none"
-                poster="/academic_prosperity_1779866712293.png"
-              />
+            {/* Dynamic Floating Watermark Overlay */}
+            {user?.email && (
+              <div 
+                className="absolute z-20 pointer-events-none text-white/15 font-black text-[10px] md:text-xs select-none transition-all duration-1000 ease-in-out whitespace-nowrap"
+                style={{
+                  top: watermarkPos.top,
+                  left: watermarkPos.left,
+                }}
+              >
+                {user.email}
+              </div>
             )}
+
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${currentLesson?.video_id || getYouTubeIdFromUrl(currentLesson?.video_url)}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`}
+              title={currentLesson?.title || 'Lecture Video'}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full select-none"
+            />
           </div>
 
           {/* Premium Tablet & Mobile Optimized Tabbed Interface Panel */}
@@ -540,7 +504,7 @@ export default function CoursePlayerClient({
             {/* Horizontal Scrollable Tabs bar */}
             <div className="flex items-center border-b border-slate-100 bg-slate-50/50 p-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap shrink-0">
               <button
-                onClick={() => setActiveTab('NOTES')}
+                onClick={() => handleTabChange('NOTES')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'NOTES'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -552,7 +516,7 @@ export default function CoursePlayerClient({
               </button>
 
               <button
-                onClick={() => setActiveTab('READING')}
+                onClick={() => handleTabChange('READING')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'READING'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -564,7 +528,7 @@ export default function CoursePlayerClient({
               </button>
 
               <button
-                onClick={() => setActiveTab('ASSIGNMENT')}
+                onClick={() => handleTabChange('ASSIGNMENT')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'ASSIGNMENT'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -576,7 +540,7 @@ export default function CoursePlayerClient({
               </button>
 
               <button
-                onClick={() => setActiveTab('DOUBTS')}
+                onClick={() => handleTabChange('DOUBTS')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'DOUBTS'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -589,7 +553,7 @@ export default function CoursePlayerClient({
 
               {/* 🎥 New Live Sessions schedule Tab */}
               <button
-                onClick={() => setActiveTab('LIVE')}
+                onClick={() => handleTabChange('LIVE')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'LIVE'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -602,7 +566,7 @@ export default function CoursePlayerClient({
 
               {/* 🏆 New Assessment Quizzes & JEE Exams Tab */}
               <button
-                onClick={() => setActiveTab('EXAMS')}
+                onClick={() => handleTabChange('EXAMS')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'EXAMS'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -614,7 +578,7 @@ export default function CoursePlayerClient({
               </button>
 
               <button
-                onClick={() => setActiveTab('SYLLABUS')}
+                onClick={() => handleTabChange('SYLLABUS')}
                 className={`lg:hidden px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'SYLLABUS'
                     ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
@@ -627,7 +591,7 @@ export default function CoursePlayerClient({
             </div>
 
             {/* Dynamic Tab Body Container */}
-            <div className="p-6 md:p-8 min-h-[300px]">
+            <div className={`p-6 md:p-8 min-h-[300px] transition-opacity duration-200 ${isTabPending ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
               
               {/* TAB 1: NOTES */}
               {activeTab === 'NOTES' && (
@@ -668,6 +632,31 @@ export default function CoursePlayerClient({
                       </span>
                     </button>
                   </div>
+
+                  {linkedAssessment && (
+                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-250/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-amber-500 text-white rounded-xl border border-amber-600 shadow-sm shrink-0">
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[9px] font-black uppercase tracking-wider border border-amber-200/50">
+                            {linkedAssessment.type === 'jee_mock' ? 'JEE Mock Exam' : 'Chapter Quiz'}
+                          </span>
+                          <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide mt-1.5 leading-tight">{linkedAssessment.title}</h4>
+                          <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Duration: {linkedAssessment.duration_minutes} Mins • Timed Assessment</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => router.push(`/learn/${course.id}/exams/${linkedAssessment.id}`)}
+                        className="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm border border-amber-600 cursor-pointer flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-[0.98] tactile-press shrink-0"
+                      >
+                        <span>Start Test</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
                   {currentLesson.description ? (
                     <>
@@ -720,6 +709,31 @@ export default function CoursePlayerClient({
               {/* TAB 3: DYNAMIC HOMEWORK ASSIGNMENT SECTION */}
               {activeTab === 'ASSIGNMENT' && (
                 <div className="space-y-6">
+                  {linkedAssessment && (
+                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-250/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-amber-500 text-white rounded-xl border border-amber-600 shadow-sm shrink-0">
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[9px] font-black uppercase tracking-wider border border-amber-200/50">
+                            {linkedAssessment.type === 'jee_mock' ? 'JEE Mock Exam' : 'Chapter Quiz'}
+                          </span>
+                          <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide mt-1.5 leading-tight">{linkedAssessment.title}</h4>
+                          <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Duration: {linkedAssessment.duration_minutes} Mins • Timed Assessment</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => router.push(`/learn/${course.id}/exams/${linkedAssessment.id}`)}
+                        className="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm border border-amber-600 cursor-pointer flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-[0.98] tactile-press shrink-0"
+                      >
+                        <span>Start Test</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
                   {currentLesson.assignment_title ? (
                     <div className="space-y-6">
                       <div className="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/50 space-y-4">
@@ -790,48 +804,116 @@ export default function CoursePlayerClient({
                         Live Doubt Solving Q&A Thread
                       </h3>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                        {doubts.length} active questions in community forum
+                        {rootDoubts.length} active questions in community forum
                       </p>
                     </div>
                   </div>
 
                   {/* Doubts list */}
-                  <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-                    {doubts.length > 0 ? (
-                      doubts.map((doubt) => {
+                  <div className="space-y-6 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
+                    {rootDoubts.length > 0 ? (
+                      rootDoubts.map((doubt) => {
                         const isOwnDoubt = doubt.user_id === user.id
                         const authorName = doubt.profiles?.full_name || doubt.profiles?.email?.split('@')[0] || 'Student'
                         const postedAt = new Date(doubt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        const replies = repliesByParent[doubt.id] || []
+                        const isDoubtInstructor = ['admin', 'teacher', 'instructor'].includes(doubt.profiles?.role?.toLowerCase())
 
                         return (
-                          <div 
-                            key={doubt.id}
-                            className={`p-4 rounded-2xl border text-sm leading-relaxed relative group transition shadow-sm ${
-                              isOwnDoubt
-                                ? 'bg-teal-50/30 border-teal-100 text-slate-700'
-                                : 'bg-slate-50/50 border-slate-200/50 text-slate-700'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-3 font-extrabold text-[11px] text-slate-400 mb-1.5 uppercase tracking-wider">
-                              <span className={isOwnDoubt ? 'text-teal-700 font-black' : 'text-slate-500'}>
-                                {authorName} {isOwnDoubt && '(You)'}
-                              </span>
-                              <span>
-                                {postedAt}
-                              </span>
-                            </div>
-                            <p className="text-slate-655 text-xs md:text-sm font-bold">
-                              {doubt.content}
-                            </p>
+                          <div key={doubt.id} className="space-y-3 border-b border-slate-100 pb-5">
+                            {/* Root Doubt Card */}
+                            <div 
+                              className={`p-4 rounded-2xl border text-sm leading-relaxed relative group transition shadow-sm ${
+                                isOwnDoubt
+                                  ? 'bg-teal-50/30 border-teal-100 text-slate-700'
+                                  : isDoubtInstructor
+                                    ? 'bg-indigo-50/30 border-indigo-150 text-slate-700'
+                                    : 'bg-slate-50/60 border-slate-200/50 text-slate-700'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-3 font-extrabold text-[11px] text-slate-450 mb-1.5 uppercase tracking-wider">
+                                <span className="flex items-center">
+                                  <span className={isOwnDoubt ? 'text-teal-700 font-black' : isDoubtInstructor ? 'text-indigo-655 font-black' : 'text-slate-600'}>
+                                    {authorName} {isOwnDoubt && '(You)'}
+                                  </span>
+                                  {renderRoleBadge(doubt.profiles?.role)}
+                                </span>
+                                <span>
+                                  {postedAt}
+                                </span>
+                              </div>
+                              <p className="text-slate-700 text-xs md:text-sm font-semibold select-text">
+                                {doubt.content}
+                              </p>
 
-                            {isOwnDoubt && (
-                              <button
-                                onClick={() => handleDeleteDoubt(doubt.id)}
-                                className="absolute top-3 right-3 text-slate-350 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-50 rounded-lg cursor-pointer"
-                                title="Delete question"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                                <button
+                                  onClick={() => setReplyingToDoubt(doubt)}
+                                  className="px-2 py-1 bg-white border border-slate-200 hover:border-slate-350 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-800 cursor-pointer transition shadow-xs"
+                                  title="Reply to question"
+                                >
+                                  Reply
+                                </button>
+                                {isOwnDoubt && (
+                                  <button
+                                    onClick={() => handleDeleteDoubt(doubt.id)}
+                                    className="p-1 text-slate-350 hover:text-red-500 hover:bg-red-50 rounded-lg cursor-pointer transition border border-transparent hover:border-red-200"
+                                    title="Delete question"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Nested Replies */}
+                            {replies.length > 0 && (
+                              <div className="pl-6 ml-4 border-l-2 border-slate-150 space-y-3">
+                                {replies.map((reply) => {
+                                  const isOwnReply = reply.user_id === user.id
+                                  const replyAuthorName = reply.profiles?.full_name || reply.profiles?.email?.split('@')[0] || 'Student'
+                                  const replyPostedAt = new Date(reply.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                  const isReplyInstructor = ['admin', 'teacher', 'instructor'].includes(reply.profiles?.role?.toLowerCase())
+
+                                  return (
+                                    <div 
+                                      key={reply.id}
+                                      className={`p-3.5 rounded-2xl border text-xs md:text-sm leading-relaxed relative group transition shadow-sm ${
+                                        isOwnReply
+                                          ? 'bg-teal-50/20 border-teal-100/60 text-slate-700'
+                                          : isReplyInstructor
+                                            ? 'bg-indigo-50/30 border-indigo-150/60 text-slate-700'
+                                            : 'bg-white border-slate-200/50 text-slate-700'
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-3 font-extrabold text-[10px] text-slate-400 mb-1 uppercase tracking-wider">
+                                        <span className="flex items-center">
+                                          <span className={isOwnReply ? 'text-teal-700 font-black' : isReplyInstructor ? 'text-indigo-655 font-black' : 'text-slate-500'}>
+                                            {replyAuthorName} {isOwnReply && '(You)'}
+                                          </span>
+                                          {renderRoleBadge(reply.profiles?.role)}
+                                        </span>
+                                        <span>
+                                          {replyPostedAt}
+                                        </span>
+                                      </div>
+                                      <p className="text-slate-655 font-semibold select-text">
+                                        {reply.content}
+                                      </p>
+
+                                      {isOwnReply && (
+                                        <button
+                                          onClick={() => handleDeleteDoubt(reply.id)}
+                                          className="absolute top-2.5 right-2.5 text-slate-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded-lg cursor-pointer"
+                                          title="Delete reply"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </div>
                             )}
                           </div>
                         )
@@ -844,13 +926,27 @@ export default function CoursePlayerClient({
                     <div ref={doubtsEndRef} />
                   </div>
 
+                  {/* Reply Indicator */}
+                  {replyingToDoubt && (
+                    <div className="flex items-center justify-between bg-indigo-50 border border-indigo-150 px-4 py-2 rounded-xl text-xs font-bold text-indigo-750 shrink-0">
+                      <span>Replying to {replyingToDoubt.profiles?.full_name || 'Student'}'s question</span>
+                      <button
+                        type="button"
+                        onClick={() => setReplyingToDoubt(null)}
+                        className="text-indigo-500 hover:text-indigo-800 p-0.5 rounded cursor-pointer font-extrabold"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+
                   {/* Submit dynamic doubts form */}
                   <form onSubmit={handlePostDoubt} className="flex gap-2.5 items-end">
                     <input
                       type="text"
                       value={newDoubt}
                       onChange={(e) => setNewDoubt(e.target.value)}
-                      placeholder="Type your question or doubt..."
+                      placeholder={replyingToDoubt ? `Type your reply to ${replyingToDoubt.profiles?.full_name || 'student'}...` : "Type your question or doubt..."}
                       disabled={isPostingDoubt}
                       className="flex-1 px-4 py-3 border border-slate-200 rounded-2xl text-xs md:text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 bg-white placeholder-slate-400 text-slate-800 font-bold"
                     />
@@ -1058,7 +1154,7 @@ export default function CoursePlayerClient({
                               </div>
                             </div>
 
-                            {isLive && (
+                            {!isEnded && (
                               <a
                                 href={session.meeting_url}
                                 target="_blank"
@@ -1184,7 +1280,7 @@ export default function CoursePlayerClient({
                             onClick={() => {
                               if (!isActive) {
                                 router.push(`?lesson=${lesson.id}`, { scroll: false })
-                                setActiveTab('NOTES') // reset dynamic mobile tab
+                                handleTabChange('NOTES') // reset dynamic mobile tab
                               }
                             }}
                             className="flex-1 min-w-0 cursor-pointer"
@@ -1204,6 +1300,12 @@ export default function CoursePlayerClient({
                                   Playing
                                 </span>
                               )}
+                              {assessments.some(a => a.lesson_id === lesson.id) && (
+                                <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-amber-50 text-amber-700 border border-amber-200/35 flex items-center gap-0.5 shadow-3xs">
+                                  <Award className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+                                  <span>Quiz</span>
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1221,7 +1323,7 @@ export default function CoursePlayerClient({
                 <button
                   onClick={() => {
                     router.push(`?lesson=${prevLesson.id}`, { scroll: false })
-                    setActiveTab('NOTES')
+                    handleTabChange('NOTES')
                   }}
                   className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-slate-650 flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
@@ -1236,7 +1338,7 @@ export default function CoursePlayerClient({
                 <button
                   onClick={() => {
                     router.push(`?lesson=${nextLesson.id}`, { scroll: false })
-                    setActiveTab('NOTES')
+                    handleTabChange('NOTES')
                   }}
                   className="px-4 py-2.5 bg-teal-650 border border-teal-605 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
@@ -1321,6 +1423,12 @@ export default function CoursePlayerClient({
                         {isActive && (
                           <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-teal-100 text-teal-700 border border-teal-200/40">
                             Now Playing
+                          </span>
+                        )}
+                        {assessments.some(a => a.lesson_id === lesson.id) && (
+                          <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-amber-50 text-amber-700 border border-amber-200/35 flex items-center gap-0.5 shadow-3xs">
+                            <Award className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+                            <span>Quiz</span>
                           </span>
                         )}
                       </div>

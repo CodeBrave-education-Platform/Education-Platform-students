@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { gradeAssessmentAction } from './actions'
+import { gradeAssessmentAction, startAssessmentAttemptAction, getServerTimeAction } from './actions'
 import { 
   Clock, 
   ArrowLeft, 
@@ -15,7 +15,10 @@ import {
   AlertCircle, 
   Award,
   ChevronRight,
-  Activity
+  Activity,
+  Cloud,
+  CloudOff,
+  Loader2
 } from 'lucide-react'
 
 export default function ExamClient({
@@ -29,9 +32,12 @@ export default function ExamClient({
 }) {
   const router = useRouter()
 
+  // Track the active attempt state locally (supporting initial null attempts)
+  const [activeAttempt, setActiveAttempt] = useState(attempt)
+
   // Scoreboard / Results Display if already submitted
   const [submissionResult, setSubmissionResult] = useState(
-    attempt.submitted_at
+    attempt?.submitted_at
       ? {
           success: true,
           score: attempt.score,
@@ -49,11 +55,11 @@ export default function ExamClient({
   const [selectedAnswers, setSelectedAnswers] = useState({})
   
   // Track final saved answers submitted to the DB
-  const [savedAnswers, setSavedAnswers] = useState(attempt.answers_payload || {})
+  const [savedAnswers, setSavedAnswers] = useState(attempt?.answers_payload || {})
   const [statuses, setStatuses] = useState(() => {
     const initialStatuses = {}
     questions.forEach((q) => {
-      initialStatuses[q.id] = attempt.answers_payload?.[q.id] !== undefined ? 'answered' : 'unanswered'
+      initialStatuses[q.id] = attempt?.answers_payload?.[q.id] !== undefined ? 'answered' : 'unanswered'
     })
     return initialStatuses
   })
@@ -66,7 +72,7 @@ export default function ExamClient({
   const [loadingMessage, setLoadingMessage] = useState('Establishing Secure Connection...')
 
   // Timer state based on assessment limit
-  const startedAtTime = new Date(attempt.started_at).getTime()
+  const startedAtTime = activeAttempt ? new Date(activeAttempt.started_at).getTime() : 0
   const durationMs = assessment.duration_minutes * 60 * 1000
   const endAtTime = startedAtTime + durationMs
   const [timeLeft, setTimeLeft] = useState(0)
@@ -74,6 +80,75 @@ export default function ExamClient({
   // Progressive PWA Offline Engine states
   const [isOfflineMode, setIsOfflineMode] = useState(false)
   const [pendingSync, setPendingSync] = useState(false)
+
+  // Instruction page start handler state
+  const [isStartingAttempt, setIsStartingAttempt] = useState(false)
+
+  // 1. Time Gate States for Zero-Trust Monotonic Server Clock check
+  const [sTimeAnchor, setSTimeAnchor] = useState(0)
+  const [perfAnchor, setPerfAnchor] = useState(0)
+  const [serverTimeSynced, setServerTimeSynced] = useState(false)
+  const [currentTime, setCurrentTime] = useState(Date.now())
+  const [timeGateLoading, setTimeGateLoading] = useState(true)
+
+  useEffect(() => {
+    const syncTime = async () => {
+      try {
+        const timeStr = await getServerTimeAction()
+        const sTime = new Date(timeStr).getTime()
+        setSTimeAnchor(sTime)
+        setPerfAnchor(performance.now())
+        setCurrentTime(sTime)
+        setServerTimeSynced(true)
+      } catch (err) {
+        console.error('[Time Gate] Failed to sync server time:', err)
+        setSTimeAnchor(Date.now())
+        setPerfAnchor(performance.now())
+        setCurrentTime(Date.now())
+      } finally {
+        setTimeGateLoading(false)
+      }
+    }
+    syncTime()
+  }, [])
+
+  useEffect(() => {
+    if (!serverTimeSynced) return
+    const interval = setInterval(() => {
+      const elapsedMs = performance.now() - perfAnchor
+      setCurrentTime(sTimeAnchor + elapsedMs)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [serverTimeSynced, sTimeAnchor, perfAnchor])
+
+  const handleStartAttempt = async () => {
+    setIsStartingAttempt(true)
+    try {
+      const res = await startAssessmentAttemptAction(course.id, assessment.id)
+      if (res.success) {
+        // Sync states with the new attempt record
+        setSavedAnswers(res.attempt.answers_payload || {})
+        setStatuses(() => {
+          const initialStatuses = {}
+          questions.forEach((q) => {
+            initialStatuses[q.id] = res.attempt.answers_payload?.[q.id] !== undefined ? 'answered' : 'unanswered'
+          })
+          return initialStatuses
+        })
+        setActiveAttempt(res.attempt)
+        if (res.alreadySubmitted) {
+          router.refresh()
+        }
+      } else {
+        alert('Failed to start attempt: ' + res.error)
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Failed to start attempt due to network error')
+    } finally {
+      setIsStartingAttempt(false)
+    }
+  }
 
   // Lightweight IndexedDB helper wrappers
   const openOfflineDB = () => {
@@ -125,8 +200,25 @@ export default function ExamClient({
     }
   }
 
+  // Request persistent storage lockdown to prevent mobile garbage collection of offline exam data
+  useEffect(() => {
+    const requestPersistentStorage = async () => {
+      if (navigator.storage && navigator.storage.persist) {
+        try {
+          const isPersisted = await navigator.storage.persist()
+          console.log(`[Storage Persistence] Storage persistence granted: ${isPersisted}`)
+        } catch (err) {
+          console.warn('[Storage Persistence] Request failed:', err)
+        }
+      }
+    }
+    requestPersistentStorage()
+  }, [])
+
   // Pre-fetch exam structure and recover pre-cached local states on initial load
   useEffect(() => {
+    if (!activeAttempt) return
+
     const cacheAssessmentOffline = async () => {
       await saveOfflineData('exams', assessment.id, {
         assessment,
@@ -135,7 +227,7 @@ export default function ExamClient({
       })
       
       // Load previously saved answers to prevent crash data loss
-      const cachedAnswers = await getOfflineData('answers', attempt.id)
+      const cachedAnswers = await getOfflineData('answers', activeAttempt.id)
       if (cachedAnswers && cachedAnswers.payload) {
         setSavedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
         setSelectedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
@@ -150,21 +242,24 @@ export default function ExamClient({
     }
 
     cacheAssessmentOffline()
-  }, [assessment, questions, course, attempt])
+  }, [assessment, questions, course, activeAttempt])
 
   // Sync state modifications dynamically to IndexedDB answers store
   useEffect(() => {
+    if (!activeAttempt) return
     if (Object.keys(savedAnswers).length > 0) {
-      saveOfflineData('answers', attempt.id, { payload: savedAnswers })
+      saveOfflineData('answers', activeAttempt.id, { payload: savedAnswers })
     }
-  }, [savedAnswers, attempt])
+  }, [savedAnswers, activeAttempt])
 
   // Manage offline notifications and background auto-sync triggers
   useEffect(() => {
+    if (!activeAttempt) return
+
     const handleOnlineStatusChange = async () => {
       if (navigator.onLine) {
         setIsOfflineMode(false)
-        const offlineAnswers = await getOfflineData('answers', attempt.id)
+        const offlineAnswers = await getOfflineData('answers', activeAttempt.id)
         if (offlineAnswers && offlineAnswers.payload && pendingSync) {
           console.log('[IndexedDB ENGINE] Connectivity restored. Auto-synchronizing offline replies...')
           setPendingSync(false)
@@ -183,15 +278,17 @@ export default function ExamClient({
       window.removeEventListener('online', handleOnlineStatusChange)
       window.removeEventListener('offline', handleOnlineStatusChange)
     }
-  }, [attempt, pendingSync])
+  }, [activeAttempt, pendingSync])
 
   // Initialize countdown timer
   useEffect(() => {
-    if (attempt.submitted_at) return
+    if (!activeAttempt || activeAttempt.submitted_at || !serverTimeSynced) return
 
     const updateTimer = () => {
-      const now = Date.now()
-      const diffSeconds = Math.max(0, Math.floor((endAtTime - now) / 1000))
+      const elapsedMs = performance.now() - perfAnchor
+      const currentAuthoritativeTime = sTimeAnchor + elapsedMs
+      
+      const diffSeconds = Math.max(0, Math.floor((endAtTime - currentAuthoritativeTime) / 1000))
       setTimeLeft(diffSeconds)
 
       if (diffSeconds === 0) {
@@ -204,7 +301,7 @@ export default function ExamClient({
     const timerInterval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(timerInterval)
-  }, [attempt.submitted_at])
+  }, [activeAttempt, endAtTime, serverTimeSynced, sTimeAnchor, perfAnchor])
 
   // Track selected answers when transitioning questions
   useEffect(() => {
@@ -333,7 +430,7 @@ export default function ExamClient({
       const result = await gradeAssessmentAction(
         course.id,
         assessment.id,
-        attempt.id,
+        activeAttempt.id,
         answersToSubmit
       )
 
@@ -346,6 +443,9 @@ export default function ExamClient({
           setSubmissionResult(result)
         } else {
           alert('Grading failed: ' + result.error)
+          if (result.timeExceeded) {
+            router.refresh()
+          }
         }
         setIsSubmitting(false)
       }, 600)
@@ -370,10 +470,185 @@ export default function ExamClient({
   }
 
   // ==========================================
+  // RENDER ZERO-TRUST TIME GATE LOCKS
+  // ==========================================
+  const startWindowTime = assessment.start_window ? new Date(assessment.start_window).getTime() : null
+  const endWindowTime = assessment.end_window ? new Date(assessment.end_window).getTime() : null
+  const isLockedUpcoming = startWindowTime && currentTime < startWindowTime
+  const isLockedClosed = endWindowTime && currentTime > endWindowTime
+
+  if (timeGateLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-teal-655"></div>
+      </div>
+    )
+  }
+
+  if (isLockedUpcoming) {
+    const secondsRemaining = Math.max(0, Math.floor((startWindowTime - currentTime) / 1000))
+    const hours = Math.floor(secondsRemaining / 3600)
+    const minutes = Math.floor((secondsRemaining % 3600) / 60)
+    const seconds = secondsRemaining % 60
+    
+    return (
+      <div className="min-h-[100dvh] bg-slate-50 text-slate-800 p-4 md:p-8 flex items-center justify-center animate-pulse">
+        <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200/60 shadow-lg text-center space-y-6">
+          <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-350 border border-slate-200 shadow-inner">
+            <Clock className="w-8 h-8 text-teal-600/60" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-black text-slate-850 tracking-tight uppercase">Assessment Starting Soon</h2>
+            <p className="text-slate-455 text-xs font-bold uppercase tracking-wider">Authoritative Server Countdown</p>
+          </div>
+          <div className="py-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+            <span className="font-mono text-3xl font-black text-teal-600">
+              {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-xs mx-auto">
+            This assessment is scheduled to unlock at {new Date(assessment.start_window).toLocaleString()}. Please wait here.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isLockedClosed && !alreadySubmitted) {
+    return (
+      <div className="min-h-[100dvh] bg-slate-900 text-white p-4 md:p-8 flex items-center justify-center select-none font-sans relative">
+        <div 
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px'
+          }}
+          className="absolute inset-0 pointer-events-none"
+        />
+        <div className="max-w-md w-full bg-slate-800 border border-slate-750 p-8 rounded-3xl shadow-2xl text-center space-y-6 relative z-10 animate-fade-in">
+          <div className="w-16 h-16 bg-slate-700/60 rounded-2xl flex items-center justify-center mx-auto text-slate-400 border border-slate-600 shadow-inner">
+            <AlertCircle className="w-8 h-8 text-rose-500 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-black text-slate-100 tracking-tight uppercase">Assessment Window Closed</h2>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Access Lock Active</p>
+          </div>
+          <div className="p-4 bg-slate-900 border border-slate-750 rounded-2xl">
+            <span className="text-xs font-mono text-slate-400">
+              Closed At: {new Date(assessment.end_window).toLocaleString()}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-xs mx-auto">
+            The scheduled window for this assessment has officially expired. Submission calculations are locked.
+          </p>
+          <div className="pt-2">
+            <Link href="/dashboard" className="w-full block px-5 py-3 bg-slate-750 hover:bg-slate-700 text-white font-bold rounded-xl transition shadow-sm text-xs border border-slate-650 cursor-pointer text-center uppercase tracking-wider">
+              Return to Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ==========================================
+  // RENDER INSTRUCTIONS SCREEN (IF NO ACTIVE ATTEMPT YET)
+  // ==========================================
+  if (!activeAttempt) {
+    const totalQuestions = questions.length
+    const totalMarks = totalQuestions * 4
+
+    return (
+      <div className="min-h-[100dvh] bg-slate-50 text-slate-800 p-4 md:p-8 animate-fade-in flex flex-col items-center justify-center">
+        <div className="max-w-2xl w-full bg-white p-6 md:p-8 rounded-3xl border border-slate-200/60 shadow-lg space-y-6">
+          {/* Header Breadcrumbs */}
+          <div className="flex items-center gap-2 text-xs font-bold text-teal-600 uppercase tracking-wider select-none">
+            <Link href="/dashboard" className="hover:text-teal-850">Dashboard</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-350" />
+            <span className="text-slate-400">{course?.title || 'Course'}</span>
+          </div>
+
+          {/* Test Landing details */}
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-teal-50 text-teal-700 border border-teal-100">
+              <Clock className="w-3.5 h-3.5" />
+              {assessment.type === 'quiz' ? 'Scheduled Quiz' : 'JEE Practice Mock'}
+            </span>
+            <h1 className="text-xl md:text-2xl font-black text-slate-850">
+              {assessment.title}
+            </h1>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Welcome to the Focus Mode Assessment Hub. Read all guidelines carefully before starting your attempt.
+            </p>
+          </div>
+
+          <hr className="border-slate-100" />
+
+          {/* Quick parameters grid */}
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Duration</span>
+              <span className="text-sm font-black text-slate-700">{assessment.duration_minutes} Minutes</span>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Questions</span>
+              <span className="text-sm font-black text-slate-700">{totalQuestions} MCQ</span>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Max Marks</span>
+              <span className="text-sm font-black text-teal-650">+{totalMarks}</span>
+            </div>
+          </div>
+
+          {/* Guidelines checklist */}
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3 text-xs leading-relaxed text-slate-655 font-bold">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+              Important Guidelines & Rules
+            </h3>
+            <ul className="list-disc pl-4 space-y-2">
+              <li>Ensure you have a stable internet connection. The countdown timer is managed authoritatively by the server and will not stop if you refresh.</li>
+              <li>Each question yields <span className="text-emerald-600">+4 marks</span> for a correct response and imposes a <span className="text-red-500">-1 mark</span> penalty for incorrect selections.</li>
+              <li>The test will automatically submit itself when the remaining minutes hit zero.</li>
+              <li>Close all background applications to guarantee focus during mock tests.</li>
+            </ul>
+          </div>
+
+          {/* Action button trigger starts attempt via Server Action */}
+          <div className="pt-2 flex gap-4 w-full">
+            <Link
+              href="/dashboard"
+              className="flex-1 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-550 font-semibold rounded-xl text-center text-sm shadow-sm"
+            >
+              Go Back
+            </Link>
+            
+            <button
+              onClick={handleStartAttempt}
+              disabled={isStartingAttempt}
+              className="flex-1 py-3 bg-teal-605 hover:bg-teal-700 text-white font-semibold rounded-xl text-sm transition shadow-sm border border-teal-600 cursor-pointer text-center flex items-center justify-center gap-2"
+            >
+              {isStartingAttempt ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Establishing Session...</span>
+                </>
+              ) : (
+                <span>Start Assessment</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ==========================================
   // RENDER GRADED RESULTS PANEL
   // ==========================================
   if (submissionResult) {
-    const scoreVal = submissionResult.score !== undefined ? submissionResult.score : attempt.score
+    const scoreVal = submissionResult.score !== undefined ? submissionResult.score : activeAttempt?.score
     const maxPossible = questions.length * 4
     const percentage = Math.max(0, Math.round((scoreVal / maxPossible) * 100))
 
@@ -587,18 +862,17 @@ export default function ExamClient({
             </h1>
           </div>
 
-          {/* Offline/Online connection status banner */}
+          {/* Offline/Online connection status telemetry badge */}
           <div className="flex items-center gap-3 shrink-0">
-            {isOfflineMode && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-extrabold select-none animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-                <span>Offline Mode</span>
+            {isOfflineMode || pendingSync ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl text-xs font-extrabold select-none animate-pulse">
+                <CloudOff className="w-4 h-4 shrink-0" />
+                <span>Saved Locally (Waiting for Network)</span>
               </div>
-            )}
-            {pendingSync && !isOfflineMode && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl text-xs font-extrabold select-none">
-                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-ping" />
-                <span>Syncing replies...</span>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-extrabold select-none">
+                <Cloud className="w-4 h-4 shrink-0" />
+                <span>Saved to Cloud</span>
               </div>
             )}
 

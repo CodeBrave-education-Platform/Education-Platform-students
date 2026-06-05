@@ -23,7 +23,7 @@ export default async function ProfilePage() {
 
   // Graceful fallback if profile wasn't created yet (e.g., fast OAuth completion)
   if (!profile) {
-    const defaultName = user.email.split('@')[0]
+    const defaultName = user.email?.split('@')[0] || 'Student'
     const defaultRole = 'student'
     
     const { data: newProfile, error: profileError } = await supabase
