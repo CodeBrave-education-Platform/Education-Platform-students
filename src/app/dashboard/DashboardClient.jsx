@@ -1053,7 +1053,7 @@ export default function DashboardClient({
                                   <span>{studentCount} Students</span>
                                 </span>
                                 <span className="text-[10px] font-bold text-zinc-400">
-                                  {new Date(course.created_at).toLocaleDateString()}
+                                  {new Date(course.created_at).toLocaleDateString('en-US')}
                                 </span>
                               </div>
                             </motion.div>
@@ -1124,7 +1124,7 @@ export default function DashboardClient({
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-right text-[10px] text-zinc-400 tracking-wide">
-                                  {new Date(enroll.enrolled_at).toLocaleDateString()}
+                                  {new Date(enroll.enrolled_at).toLocaleDateString('en-US')}
                                 </td>
                               </tr>
                             ))}
@@ -1235,7 +1235,7 @@ export default function DashboardClient({
                                       </span>
                                     </div>
                                     <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">
-                                      {new Date(enroll.enrolled_at).toLocaleDateString()}
+                                      {new Date(enroll.enrolled_at).toLocaleDateString('en-US')}
                                     </span>
                                   </div>
 
@@ -1294,7 +1294,7 @@ export default function DashboardClient({
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {initialBatches.map((batch, idx) => {
                           const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
-                          const formattedDate = new Date(batch.start_date).toLocaleDateString(undefined, {
+                          const formattedDate = new Date(batch.start_date).toLocaleDateString('en-US', {
                             month: 'long',
                             day: 'numeric',
                             year: 'numeric'
@@ -1606,7 +1606,7 @@ export default function DashboardClient({
                                     axisLine={false} 
                                     tickFormatter={(val) => {
                                       const d = new Date(val)
-                                      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                                      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                     }}
                                   />
                                   <YAxis 
@@ -1624,7 +1624,7 @@ export default function DashboardClient({
                                       fontWeight: 'bold',
                                       color: '#1e293b'
                                     }} 
-                                    labelFormatter={(label) => `Test Date: ${new Date(label).toLocaleDateString()}`}
+                                    labelFormatter={(label) => `Test Date: ${new Date(label).toLocaleDateString('en-US')}`}
                                     formatter={(value) => [`Score: ${value} pts`, 'Grade']}
                                   />
                                   <Bar 
@@ -2708,7 +2708,7 @@ export default function DashboardClient({
                             <div key={file.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
                               <div className="min-w-0">
                                 <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none truncate max-w-[280px]">{file.file_name}</h5>
-                                <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {new Date(file.created_at).toLocaleDateString()}</p>
+                                <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {new Date(file.created_at).toLocaleDateString('en-US')}</p>
                               </div>
                               <a
                                 href={`/api/downloads?file=${encodeURIComponent(file.file_path)}&batchId=${encodeURIComponent(selectedCohortBatch.id)}`}
