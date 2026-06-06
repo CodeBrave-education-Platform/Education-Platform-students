@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enforce standalone build compilation
-  output: 'standalone',
   
   // Disable source maps in production to limit output size
   productionBrowserSourceMaps: false,
