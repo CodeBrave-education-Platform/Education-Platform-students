@@ -4,7 +4,6 @@ import { createClient } from '@/utils/supabase/server'
 import { orderRateLimit } from '@/utils/rate-limit'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 export async function POST(request) {
   // Build-time & runtime configuration check

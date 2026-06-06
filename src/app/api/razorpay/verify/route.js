@@ -3,7 +3,6 @@ import { verifyWebhookSignature } from '@/utils/crypto'
 import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 export async function POST(request) {
   try {
