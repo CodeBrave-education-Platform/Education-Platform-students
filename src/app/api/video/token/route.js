@@ -67,7 +67,10 @@ export async function POST(request) {
     const payload = `${user.id}:${courseId}:${lessonId}:${expiresAt}`
     
     // Sign payload with secure server secret to prevent client side forgery
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'asentra-secret-drm-key-2026'
+    const secret = process.env.RAZORPAY_KEY_SECRET
+    if (!secret) {
+      throw new Error('Server configuration error: RAZORPAY_KEY_SECRET is missing')
+    }
     const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
     const secureToken = `${payload}:${signature}`
 

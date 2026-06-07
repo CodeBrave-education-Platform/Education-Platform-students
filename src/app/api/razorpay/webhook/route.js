@@ -30,7 +30,11 @@ export async function POST(request) {
     }
 
     // 3. Cryptographically verify signature using the local secret with constant-time check
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'your_webhook_secret_here'
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      console.error('Webhook Error: RAZORPAY_WEBHOOK_SECRET is missing')
+      return NextResponse.json({ error: 'Webhook configuration error' }, { status: 500 })
+    }
     const isValid = await verifyWebhookSignature(rawBody, signature, webhookSecret)
 
     if (!isValid) {
@@ -83,7 +87,8 @@ export async function POST(request) {
             _user_id: userId,
             _batch_id: batchId,
             _payment_id: paymentId,
-            _amount: amountPaid
+            _amount: amountPaid,
+            _secret_token: process.env.RAZORPAY_KEY_SECRET
           })
 
           if (rpcError) {
@@ -98,7 +103,8 @@ export async function POST(request) {
             _user_id: userId,
             _course_id: courseId,
             _payment_id: paymentId,
-            _amount: amountPaid
+            _amount: amountPaid,
+            _secret_token: process.env.RAZORPAY_KEY_SECRET
           })
 
           if (rpcError) {
@@ -163,7 +169,8 @@ export async function POST(request) {
       try {
         // Invoke database transaction function to mathematically sever access
         const { data: success, error: rpcError } = await supabase.rpc('execute_enrollment_revocation', {
-          _payment_id: paymentId
+          _payment_id: paymentId,
+          _secret_token: process.env.RAZORPAY_KEY_SECRET
         })
 
         if (rpcError) {

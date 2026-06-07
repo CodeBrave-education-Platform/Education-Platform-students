@@ -46,7 +46,8 @@ export async function POST(request) {
         _user_id: user.id,
         _batch_id: batchId,
         _payment_id: razorpay_payment_id,
-        _amount: amountPaid
+        _amount: amountPaid,
+        _secret_token: secret
       })
 
       if (rpcError) {
@@ -60,7 +61,8 @@ export async function POST(request) {
         _user_id: user.id,
         _course_id: courseId,
         _payment_id: razorpay_payment_id,
-        _amount: amountPaid
+        _amount: amountPaid,
+        _secret_token: secret
       })
 
       if (rpcError) {

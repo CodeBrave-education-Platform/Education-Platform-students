@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import { getSafeRedirectUrl } from '@/utils/security'
 
 // Initialize Upstash Redis client securely for rate limiting
 let redis;
@@ -138,6 +139,14 @@ export async function GET(request) {
       // Fallback: If signed asset generation fails or bucket not fully set up,
       // redirect securely to the original workspace link to ensure resilience
       if (file.startsWith('http')) {
+        const safeUrl = getSafeRedirectUrl(file, '/dashboard')
+        const isSupabaseUrl = file.includes('.supabase.co')
+        if (safeUrl === '/dashboard' && !isSupabaseUrl) {
+          return NextResponse.json(
+            { error: 'Forbidden: Redirect domain is not whitelisted' },
+            { status: 403 }
+          )
+        }
         return NextResponse.redirect(file)
       } else {
         return NextResponse.json(

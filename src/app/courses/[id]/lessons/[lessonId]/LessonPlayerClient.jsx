@@ -56,7 +56,7 @@ export default function LessonPlayerClient({
   useEffect(() => {
     setActiveVideoUrl(currentLesson.video_url)
     setDoubts(initialDoubts)
-  }, [currentLesson, initialDoubts])
+  }, [currentLesson.id])
 
   // Secure HLS segment loader with DRM and anti-recording hooks
   useEffect(() => {

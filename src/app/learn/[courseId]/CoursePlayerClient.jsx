@@ -328,7 +328,7 @@ export default function CoursePlayerClient({
     return () => {
       active = false
     }
-  }, [currentLesson.id, initialLessonId, initialDoubts, lessons])
+  }, [currentLesson.id])
 
   // Scroll to bottom of doubts thread when tab changes or doubts update
   useEffect(() => {

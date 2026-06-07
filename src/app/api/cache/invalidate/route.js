@@ -14,9 +14,9 @@ export async function POST(request) {
 
     // 1. Check Authorization Bearer token first
     const authHeader = request.headers.get('Authorization')
-    const secretToken = process.env.RAZORPAY_KEY_SECRET || 'asentra-secret-drm-key-2026'
+    const secretToken = process.env.RAZORPAY_KEY_SECRET
 
-    if (authHeader === `Bearer ${secretToken}` || authHeader === 'Bearer asentra-secret-drm-key-2026') {
+    if (secretToken && authHeader === `Bearer ${secretToken}`) {
       isAuthorized = true
     } else {
       // 2. Fall back to cookie session verification, wrapped in try-catch to prevent next/headers cookies() exceptions
