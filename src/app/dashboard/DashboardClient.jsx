@@ -175,7 +175,7 @@ export default function DashboardClient({
   const [courses, setCourses] = useState(initialCourses)
   const [enrollments, setEnrollments] = useState(initialEnrollments)
   const [batchEnrollments, setBatchEnrollments] = useState(initialBatchEnrollments)
-  const [directory, setDirectory] = useState(allCourses)
+  const directory = allCourses
 
   const [selectedCohortBatch, setSelectedCohortBatch] = useState(null)
   const [cohortLiveSessions, setCohortLiveSessions] = useState([])

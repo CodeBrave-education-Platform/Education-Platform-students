@@ -409,6 +409,14 @@ export default function AuthForm({
                         className={inputClass}
                       />
                     </div>
+                    <div className="flex justify-end mt-1.5">
+                      <Link
+                        href="/forgot-password"
+                        className="text-[10px] font-bold text-teal-600 hover:text-teal-700 transition"
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
                   </div>
                 </motion.div>
               )}

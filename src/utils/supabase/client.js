@@ -24,6 +24,12 @@ export function createClient() {
         updateUser: async () => {
           throw new Error("Missing Supabase Environment Variables.");
         },
+        resetPasswordForEmail: async () => {
+          throw new Error("Missing Supabase Environment Variables.");
+        },
+        exchangeCodeForSession: async () => {
+          throw new Error("Missing Supabase Environment Variables.");
+        },
         getUser: async () => ({ data: { user: null }, error: null }),
         signOut: async () => {},
       }
