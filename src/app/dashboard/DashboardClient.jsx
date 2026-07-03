@@ -265,6 +265,14 @@ export default function DashboardClient({
   // Interactive Search Query
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Sync search query from URL parameter 'q'
+  React.useEffect(() => {
+    const q = searchParams ? searchParams.get('q') : null
+    if (q !== null) {
+      setSearchQuery(q)
+    }
+  }, [searchParams])
+
   // Profile pre-fills and dynamic contact numbers
   const [profileName, setProfileName] = useState(profile.full_name || '')
   const [profilePhone, setProfilePhone] = useState(profile.phone || '')
@@ -860,6 +868,13 @@ export default function DashboardClient({
                     <TrendingUp className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Analytics</span>
                   </button>
+                  <button 
+                    onClick={() => router.push('/test-series')}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
+                  >
+                    <Award className="w-5 h-5 shrink-0 text-teal-600 dark:text-teal-400" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Test Series</span>
+                  </button>
                   <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
@@ -1437,7 +1452,7 @@ export default function DashboardClient({
                               </div>
 
                               <button
-                                onClick={() => router.push(`/learn/${exam.course_id}/exams/${exam.id}`)}
+                                onClick={() => router.push(`/learn/${exam.course_id || 'batch'}/exams/${exam.id}`)}
                                 disabled={!isActive}
                                 className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-355 disabled:border-slate-100 dark:disabled:bg-zinc-850 dark:disabled:border-zinc-800 dark:disabled:text-zinc-650 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition cursor-pointer text-center border border-teal-650"
                               >
@@ -2680,7 +2695,7 @@ export default function DashboardClient({
                                 <button
                                   onClick={() => {
                                     setSelectedCohortBatch(null)
-                                    router.push(`/learn/${exam.course_id}/exams/${exam.id}`)
+                                    router.push(`/learn/${exam.course_id || 'batch'}/exams/${exam.id}`)
                                   }}
                                   disabled={!isActive}
                                   className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs shrink-0 cursor-pointer border border-teal-650"

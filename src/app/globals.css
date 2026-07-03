@@ -13,6 +13,21 @@
       background-position: 100% 50%;
     }
   }
+
+  /* Override teal colors with Coursera Blue theme */
+  --color-teal-50: #ebf8ff;
+  --color-teal-100: #bee3f8;
+  --color-teal-200: #90cdf4;
+  --color-teal-300: #63b3ed;
+  --color-teal-400: #4299e1;
+  --color-teal-500: #0056D2; /* Coursera Brand Blue */
+  --color-teal-600: #00419e;
+  --color-teal-650: #0056D2;
+  --color-teal-700: #002e70;
+  --color-teal-750: #002252;
+  --color-teal-800: #001633;
+  --color-teal-900: #0a1128;
+  --color-teal-950: #050814;
 }
 
 @utility bg-gradient-size {

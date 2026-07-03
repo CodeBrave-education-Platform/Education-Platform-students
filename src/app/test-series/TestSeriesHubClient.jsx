@@ -1,0 +1,315 @@
+'use client'
+
+import * as React from 'react'
+import { useState, useTransition } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import { 
+  BookOpen, Search, GraduationCap, Award, ClipboardList, 
+  ArrowRight, ShieldAlert, Clock, Sparkles, CheckCircle2,
+  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity
+} from 'lucide-react'
+
+export default function TestSeriesHubClient({
+  user,
+  profile,
+  initialPackages,
+  initialExams,
+  initialAttempts
+}) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  
+  const [packages, setPackages] = useState(initialPackages)
+  const [exams, setExams] = useState(initialExams)
+  const [attempts, setAttempts] = useState(initialAttempts)
+
+  const [activeTag, setActiveTag] = useState('ALL')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [expandedPackageId, setExpandedPackageId] = useState(null)
+
+  // Extract unique competitive tag filters
+  const tags = React.useMemo(() => {
+    const set = new Set(['ALL'])
+    packages.forEach(pkg => {
+      if (pkg.target_exam_tag) {
+        set.add(pkg.target_exam_tag.toUpperCase())
+      }
+    })
+    return Array.from(set)
+  }, [packages])
+
+  // Filter packages based on active tag and search query
+  const filteredPackages = React.useMemo(() => {
+    return packages.filter(pkg => {
+      const matchTag = activeTag === 'ALL' || pkg.target_exam_tag.toUpperCase() === activeTag
+      const matchSearch = pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          pkg.target_exam_tag.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchTag && matchSearch
+    })
+  }, [packages, activeTag, searchQuery])
+
+  // Toggle package accordion to show list of exams
+  const togglePackage = (pkgId) => {
+    if (expandedPackageId === pkgId) {
+      setExpandedPackageId(null)
+    } else {
+      setExpandedPackageId(pkgId)
+    }
+  }
+
+  // Check if student has already completed an exam and get attempt id
+  const getExamAttempt = (examId) => {
+    return attempts.find(att => att.exam_id === examId)
+  }
+
+  // Calculate high-level student metrics
+  const stats = React.useMemo(() => {
+    const totalCompleted = attempts.length
+    const totalScore = attempts.reduce((sum, att) => sum + (att.score || 0), 0)
+    const avgScore = totalCompleted > 0 ? Math.round(totalScore / totalCompleted) : 0
+    const highestScore = totalCompleted > 0 ? Math.max(...attempts.map(att => att.score || 0)) : 0
+
+    return { totalCompleted, avgScore, highestScore }
+  }, [attempts])
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between select-none font-sans overflow-x-hidden">
+      
+      {/* Premium Glassmorphic Navbar Overlay */}
+      <div className="z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-900 sticky top-0">
+        <Navbar user={user} profile={profile} />
+      </div>
+
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8 space-y-10">
+        
+        {/* Dynamic Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/30 border border-slate-900 p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-[80px]" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-[80px]" />
+
+          <div className="space-y-2.5 z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/25 text-teal-400 text-[10px] font-black tracking-widest uppercase">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>CBT CBT Test Center</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+              ASENTRA Test Series Hub
+            </h1>
+            <p className="text-xs md:text-sm text-slate-400 max-w-xl leading-relaxed">
+              Examine your speed, accuracy, and subject mastery with proctored computer-based test drills matching competitive testing parameters.
+            </p>
+          </div>
+
+          {/* Quick Metrics display widget */}
+          <div className="grid grid-cols-3 gap-4 w-full md:w-auto z-10">
+            {[
+              { label: 'Avg Score', value: `${stats.avgScore} pts`, icon: Activity, color: 'text-teal-400 bg-teal-500/10 border-teal-500/20' },
+              { label: 'Completed', value: stats.totalCompleted, icon: CheckCircle2, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' },
+              { label: 'Record High', value: `${stats.highestScore} pts`, icon: Award, color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' }
+            ].map((stat, idx) => (
+              <div key={idx} className={`flex flex-col p-4 rounded-2xl border ${stat.color} items-center text-center backdrop-blur-md`}>
+                <stat.icon className="w-5 h-5 mb-2" />
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">{stat.label}</span>
+                <span className="text-sm font-black text-white mt-1">{stat.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Filter Toolbar & Search */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-900/10 border border-slate-900/50 p-4 rounded-2xl backdrop-blur-sm">
+          {/* Tag Selectors */}
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            {tags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition select-none cursor-pointer border ${
+                  activeTag === tag
+                    ? 'bg-teal-500 text-slate-950 font-black border-teal-400'
+                    : 'bg-slate-900/50 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search Test Series Bundles..."
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-xs text-slate-200 outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition font-bold"
+            />
+          </div>
+        </div>
+
+        {/* Grid of Test Packages */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filteredPackages.map(pkg => {
+              const pkgExams = exams.filter(e => e.package_id === pkg.id)
+              const distribution = pkg.test_distribution || {}
+              const ledger = pkg.price_ledger || {}
+              const isPremium = ledger.status === 'premium'
+
+              return (
+                <motion.div
+                  key={pkg.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-slate-900/30 border border-slate-900 hover:border-slate-800/80 rounded-[2rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group shadow-lg shadow-black/40"
+                >
+                  {/* Thumbnail / Header area */}
+                  <div className="relative aspect-video bg-gradient-to-br from-slate-900 to-slate-950 p-6 flex flex-col justify-between overflow-hidden border-b border-slate-900">
+                    <div className="absolute inset-0 bg-slate-950/20 z-0" />
+                    
+                    {/* Tags & Price */}
+                    <div className="flex justify-between items-start z-10">
+                      <span className="px-3 py-1 bg-slate-900 text-teal-400 border border-teal-500/20 text-[9px] font-black uppercase tracking-wider rounded-full">
+                        {pkg.target_exam_tag}
+                      </span>
+                      <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border ${
+                        isPremium 
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      }`}>
+                        {isPremium ? `₹${ledger.price || 499}` : 'FREE'}
+                      </span>
+                    </div>
+
+                    {/* Metric Volume badges inside the grid */}
+                    <div className="grid grid-cols-2 gap-2 mt-4 z-10">
+                      <div className="bg-slate-950/80 border border-slate-900 p-2 rounded-lg text-center">
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-tight">Total Tests</span>
+                        <span className="text-xs font-black text-white">{pkg.total_tests_count}</span>
+                      </div>
+                      <div className="bg-slate-950/80 border border-slate-900 p-2 rounded-lg text-center">
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-tight">Mocks</span>
+                        <span className="text-xs font-black text-white">{distribution.full_mocks || 0} Papers</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Info Area */}
+                  <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-1.5">
+                      <h3 className="font-extrabold text-sm text-white group-hover:text-teal-400 transition">
+                        {pkg.title}
+                      </h3>
+                      {/* Metric text details line */}
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                        {distribution.chapter_drills || 0} Drills • {distribution.full_mocks || 0} Mocks • {distribution.live_papers || 0} Live Ranking
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => togglePackage(pkg.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-slate-900/50 hover:bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition select-none cursor-pointer"
+                    >
+                      <span>Explore Exam Roster ({pkgExams.length})</span>
+                      {expandedPackageId === pkg.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+
+                    {/* Accordion panel for active exams */}
+                    <AnimatePresence>
+                      {expandedPackageId === pkg.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden space-y-2 pt-2 border-t border-slate-900/50"
+                        >
+                          {pkgExams.length === 0 ? (
+                            <p className="text-center text-[10px] text-slate-500 py-3 font-semibold">
+                              No active exam blueprints compiled yet.
+                            </p>
+                          ) : (
+                            pkgExams.map(exam => {
+                              const attempt = getExamAttempt(exam.id)
+                              
+                              return (
+                                <div 
+                                  key={exam.id}
+                                  className="flex items-center justify-between p-3 bg-slate-950/60 border border-slate-900 rounded-xl"
+                                >
+                                  <div className="min-w-0 pr-2">
+                                    <h4 className="text-[11px] font-extrabold text-slate-200 truncate leading-tight">
+                                      {exam.title}
+                                    </h4>
+                                    <div className="flex gap-2 text-[9px] text-slate-500 font-bold uppercase mt-0.5 leading-none">
+                                      <span>{exam.duration_minutes} Mins</span>
+                                      <span>•</span>
+                                      <span>{exam.total_questions} Questions</span>
+                                      {exam.is_live_ranking && (
+                                        <>
+                                          <span>•</span>
+                                          <span className="text-teal-400">Live Ranking</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  {attempt ? (
+                                    <Link
+                                      href={`/test-series/analytics/${attempt.id}`}
+                                      className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-lg text-[10px] font-black uppercase tracking-wider transition"
+                                    >
+                                      <BarChart3 className="w-3.5 h-3.5" />
+                                      <span>Scorecard</span>
+                                    </Link>
+                                  ) : (
+                                    <Link
+                                      href={`/test-series/engine/${exam.id}`}
+                                      className="flex items-center gap-1 px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-lg text-[10px] font-black uppercase tracking-wider transition"
+                                    >
+                                      <span>Launch</span>
+                                      <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                  )}
+                                </div>
+                              )
+                            })
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Empty state fallback */}
+        {filteredPackages.length === 0 && (
+          <div className="p-12 text-center rounded-[2rem] border border-dashed border-slate-800 bg-slate-900/5 space-y-4">
+            <ClipboardList className="w-8 h-8 text-slate-600 mx-auto" />
+            <div className="space-y-1">
+              <h4 className="text-sm font-extrabold text-slate-300">No test series packages found</h4>
+              <p className="text-xs text-slate-550">Adjust filters or refine search text</p>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      <div className="z-10 mt-10">
+        <Footer />
+      </div>
+
+    </div>
+  )
+}

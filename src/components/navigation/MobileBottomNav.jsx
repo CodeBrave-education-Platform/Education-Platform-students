@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Home, Users, TrendingUp, User } from 'lucide-react'
+import { Home, Users, TrendingUp, User, Award } from 'lucide-react'
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
@@ -52,6 +52,12 @@ export default function MobileBottomNav() {
       href: '/dashboard?tab=batches',
       icon: Users,
       active: isActive('/batches'),
+    },
+    {
+      label: 'Test Series',
+      href: '/test-series',
+      icon: Award,
+      active: pathname.startsWith('/test-series'),
     },
     {
       label: 'Performance',

@@ -20,20 +20,7 @@ export default async function ExamPage(props) {
     redirect('/login')
   }
 
-  // 2. Authorization: Check enrollment status for courseId
-  const { data: enrollment, error: enrollError } = await supabase
-    .from('enrollments')
-    .select('id, status')
-    .eq('user_id', user.id)
-    .eq('course_id', courseId)
-    .eq('status', 'active')
-    .maybeSingle()
-
-  if (enrollError || !enrollment) {
-    redirect('/dashboard?unauthorized=true')
-  }
-
-  // 3. Fetch assessment configurations
+  // 2. Fetch assessment configurations
   let assessment = null
   const cached = await redisGet(`asentra:exam:${assessmentId}`)
   if (cached) {
@@ -56,6 +43,66 @@ export default async function ExamPage(props) {
     await redisSet(`asentra:exam:${assessmentId}`, JSON.stringify(assessment), { ex: 3600 })
   }
 
+  // 3. Authorization: Check enrollment status based on assessment links
+  let enrollment = null
+  let enrollError = null
+  let course = null
+
+  if (assessment.batch_id) {
+    // Check batch enrollment
+    const { data, error } = await supabase
+      .from('batch_enrollments')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .eq('batch_id', assessment.batch_id)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    enrollment = data
+    enrollError = error
+
+    if (!enrollError && enrollment) {
+      const { data: batchData } = await supabase
+        .from('batches')
+        .select('*')
+        .eq('id', assessment.batch_id)
+        .single()
+      
+      if (batchData) {
+        course = {
+          id: batchData.id,
+          title: batchData.title
+        }
+      }
+    }
+  } else {
+    // Check standard course enrollment
+    const { data, error } = await supabase
+      .from('enrollments')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .eq('course_id', assessment.course_id || courseId)
+      .eq('status', 'active')
+      .maybeSingle()
+    
+    enrollment = data
+    enrollError = error
+
+    if (!enrollError && enrollment && (assessment.course_id || courseId !== 'batch')) {
+      const { data: courseData } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', assessment.course_id || courseId)
+        .single()
+      
+      course = courseData
+    }
+  }
+
+  if (enrollError || !enrollment) {
+    redirect('/dashboard?unauthorized=true')
+  }
+
   // 4. Fetch questions from the secure BLIND student_questions view (correct_option_index is dropped)
   const { data: questions, error: qError } = await supabase
     .from('student_questions')
@@ -66,7 +113,7 @@ export default async function ExamPage(props) {
     return (
       <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-6 text-slate-800 animate-fade-in">
         <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200/60 shadow-lg text-center space-y-6">
-          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto text-red-600 border border-red-100 shadow-inner">
+          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto text-red-650 border border-red-100 shadow-inner">
             <HelpCircle className="w-8 h-8" />
           </div>
           <div className="space-y-2">
@@ -130,16 +177,9 @@ export default async function ExamPage(props) {
     }
   }
 
-  // 6. Fetch Course details
-  const { data: course } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('id', courseId)
-    .single()
-
   return (
     <ExamClient
-      course={course}
+      course={course || { id: courseId, title: 'Batch Assessment' }}
       assessment={assessment}
       questions={questions}
       attempt={attempt}
