@@ -167,6 +167,17 @@ export default function Navbar({ user, profile }) {
           <Award className="w-4 h-4 text-blue-600 dark:text-blue-450" />
           <span>Test Series Hub</span>
         </Link>
+
+        {/* Direct link to Books & Materials */}
+        <Link
+          href="/books"
+          className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-teal-50 hover:bg-teal-100/80 dark:bg-teal-950/40 dark:hover:bg-teal-900/60 border border-teal-200 dark:border-teal-800/80 rounded-lg text-xs font-extrabold text-teal-800 dark:text-teal-300 transition shadow-2xs select-none"
+        >
+          <div className="w-4 h-4 rounded bg-teal-600 text-white flex items-center justify-center text-[9px] font-black shrink-0">
+            📖
+          </div>
+          <span>Books & Materials</span>
+        </Link>
       </div>
 
       {/* Middle: Search Bar */}
