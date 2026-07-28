@@ -1,0 +1,1 @@
+"-- Phase 8 Migration: YouTube Unlisted Delivery Shift\nALTER TABLE public.lessons\n  ADD COLUMN IF NOT EXISTS video_source TEXT DEFAULT 'youtube',\n  ADD COLUMN IF NOT EXISTS video_id TEXT;\n"
