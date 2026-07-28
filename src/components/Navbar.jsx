@@ -159,6 +159,24 @@ export default function Navbar({ user, profile }) {
           )}
         </div>
 
+        {/* Direct link to Course Catalog */}
+        <Link
+          href="/courses"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/80 rounded-lg text-xs font-bold text-slate-700 dark:text-zinc-300 transition shadow-2xs select-none"
+        >
+          <BookOpen className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+          <span>Course Catalog</span>
+        </Link>
+
+        {/* Direct link to Batches & Cohorts */}
+        <Link
+          href="/batches"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/80 rounded-lg text-xs font-bold text-slate-700 dark:text-zinc-300 transition shadow-2xs select-none"
+        >
+          <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          <span>Live Batches</span>
+        </Link>
+
         {/* Direct link to Test Series Hub */}
         <Link
           href="/test-series"

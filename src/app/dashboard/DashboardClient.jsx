@@ -875,6 +875,13 @@ export default function DashboardClient({
                     <Award className="w-5 h-5 shrink-0 text-teal-600 dark:text-teal-400" />
                     <span className="text-[10px] tracking-tight mt-0.5">Test Series</span>
                   </button>
+                  <button 
+                    onClick={() => router.push('/books/my-orders')}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
+                  >
+                    <BookOpen className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <span className="text-[10px] tracking-tight mt-0.5">Book Library</span>
+                  </button>
                   <div className="w-8 h-[1px] bg-slate-200/65 dark:bg-zinc-800/80 my-2 mx-auto" />
                   <button 
                     onClick={() => handleTabChange('PROFILE', 'profile')}
