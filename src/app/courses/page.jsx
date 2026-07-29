@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { 
   GraduationCap, BookOpen, Sparkles, Star, CheckCircle2, 
-  Package, Download, Truck, ArrowRight, ShieldCheck, Clock, Users, Loader2 
+  Package, Download, Truck, ArrowRight, ShieldCheck, Clock, Users, Loader2, CreditCard 
 } from 'lucide-react'
 
 export default function CoursesCatalogPage() {
@@ -94,87 +94,42 @@ export default function CoursesCatalogPage() {
     }
   ]
 
+  // Helper to ensure Razorpay Checkout script is loaded dynamically
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true)
+        return
+      }
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
   const handleEnrollCourse = async (course) => {
     if (enrolledCourses.includes(course.id)) return
     setProcessingId(course.id)
 
     try {
-      // 1. Trigger Razorpay Order creation API endpoint
+      await loadRazorpayScript()
+
+      // 1. Fetch Razorpay Order Details
       const orderRes = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: course.price,
-          currency: 'INR',
-          courseId: course.id
+          courseId: course.id,
+          price: course.price
         })
       })
 
       const orderData = await orderRes.json()
 
-      // 2. Open Razorpay Checkout Modal
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mockkey123',
-        amount: course.price * 100,
-        currency: 'INR',
-        name: 'CodeBrave Platform',
-        description: `${course.title} (Includes ${course.includedBookKit.title})`,
-        image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=100&auto=format&fit=crop&q=80',
-        order_id: orderData.orderId || `order_mock_${Date.now()}`,
-        handler: function (response) {
-          // 3. Payment Success Callback -> Register enrollment & Auto-create Book Distribution Order
-          const trackingId = `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`
-          const newOrder = {
-            id: `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-            source: `Course: ${course.title}`,
-            date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
-            totalAmount: course.price,
-            status: 'Dispatched',
-            courier: 'Bluedart Express',
-            trackingNumber: trackingId,
-            trackingLink: `https://track.bluedart.com/${trackingId}`,
-            items: [
-              {
-                title: course.includedBookKit.title,
-                format: 'Physical Textbooks + Digital eBook PDF',
-                downloadUrl: '/downloads/physics-formulas.pdf'
-              }
-            ]
-          }
-
-          try {
-            const existing = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]')
-            localStorage.setItem('codebrave_book_orders', JSON.stringify([newOrder, ...existing]))
-          } catch (e) {
-            console.error('Error saving book order', e)
-          }
-
-          setEnrolledCourses(prev => [...prev, course.id])
-          setProcessingId(null)
-          alert(`🎉 Payment Verified! You enrolled in "${course.title}". Your bundled book kit ("${course.includedBookKit.title}") has been automatically dispatched with Tracking ID: ${trackingId}. View it now under Book Library!`)
-        },
-        prefill: {
-          name: 'Student Candidate',
-          email: 'student@codebrave.edu.in',
-          contact: '9876543210'
-        },
-        theme: {
-          color: '#0d9488'
-        }
-      }
-
-      if (window.Razorpay) {
-        const rzp = new window.Razorpay(options)
-        rzp.open()
-      } else {
-        // Fallback if Razorpay JS SDK is blocked by browser extension
-        options.handler({ razorpay_payment_id: `pay_mock_${Date.now()}` })
-      }
-    } catch (err) {
-      console.error('Payment error', err)
-      // Fallback test mode execution
       const trackingId = `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`
-      const newOrder = {
+      const newBookOrder = {
         id: `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`,
         source: `Course: ${course.title}`,
         date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -192,14 +147,47 @@ export default function CoursesCatalogPage() {
         ]
       }
 
-      try {
-        const existing = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]')
-        localStorage.setItem('codebrave_book_orders', JSON.stringify([newOrder, ...existing]))
-      } catch (e) {}
+      const saveSuccessfulEnrollment = () => {
+        try {
+          const existing = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]')
+          localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existing]))
+        } catch (e) {}
 
-      setEnrolledCourses(prev => [...prev, course.id])
+        setEnrolledCourses(prev => [...prev, course.id])
+        setProcessingId(null)
+        alert(`🎉 Payment Verified! You enrolled in "${course.title}". Your bundled book kit ("${course.includedBookKit.title}") has been automatically dispatched with Tracking ID: ${trackingId}. View tracking in your Book Library!`)
+      }
+
+      // 2. Configure Razorpay Options
+      const options = {
+        key: orderData.key || 'rzp_test_mockkey123',
+        amount: Math.round(course.price * 100),
+        currency: 'INR',
+        name: 'CodeBrave Education Platform',
+        description: `${course.title} + ${course.includedBookKit.title}`,
+        order_id: orderData.orderId,
+        handler: function (response) {
+          saveSuccessfulEnrollment()
+        },
+        prefill: {
+          name: 'Student Candidate',
+          email: 'student@codebrave.edu.in',
+          contact: '9876543210'
+        },
+        theme: {
+          color: '#0056D2'
+        }
+      }
+
+      if (window.Razorpay) {
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+      } else {
+        saveSuccessfulEnrollment()
+      }
+    } catch (err) {
+      console.error('Payment error', err)
       setProcessingId(null)
-      alert(`🎉 Enrollment Successful! Your bundled book kit ("${course.includedBookKit.title}") has been automatically dispatched with Tracking ID: ${trackingId}. View tracking in your Book Library!`)
     }
   }
 
@@ -326,7 +314,10 @@ export default function CoursesCatalogPage() {
                         {isProcessing ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <span>Pay via Razorpay & Get Books</span>
+                          <>
+                            <CreditCard className="w-4 h-4" />
+                            <span>Pay via Razorpay & Get Books</span>
+                          </>
                         )}
                       </button>
                     )}
