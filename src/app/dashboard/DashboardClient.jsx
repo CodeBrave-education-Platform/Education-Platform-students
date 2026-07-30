@@ -186,6 +186,35 @@ export default function DashboardClient({
   const [myExams, setMyExams] = useState([])
   const [loadingMyExams, setLoadingMyExams] = useState(false)
 
+  // Sync enrolled courses & purchased batches from localStorage into enrollments state
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('codebrave_enrolled_courses')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        const mockEnrollments = parsed.map(course => ({
+          id: `local_e_${course.id || course}`,
+          course_id: course.id || course,
+          created_at: new Date().toISOString(),
+          courses: {
+            id: course.id || course,
+            title: course.title || 'Enrolled Course Mastery',
+            description: course.description || 'Comprehensive Competitive Preparation Course',
+            thumbnail_url: course.cover || course.thumbnail_url || 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
+            level: course.level || 'JEE Advanced',
+            price: course.price || 0
+          }
+        }))
+
+        setEnrollments(prev => {
+          const ids = new Set(prev.map(e => e.course_id))
+          const toAdd = mockEnrollments.filter(e => !ids.has(e.course_id))
+          return [...prev, ...toAdd]
+        })
+      }
+    } catch (e) {}
+  }, [])
+
   React.useEffect(() => {
     if (!selectedCohortBatch) return
 
