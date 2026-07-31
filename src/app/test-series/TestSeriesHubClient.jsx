@@ -10,7 +10,7 @@ import Footer from '@/components/Footer'
 import { 
   BookOpen, Search, GraduationCap, Award, ClipboardList, 
   ArrowRight, ShieldAlert, Clock, Sparkles, CheckCircle2,
-  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity
+  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity, RotateCcw
 } from 'lucide-react'
 
 export default function TestSeriesHubClient({
