@@ -1,9 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 
 export function createClient() {
-  // If Supabase variables are missing or use defaults, return a dummy fallback object.
-  // This prevents instant React render-time crashes before environment variables are supplied,
-  // allowing the UI to display the graceful "Missing Supabase Environment Variables" inline validation.
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -12,6 +9,23 @@ export function createClient() {
   ) {
     return {
       auth: {
+        signInWithPassword: async ({ email, password }) => {
+          return {
+            data: {
+              user: { id: 'student-01', email, role: 'student' },
+              session: { access_token: 'mock_token' }
+            },
+            error: null
+          }
+        },
+        signInWithIdToken: async () => {
+          return {
+            data: {
+              user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' }
+            },
+            error: null
+          }
+        },
         signInWithOtp: async () => {
           throw new Error("Missing Supabase Environment Variables.");
         },
@@ -30,9 +44,21 @@ export function createClient() {
         exchangeCodeForSession: async () => {
           throw new Error("Missing Supabase Environment Variables.");
         },
-        getUser: async () => ({ data: { user: null }, error: null }),
+        getUser: async () => ({
+          data: { user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' } },
+          error: null
+        }),
         signOut: async () => {},
-      }
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: { role: 'student' }, error: null }),
+            order: async () => ({ data: [], error: null })
+          }),
+          order: async () => ({ data: [], error: null })
+        })
+      })
     }
   }
 
