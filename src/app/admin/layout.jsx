@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, Award, HelpCircle, ShieldAlert, BarChart2, 
-  Settings, ArrowLeft, LogOut, Bell, Sparkles, CheckCircle2 
+  Settings, ArrowLeft, LogOut, Bell, Sparkles, CheckCircle2, Users, Package
 } from 'lucide-react'
 
 export default function AdminLayout({ children }) {
@@ -13,10 +13,11 @@ export default function AdminLayout({ children }) {
 
   const navItems = [
     { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+    { label: 'Student Directory', href: '/admin/students', icon: Users },
     { label: 'Test Series Studio', href: '/admin/test-series', icon: Award },
     { label: 'NTA Question Bank', href: '/admin/questions', icon: HelpCircle },
     { label: 'Live Proctor Monitor', href: '/admin/proctoring', icon: ShieldAlert },
-    { label: 'Student Performance', href: '/admin#analytics', icon: BarChart2 }
+    { label: 'Book Fulfillment', href: '/admin/books/orders', icon: Package }
   ]
 
   return (
