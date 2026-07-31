@@ -98,12 +98,13 @@ export default function CbtEngineClient({ user, profile, exam }) {
 
   const enterFullscreen = async () => {
     try {
-      if (containerRef.current) {
-        await containerRef.current.requestFullscreen()
-        setIsFullscreen(true)
+      if (document.documentElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen()
       }
     } catch (err) {
-      console.error('[CBT Engine] Failed to enter fullscreen:', err)
+      console.warn('[CBT Engine] Fullscreen notice:', err)
+    } finally {
+      setIsFullscreen(true)
     }
   }
 
