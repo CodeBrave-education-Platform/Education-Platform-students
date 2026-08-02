@@ -5,14 +5,20 @@ import Link from 'next/link'
 import Script from 'next/script'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { validateCoupon } from '@/utils/coupons'
 import { 
   Users, Sparkles, CheckCircle2, Clock, Calendar, 
-  Package, Download, Award, ArrowRight, ShieldCheck, Loader2, CreditCard, Check 
+  Package, Download, Award, ArrowRight, ShieldCheck, Loader2, CreditCard, Check, Tag 
 } from 'lucide-react'
 
 export default function BatchesPage() {
   const [joinedBatchIds, setJoinedBatchIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
+
+  // Promo Code States
+  const [couponInputs, setCouponInputs] = useState({})
+  const [appliedCoupons, setAppliedCoupons] = useState({})
+  const [couponErrors, setCouponErrors] = useState({})
 
   const batches = [
     {
@@ -24,8 +30,9 @@ export default function BatchesPage() {
       schedule: 'Mon - Sat (4:00 PM - 8:30 PM)',
       price: 6999,
       originalPrice: 11999,
-      studentsEnrolled: '450 / 500 Seats Filled',
-      badge: 'Live Interactive Cohort',
+      studentsEnrolled: '488 / 500 Seats Filled',
+      seatsLeft: 12,
+      badge: '🔥 12 Seats Left',
       checklist: [
         'Daily Live 4.5-Hour Interactive Problem-Solving Lectures',
         'Full 6-Volume Hardcopy Printed Textbook Set Delivered Free',
@@ -47,8 +54,9 @@ export default function BatchesPage() {
       schedule: 'Mon - Fri (9:00 AM - 1:30 PM)',
       price: 5999,
       originalPrice: 9999,
-      studentsEnrolled: '380 / 400 Seats Filled',
-      badge: 'NCERT Intensive',
+      studentsEnrolled: '382 / 400 Seats Filled',
+      seatsLeft: 18,
+      badge: '⚡ NCERT Intensive',
       checklist: [
         '360-Degree NCERT Line-by-Line Biology & Chemistry Coverage',
         'NEET 10,000 MCQ Bank & Biology Flashcard Box Delivered Free',
@@ -73,47 +81,44 @@ export default function BatchesPage() {
     } catch (e) {}
   }, [])
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true)
-        return
-      }
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => resolve(true)
-      script.onerror = () => resolve(false)
-      document.body.appendChild(script)
-    })
+  const handleApplyCoupon = (batchId, basePrice) => {
+    const code = couponInputs[batchId]
+    const result = validateCoupon(code, basePrice)
+    if (result.valid) {
+      setAppliedCoupons(prev => ({ ...prev, [batchId]: result }))
+      setCouponErrors(prev => ({ ...prev, [batchId]: null }))
+    } else {
+      setCouponErrors(prev => ({ ...prev, [batchId]: result.error }))
+      setAppliedCoupons(prev => ({ ...prev, [batchId]: null }))
+    }
   }
 
   const handleJoinBatch = async (batch) => {
     if (joinedBatchIds.includes(batch.id)) return
     setProcessingId(batch.id)
 
-    try {
-      await loadRazorpayScript()
+    const activeDiscount = appliedCoupons[batch.id]
+    const finalEnrollPrice = activeDiscount ? activeDiscount.finalPrice : batch.price
 
+    try {
       const orderRes = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           batchId: batch.id,
-          price: batch.price
+          price: finalEnrollPrice
         })
       })
 
       const orderData = await orderRes.json()
 
       const saveSuccessfulJoin = () => {
-        // Save to joined batches in localStorage
         try {
           const existingBatches = JSON.parse(localStorage.getItem('codebrave_joined_batches') || '[]')
           const updatedBatches = [batch, ...existingBatches.filter(b => (b.id || b) !== batch.id)]
           localStorage.setItem('codebrave_joined_batches', JSON.stringify(updatedBatches))
         } catch (e) {}
 
-        // Save also as enrolled course so it instantly shows in My Learning
         try {
           const existingCourses = JSON.parse(localStorage.getItem('codebrave_enrolled_courses') || '[]')
           const courseRef = {
@@ -123,18 +128,17 @@ export default function BatchesPage() {
             subject: 'Batch Cohort',
             level: batch.targetYear,
             cover: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-            price: batch.price
+            price: finalEnrollPrice
           }
           localStorage.setItem('codebrave_enrolled_courses', JSON.stringify([courseRef, ...existingCourses]))
         } catch (e) {}
 
-        // Auto-create Book Distribution Order
         const trackingId = `TRK-DT-${Math.floor(100000000 + Math.random() * 900000000)}`
         const newBookOrder = {
           id: `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`,
           source: `Batch: ${batch.title}`,
           date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
-          totalAmount: batch.price,
+          totalAmount: finalEnrollPrice,
           status: 'Dispatched',
           courier: 'DTDC Express',
           trackingNumber: trackingId,
@@ -160,7 +164,7 @@ export default function BatchesPage() {
 
       const options = {
         key: orderData.key || 'rzp_test_mockkey123',
-        amount: Math.round(batch.price * 100),
+        amount: Math.round(finalEnrollPrice * 100),
         currency: 'INR',
         name: 'CodeBrave Education Platform',
         description: `${batch.title} + Free Book Box`,
@@ -192,15 +196,16 @@ export default function BatchesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      {/* Eagerly Preloaded Razorpay SDK for instantaneous checkout (0 lazy loading delay) */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
       <Navbar />
 
       {/* Hero Header */}
-      <div className="bg-white border-b border-slate-200 py-12 px-6">
+      <div className="bg-white border-b border-slate-200 py-10 px-6">
         <div className="max-w-7xl mx-auto space-y-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 border border-teal-200 text-teal-700 rounded-full text-xs font-extrabold uppercase">
             <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-            <span>Live Interactive Batches • Includes Textbook Box Sets</span>
+            <span>Live PW / Unacademy Style Interactive Cohorts</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
             Live Preparation <span className="text-teal-600">Batches & Cohorts</span>
@@ -217,7 +222,11 @@ export default function BatchesPage() {
           {batches.map((batch) => {
             const isJoined = joinedBatchIds.includes(batch.id)
             const isProcessing = processingId === batch.id
-            const discount = Math.round(((batch.originalPrice - batch.price) / batch.originalPrice) * 100)
+            const appliedCoupon = appliedCoupons[batch.id]
+            const couponError = couponErrors[batch.id]
+
+            const currentPrice = appliedCoupon ? appliedCoupon.finalPrice : batch.price
+            const discount = Math.round(((batch.originalPrice - currentPrice) / batch.originalPrice) * 100)
 
             return (
               <div key={batch.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition">
@@ -226,7 +235,7 @@ export default function BatchesPage() {
                     <span className="px-3 py-1 bg-slate-900 text-white text-[10px] font-black rounded-full uppercase">
                       {batch.targetYear}
                     </span>
-                    <span className="px-3 py-1 bg-teal-50 text-teal-700 text-[10px] font-black rounded-lg border border-teal-200">
+                    <span className="px-3 py-1 bg-rose-50 text-rose-700 text-[10px] font-black rounded-lg border border-rose-200 animate-pulse">
                       {batch.badge}
                     </span>
                   </div>
@@ -236,14 +245,21 @@ export default function BatchesPage() {
                     <p className="text-xs font-semibold text-slate-600">Faculty: {batch.faculty} • <span className="text-slate-400">{batch.facultyRole}</span></p>
                   </div>
 
+                  {/* Seat Occupancy Progress Bar */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                      <span>Seat Occupancy Rate</span>
+                      <span className="text-rose-600">{batch.studentsEnrolled}</span>
+                    </div>
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-rose-500 h-full rounded-full" style={{ width: '96%' }} />
+                    </div>
+                  </div>
+
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs font-medium text-slate-700">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-teal-600 shrink-0" />
                       <span>{batch.schedule}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-teal-600 shrink-0" />
-                      <span className="font-bold text-slate-900">Seat Capacity: {batch.studentsEnrolled}</span>
                     </div>
                   </div>
 
@@ -262,6 +278,42 @@ export default function BatchesPage() {
                     </ul>
                   </div>
 
+                  {/* Promo Code Drawer */}
+                  {!isJoined && (
+                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-slate-700 flex items-center gap-1">
+                          <Tag className="w-3.5 h-3.5 text-teal-600" /> Have a Promo Code?
+                        </span>
+                        {appliedCoupon && (
+                          <span className="text-emerald-600 font-bold text-[10px]">
+                            {appliedCoupon.code} Applied (-₹{appliedCoupon.discountAmount})
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInputs[batch.id] || ''}
+                          onChange={e => setCouponInputs({ ...couponInputs, [batch.id]: e.target.value })}
+                          placeholder="Enter Code (e.g. JEE2026)"
+                          className="flex-1 uppercase bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-teal-600 font-bold"
+                        />
+                        <button
+                          onClick={() => handleApplyCoupon(batch.id, batch.price)}
+                          className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                        >
+                          Apply
+                        </button>
+                      </div>
+
+                      {couponError && (
+                        <p className="text-rose-600 font-bold text-[10px]">{couponError}</p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Included Book Box Banner */}
                   <div className="p-4 bg-teal-50 rounded-2xl border border-teal-200 text-xs space-y-1">
                     <div className="flex items-center gap-1.5 text-teal-900 font-black">
@@ -277,7 +329,7 @@ export default function BatchesPage() {
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold block uppercase">Total Batch Fee (Book Box Included)</span>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-slate-900">₹{batch.price}</span>
+                        <span className="text-3xl font-black text-slate-900">₹{currentPrice}</span>
                         <span className="text-xs text-slate-400 line-through">₹{batch.originalPrice}</span>
                         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded">Save {discount}%</span>
                       </div>

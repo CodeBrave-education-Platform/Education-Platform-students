@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useState, useTransition } from 'react'
+import CodeBraveAiAssistantModal from '@/components/CodeBraveAiAssistantModal'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -185,6 +186,7 @@ export default function DashboardClient({
 
   const [myExams, setMyExams] = useState([])
   const [loadingMyExams, setLoadingMyExams] = useState(false)
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false)
 
   // Sync enrolled courses & purchased batches from localStorage into enrollments state
   React.useEffect(() => {
@@ -985,24 +987,40 @@ export default function DashboardClient({
 
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
-            {/* Small Welcome Note (No gradients, premium Blue/White glass theme) */}
-            <div className="p-6 rounded-2xl bg-teal-50/40 dark:bg-blue-955/10 border border-teal-500/10 dark:border-blue-400/10 select-none shadow-sm">
-              <div className="max-w-3xl space-y-2">
+            {/* PW / Unacademy Style Welcome Banner & Gamified Streak Header */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 select-none shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div className="max-w-2xl space-y-2">
                 <div className="flex items-center gap-2 select-none">
-                  <span className="w-1.5 h-1.5 bg-teal-600 dark:bg-blue-400 rounded-full animate-pulse" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400">
-                    Portal Active
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200">
+                    AIR Ranker Hub Active
                   </span>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
-                  Welcome, {displayName}!
+                <h2 className="text-2xl font-black tracking-tight text-slate-900">
+                  Welcome back, {displayName}!
                 </h2>
-                <p className="text-xs font-medium text-slate-500 dark:text-zinc-450 leading-relaxed max-w-2xl">
+                <p className="text-xs font-medium text-slate-600 leading-relaxed">
                   {isTeacher 
-                    ? 'Welcome to your instructor control panel. Publish modules, track student enrollments, and manage your courses cleanly.' 
-                    : 'Welcome to your student control panel. View your active learning syllabi, explore the course directory, and track your study progress.'
+                    ? 'Manage student course enrollments, publish syllabus modules, and inspect proctored exam scorecards.' 
+                    : 'Track your JEE/NEET prep progress, access enrolled textbooks, and practice with CodeBrave AI Tutor!'
                   }
                 </p>
+              </div>
+
+              {/* PW / Unacademy Gamified Streak & AI Tutor Launcher */}
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 font-black text-xs shadow-xs">
+                  <span className="text-base">🔥</span>
+                  <span>7-Day Streak</span>
+                </div>
+
+                <button
+                  onClick={() => setIsAiModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-2xl transition cursor-pointer shadow-md"
+                >
+                  <Sparkles className="w-4 h-4 text-teal-400" />
+                  <span>CodeBrave AI Tutor</span>
+                </button>
               </div>
             </div>
 
@@ -2781,10 +2799,16 @@ export default function DashboardClient({
         )}
       </AnimatePresence>
 
-      {/* Official script loader injected lazily to optimize hydration performance */}
+      {/* CodeBrave AI Tutor & Doubt Resolver Modal */}
+      <CodeBraveAiAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+      />
+
+      {/* Official script loader eagerly preloaded for instantaneous checkout */}
       <Script 
         src="https://checkout.razorpay.com/v1/checkout.js" 
-        strategy="lazyOnload" 
+        strategy="beforeInteractive" 
       />
 
     </div>
