@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { useState, useTransition } from 'react'
-import CodeBraveAiAssistantModal from '@/components/CodeBraveAiAssistantModal'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -186,7 +185,6 @@ export default function DashboardClient({
 
   const [myExams, setMyExams] = useState([])
   const [loadingMyExams, setLoadingMyExams] = useState(false)
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false)
 
   // Sync enrolled courses & purchased batches from localStorage into enrollments state
   React.useEffect(() => {
@@ -1002,25 +1000,17 @@ export default function DashboardClient({
                 <p className="text-xs font-medium text-slate-600 leading-relaxed">
                   {isTeacher 
                     ? 'Manage student course enrollments, publish syllabus modules, and inspect proctored exam scorecards.' 
-                    : 'Track your JEE/NEET prep progress, access enrolled textbooks, and practice with CodeBrave AI Tutor!'
+                    : 'Track your JEE/NEET prep progress, access enrolled textbooks, and practice with mock tests.'
                   }
                 </p>
               </div>
 
-              {/* PW / Unacademy Gamified Streak & AI Tutor Launcher */}
+              {/* PW / Unacademy Gamified Streak Header */}
               <div className="flex items-center gap-3 shrink-0">
                 <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 font-black text-xs shadow-xs">
                   <span className="text-base">🔥</span>
                   <span>7-Day Streak</span>
                 </div>
-
-                <button
-                  onClick={() => setIsAiModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-2xl transition cursor-pointer shadow-md"
-                >
-                  <Sparkles className="w-4 h-4 text-teal-400" />
-                  <span>CodeBrave AI Tutor</span>
-                </button>
               </div>
             </div>
 
@@ -2798,12 +2788,6 @@ export default function DashboardClient({
           </>
         )}
       </AnimatePresence>
-
-      {/* CodeBrave AI Tutor & Doubt Resolver Modal */}
-      <CodeBraveAiAssistantModal
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-      />
 
       {/* Official script loader preloaded for instantaneous checkout */}
       <Script 
