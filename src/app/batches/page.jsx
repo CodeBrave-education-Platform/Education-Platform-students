@@ -196,8 +196,8 @@ export default function BatchesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
-      {/* Eagerly Preloaded Razorpay SDK for instantaneous checkout (0 lazy loading delay) */}
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
+      {/* Razorpay SDK for instantaneous checkout */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       <Navbar />
 
       {/* Hero Header */}

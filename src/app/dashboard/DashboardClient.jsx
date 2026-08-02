@@ -2805,10 +2805,10 @@ export default function DashboardClient({
         onClose={() => setIsAiModalOpen(false)}
       />
 
-      {/* Official script loader eagerly preloaded for instantaneous checkout */}
+      {/* Official script loader preloaded for instantaneous checkout */}
       <Script 
         src="https://checkout.razorpay.com/v1/checkout.js" 
-        strategy="beforeInteractive" 
+        strategy="afterInteractive" 
       />
 
     </div>
