@@ -398,11 +398,21 @@ export default function CbtEngineClient({ user, profile, exam }) {
               </span>
             </div>
 
-            {/* Clear Question Prompt Display */}
+            {/* Clear Question Prompt & Diagram Display */}
             <div className="space-y-4">
               <h3 className="text-lg font-black text-slate-900 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 {questionPrompt}
               </h3>
+
+              {(currentQuestion?.diagram_url || currentQuestion?.diagramUrl) && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg">
+                  <img 
+                    src={currentQuestion.diagram_url || currentQuestion.diagramUrl} 
+                    alt="Question Diagram" 
+                    className="max-h-56 object-contain rounded-xl" 
+                  />
+                </div>
+              )}
 
               {/* Options */}
               <div className="space-y-3 pt-2">
