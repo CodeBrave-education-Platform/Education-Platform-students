@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import RazorpayPaymentGatewayModal from '@/components/RazorpayPaymentGatewayModal'
 import { 
   BookOpen, Search, GraduationCap, Award, ClipboardList, 
   ArrowRight, ShieldAlert, Clock, Sparkles, CheckCircle2,
-  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity, RotateCcw
+  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity, RotateCcw, Image as ImageIcon
 } from 'lucide-react'
 
 export default function TestSeriesHubClient({
@@ -30,6 +31,10 @@ export default function TestSeriesHubClient({
   const [activeTag, setActiveTag] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedPackageId, setExpandedPackageId] = useState(null)
+
+  // Razorpay In-Website Payment Gateway State
+  const [paymentModalItem, setPaymentModalItem] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // Extract unique competitive tag filters
   const tags = React.useMemo(() => {
@@ -168,43 +173,60 @@ export default function TestSeriesHubClient({
                   transition={{ duration: 0.3 }}
                   className="bg-white border border-slate-200 hover:border-slate-300 rounded-[2rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group shadow-sm hover:shadow-md"
                 >
-                  {/* Header area */}
-                  <div className="relative p-6 flex flex-col justify-between overflow-hidden border-b border-slate-100 bg-slate-50/50">
-                    <div className="flex justify-between items-start z-10">
-                      <span className="px-3 py-1 bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider rounded-full">
-                        {pkg.target_exam_tag}
-                      </span>
-                      <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border ${
-                        isPremium 
-                          ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
-                        {isPremium ? `₹${ledger.price || 499}` : 'FREE'}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 mt-4 z-10">
-                      <div className="bg-white border border-slate-200 p-2 rounded-xl text-center shadow-xs">
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-tight">Total Tests</span>
-                        <span className="text-xs font-black text-slate-900">{pkg.total_tests_count}</span>
-                      </div>
-                      <div className="bg-white border border-slate-200 p-2 rounded-xl text-center shadow-xs">
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-tight">Full Mocks</span>
-                        <span className="text-xs font-black text-slate-900">{distribution.full_mocks || 0} Papers</span>
+                  {/* Package Thumbnail & Header */}
+                  <div className="relative h-40 overflow-hidden bg-slate-100">
+                    <img 
+                      src={pkg.thumbnail_url || 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80'} 
+                      alt={pkg.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent p-4 flex flex-col justify-between">
+                      <div className="flex justify-between items-start">
+                        <span className="px-2.5 py-0.5 bg-slate-900/90 text-teal-400 border border-teal-500/30 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                          {pkg.target_exam_tag}
+                        </span>
+                        <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border ${
+                          isPremium 
+                            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {isPremium ? `₹${ledger.price || 499}` : 'FREE'}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Card Info Area */}
                   <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                    <div className="space-y-1.5">
-                      <h3 className="font-black text-base text-slate-900 group-hover:text-teal-700 transition">
+                    <div className="space-y-2">
+                      <h3 className="font-black text-base text-slate-900 group-hover:text-teal-700 transition leading-snug">
                         {pkg.title}
                       </h3>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                      <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">
+                        {pkg.description || 'Comprehensive NTA proctored CBT test series package.'}
+                      </p>
+                      <p className="text-[10px] text-teal-700 font-black uppercase tracking-wide">
                         {distribution.chapter_drills || 0} Drills • {distribution.full_mocks || 0} Mocks • {distribution.live_papers || 0} Live Ranking
                       </p>
                     </div>
+
+                    {isPremium && (
+                      <button
+                        onClick={() => {
+                          setPaymentModalItem({
+                            id: pkg.id,
+                            title: pkg.title,
+                            price: ledger.price || 499,
+                            type: 'Test Series Package'
+                          });
+                          setIsPaymentModalOpen(true);
+                        }}
+                        className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                      >
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Unlock Package via Razorpay (₹{ledger.price || 499})</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => togglePackage(pkg.id)}
@@ -309,9 +331,19 @@ export default function TestSeriesHubClient({
       </div>
 
       <div className="z-10 mt-10">
+        {/* Razorpay In-Website Payment Gateway & Tax Invoice Modal */}
+        <RazorpayPaymentGatewayModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          item={paymentModalItem}
+          studentUser={user}
+          onSuccessPayment={(receipt) => {
+            console.log('[Razorpay Payment Success]:', receipt);
+          }}
+        />
+
         <Footer />
       </div>
-
     </div>
   )
 }
