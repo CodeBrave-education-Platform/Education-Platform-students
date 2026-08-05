@@ -182,9 +182,14 @@ export default function TestSeriesHubClient({
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent p-4 flex flex-col justify-between">
                       <div className="flex justify-between items-start">
-                        <span className="px-2.5 py-0.5 bg-slate-900/90 text-teal-400 border border-teal-500/30 text-[9px] font-black uppercase tracking-widest rounded-lg">
-                          {pkg.target_exam_tag}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2.5 py-0.5 bg-slate-900/90 text-teal-400 border border-teal-500/30 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                            {pkg.target_exam_tag}
+                          </span>
+                          <span className="px-2.5 py-0.5 bg-indigo-900/90 text-indigo-200 border border-indigo-500/30 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                            {pkg.campus_branch || 'Hyderabad Main'}
+                          </span>
+                        </div>
                         <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border ${
                           isPremium 
                             ? 'bg-amber-50 text-amber-700 border-amber-200' 

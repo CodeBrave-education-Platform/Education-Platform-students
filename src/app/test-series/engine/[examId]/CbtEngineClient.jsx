@@ -84,6 +84,18 @@ export default function CbtEngineClient({ user, profile, exam }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [markedReview, setMarkedReview] = useState(new Set())
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true)
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   // Tool Modals
   const [showCalculator, setShowCalculator] = useState(false)
@@ -323,6 +335,23 @@ export default function CbtEngineClient({ user, profile, exam }) {
           <h2 className="text-sm font-black text-slate-900 truncate max-w-[200px] md:max-w-sm">
             {exam.title}
           </h2>
+          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border flex items-center gap-1.5 ${
+            isOnline 
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+              : 'bg-amber-50 text-amber-700 border-amber-200'
+          }`}>
+            {isOnline ? (
+              <>
+                <Cloud className="w-3 h-3 text-emerald-600" />
+                <span>Cloud Synced</span>
+              </>
+            ) : (
+              <>
+                <CloudOff className="w-3 h-3 text-amber-600 animate-pulse" />
+                <span>IndexedDB Offline Mode</span>
+              </>
+            )}
+          </span>
         </div>
 
         {/* NTA Interactive Feature Tools */}
