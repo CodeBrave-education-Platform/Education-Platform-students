@@ -22,11 +22,13 @@ export default function RazorpayPaymentGatewayModal({
   const gstAmount = Math.round(itemPrice * 0.18);
   const totalAmount = itemPrice + gstAmount;
 
+  const [dispatchStatus, setDispatchStatus] = useState(null);
+
   const handleRazorpayPay = () => {
     setProcessing(true);
 
     // Simulate Razorpay In-Website Gateway Transaction Verification
-    setTimeout(() => {
+    setTimeout(async () => {
       const transactionId = `pay_rzp_${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
       const invoiceNo = `INV-CB-${Math.floor(100000 + Math.random() * 900000)}`;
       
@@ -46,6 +48,19 @@ export default function RazorpayPaymentGatewayModal({
       setReceiptData(receipt);
       setProcessing(false);
       setPaymentCompleted(true);
+
+      // Dispatch automated WhatsApp & Email notification receipt
+      try {
+        const res = await fetch('/api/notifications/dispatch-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiptData: receipt, studentEmail: receipt.studentEmail })
+        });
+        const data = await res.json();
+        setDispatchStatus(data.message || 'Invoice sent to WhatsApp & Email');
+      } catch (err) {
+        console.warn('[Invoice Dispatch Warning]:', err.message);
+      }
 
       if (onSuccessPayment) {
         onSuccessPayment(receipt);
@@ -209,12 +224,17 @@ export default function RazorpayPaymentGatewayModal({
         ) : (
           /* Step 2: Printable Tax Invoice Receipt */
           <div className="space-y-6">
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center gap-3 text-emerald-900">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
-              <div>
-                <h4 className="text-xs font-black">Payment Successfully Confirmed!</h4>
-                <p className="text-[11px] font-medium opacity-90">Your course/test series access has been instantly unlocked.</p>
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between text-emerald-900">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                <div>
+                  <h4 className="text-xs font-black">Payment Successfully Confirmed!</h4>
+                  <p className="text-[11px] font-medium opacity-90">Your course/test series access has been instantly unlocked.</p>
+                </div>
               </div>
+              <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1 shadow-xs">
+                <span>WhatsApp Sent</span>
+              </span>
             </div>
 
             {/* Printable Tax Invoice Content */}

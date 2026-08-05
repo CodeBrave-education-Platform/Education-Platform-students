@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { saveExamState, getExamState, clearExamState } from '@/utils/indexeddb'
+import KatexRenderer from '@/components/KatexRenderer'
 import { 
   AlertTriangle, CheckCircle2, Clock, Cloud, CloudOff, 
   HelpCircle, Monitor, ShieldAlert, User, Zap, RefreshCw, RotateCcw,
@@ -400,9 +401,9 @@ export default function CbtEngineClient({ user, profile, exam }) {
 
             {/* Clear Question Prompt & Diagram Display */}
             <div className="space-y-4">
-              <h3 className="text-lg font-black text-slate-900 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                {questionPrompt}
-              </h3>
+              <div className="text-lg font-black text-slate-900 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <KatexRenderer content={questionPrompt} />
+              </div>
 
               {(currentQuestion?.diagram_url || currentQuestion?.diagramUrl) && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg">
@@ -433,7 +434,9 @@ export default function CbtEngineClient({ user, profile, exam }) {
                           : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
                       }`}
                     >
-                      <span className="text-xs font-bold leading-relaxed">{opt}</span>
+                      <span className="text-xs font-bold leading-relaxed">
+                        <KatexRenderer content={opt} />
+                      </span>
                       {isSelected && <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0" />}
                     </button>
                   )
