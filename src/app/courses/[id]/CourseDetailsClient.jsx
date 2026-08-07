@@ -170,7 +170,32 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
               throw new Error(verifyData.error || 'Payment verification failed.')
             }
 
-            alert('Payment Successful! Welcome to the classroom.')
+            // Auto-provision accompanying Hardcopy Book Kit into Book Orders
+            try {
+              const bookKitTitle = course.bookKit || `${course.title} Printed Textbook Set`;
+              const newBookOrder = {
+                id: `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+                source: 'Course Enrollment',
+                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                totalAmount: 0,
+                status: 'Dispatched & In Transit',
+                courier: 'Bluedart Express',
+                trackingNumber: `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`,
+                trackingLink: 'https://track.bluedart.com/',
+                items: [
+                  {
+                    title: bookKitTitle,
+                    format: 'Hardcopy Textbook Kit + Instant eBook PDF',
+                    downloadUrl: '/downloads/physics-formulas.pdf'
+                  }
+                ]
+              };
+              const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]');
+              localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]));
+            } catch (e) {
+              console.warn('Book provision error:', e);
+            }
+
             setEnrolled(true)
             startTransition(() => {
               router.refresh()

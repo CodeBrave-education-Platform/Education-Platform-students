@@ -49,6 +49,33 @@ export default function RazorpayPaymentGatewayModal({
       setProcessing(false);
       setPaymentCompleted(true);
 
+      // Auto-Provision Included Printed Book Kit into Book Orders Portal
+      try {
+        const bookKitTitle = item.bookKit || `${item.title} - Complete Textbook & Formula Box Set`;
+        const newBookOrder = {
+          id: `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          source: `${item.type || 'Course'} Enrollment`,
+          date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+          totalAmount: 0,
+          status: 'Dispatched & In Transit',
+          courier: 'Bluedart Express',
+          trackingNumber: `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`,
+          trackingLink: 'https://track.bluedart.com/',
+          items: [
+            {
+              title: bookKitTitle,
+              format: 'Hardcopy Textbook Kit + Instant eBook PDF',
+              downloadUrl: '/downloads/physics-formulas.pdf'
+            }
+          ]
+        };
+
+        const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]');
+        localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]));
+      } catch (e) {
+        console.warn('[Book Auto-Provisioning Notice]:', e);
+      }
+
       // Dispatch automated WhatsApp & Email notification receipt
       try {
         const res = await fetch('/api/notifications/dispatch-invoice', {
