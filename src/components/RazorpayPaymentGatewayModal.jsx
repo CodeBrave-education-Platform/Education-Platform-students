@@ -22,6 +22,13 @@ export default function RazorpayPaymentGatewayModal({
   const gstAmount = Math.round(itemPrice * 0.18);
   const totalAmount = itemPrice + gstAmount;
 
+  const [shippingName, setShippingName] = useState(studentUser?.user_metadata?.full_name || 'Student Candidate');
+  const [shippingPhone, setShippingPhone] = useState('+91 9876543210');
+  const [shippingStreet, setShippingStreet] = useState('Flat 402, Block A, Jubilee Hills');
+  const [shippingCity, setShippingCity] = useState('Hyderabad');
+  const [shippingState, setShippingState] = useState('Telangana');
+  const [shippingPincode, setShippingPincode] = useState('500033');
+
   const [dispatchStatus, setDispatchStatus] = useState(null);
 
   const handleRazorpayPay = () => {
@@ -36,7 +43,7 @@ export default function RazorpayPaymentGatewayModal({
         invoiceNo,
         transactionId,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-        studentName: studentUser?.user_metadata?.full_name || studentUser?.email?.split('@')[0] || 'Student Member',
+        studentName: shippingName || studentUser?.user_metadata?.full_name || 'Student Member',
         studentEmail: studentUser?.email || 'student@codebrave.edu.in',
         itemTitle: item.title,
         itemType: item.type || 'Test Series Package',
@@ -49,7 +56,7 @@ export default function RazorpayPaymentGatewayModal({
       setProcessing(false);
       setPaymentCompleted(true);
 
-      // Auto-Provision Included Printed Book Kit into Book Orders Portal
+      // Auto-Provision Included Printed Book Kit into Book Orders Portal with Shipping Address
       try {
         const bookKitTitle = item.bookKit || `${item.title} - Complete Textbook & Formula Box Set`;
         const newBookOrder = {
@@ -61,6 +68,14 @@ export default function RazorpayPaymentGatewayModal({
           courier: 'Bluedart Express',
           trackingNumber: `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`,
           trackingLink: 'https://track.bluedart.com/',
+          shippingAddress: {
+            name: shippingName,
+            phone: shippingPhone,
+            street: shippingStreet,
+            city: shippingCity,
+            state: shippingState,
+            pincode: shippingPincode
+          },
           items: [
             {
               title: bookKitTitle,
@@ -149,6 +164,81 @@ export default function RazorpayPaymentGatewayModal({
               <div className="text-[11px] text-slate-500 font-medium flex justify-between border-t border-slate-200/60 pt-2 mt-2">
                 <span>Tuition Base: ₹{itemPrice}</span>
                 <span>GST (18%): ₹{gstAmount}</span>
+              </div>
+            </div>
+
+            {/* Physical Hardcopy Book Delivery Shipping Address Form */}
+            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-black text-amber-900">
+                <span className="w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center text-[10px]">📦</span>
+                <span>Physical Hardcopy Book Kit Shipping Destination Address:</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">Recipient Name</label>
+                  <input
+                    type="text"
+                    value={shippingName}
+                    onChange={e => setShippingName(e.target.value)}
+                    placeholder="Full Student Name"
+                    className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">Contact Phone (WhatsApp)</label>
+                  <input
+                    type="text"
+                    value={shippingPhone}
+                    onChange={e => setShippingPhone(e.target.value)}
+                    placeholder="+91 Phone Number"
+                    className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs">
+                <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">Flat / Building / Street Address</label>
+                <input
+                  type="text"
+                  value={shippingStreet}
+                  onChange={e => setShippingStreet(e.target.value)}
+                  placeholder="Door No, Street & Area Landmark"
+                  className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">City</label>
+                  <input
+                    type="text"
+                    value={shippingCity}
+                    onChange={e => setShippingCity(e.target.value)}
+                    placeholder="City"
+                    className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">State</label>
+                  <input
+                    type="text"
+                    value={shippingState}
+                    onChange={e => setShippingState(e.target.value)}
+                    placeholder="State"
+                    className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-amber-800 uppercase block mb-1">Pincode</label>
+                  <input
+                    type="text"
+                    value={shippingPincode}
+                    onChange={e => setShippingPincode(e.target.value)}
+                    placeholder="Pincode"
+                    className="w-full bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900 font-bold outline-none focus:border-amber-500"
+                  />
+                </div>
               </div>
             </div>
 

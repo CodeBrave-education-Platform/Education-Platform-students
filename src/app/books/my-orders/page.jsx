@@ -116,6 +116,20 @@ export default function MyBookOrdersPage() {
                 ))}
               </div>
 
+              {/* Shipping Destination Address Box */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <Truck className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                  <span>Physical Hardcopy Delivery Destination:</span>
+                </div>
+                <p className="text-[11px] text-slate-600 font-medium pl-5">
+                  {order.shippingAddress 
+                    ? `${order.shippingAddress.name} (${order.shippingAddress.phone}) • ${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}`
+                    : 'CodeBrave Student Campus Registry • Flat 402, Block A, Jubilee Hills, Hyderabad, TS - 500033 (Ph: +91 9876543210)'
+                  }
+                </p>
+              </div>
+
               {/* Live Tracking Information */}
               <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-950 space-y-3">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
