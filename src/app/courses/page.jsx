@@ -15,6 +15,7 @@ export default function CoursesCatalogPage() {
   const [selectedSubject, setSelectedSubject] = useState('All')
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   // Promo Code States
   const [couponInputs, setCouponInputs] = useState({})
@@ -160,6 +161,7 @@ export default function CoursesCatalogPage() {
   ]
 
   useEffect(() => {
+    setIsMounted(true)
     try {
       const stored = localStorage.getItem('codebrave_enrolled_courses')
       if (stored) {
