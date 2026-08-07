@@ -29,8 +29,10 @@ export default function RootLayout({ children }) {
           strategy="afterInteractive"
         />
 
-        {/* Secure inline PWA Service Worker registration */}
-        <script
+        {/* Secure inline PWA Service Worker registration via Next.js Script */}
+        <Script
+          id="pwa-sw"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
