@@ -1294,7 +1294,9 @@ export default function DashboardClient({
                                       </span>
                                     </div>
                                     <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">
-                                      {new Date(enroll.enrolled_at).toLocaleDateString('en-US')}
+                                      {enroll.enrolled_at && !isNaN(new Date(enroll.enrolled_at).getTime())
+                                        ? new Date(enroll.enrolled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                        : 'Active Access'}
                                     </span>
                                   </div>
 
@@ -1308,7 +1310,7 @@ export default function DashboardClient({
                                     </button>
                                     
                                     <button
-                                      onClick={() => router.push(`/learn/${course.id}`)}
+                                      onClick={() => router.push(`/learn/${course.id || 'c1'}`)}
                                       className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                     >
                                       <span>RESUME SYLLABI</span>
