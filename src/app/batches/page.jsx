@@ -8,12 +8,14 @@ import Footer from '@/components/Footer'
 import { validateCoupon } from '@/utils/coupons'
 import { 
   Users, Sparkles, CheckCircle2, Clock, Calendar, 
-  Package, Download, Award, ArrowRight, ShieldCheck, Loader2, CreditCard, Check, Tag 
+  Package, Download, Award, ArrowRight, ShieldCheck, Loader2, CreditCard, Check, Tag,
+  ChevronDown, ChevronUp, BookOpen, FileText, Video, PlayCircle
 } from 'lucide-react'
 
 export default function BatchesPage() {
   const [joinedBatchIds, setJoinedBatchIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
+  const [expandedCurriculumBatchId, setExpandedCurriculumBatchId] = useState(null)
 
   // Promo Code States
   const [couponInputs, setCouponInputs] = useState({})
@@ -43,7 +45,34 @@ export default function BatchesPage() {
         title: 'Full 6-Volume Hardcopy Textbook Box Set + Digital PDF Vault',
         booksCount: 6,
         value: 3499
-      }
+      },
+      curriculum: [
+        {
+          chapter: 'Module 1: Physics Mechanics & Rotational Dynamics',
+          duration: '3 Weeks • 18 Live Classes',
+          lessons: [
+            { title: 'Vector Algebra & Kinematics 2D Masterclass', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
+            { title: 'Newton Laws of Motion & Friction Deep Dive', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
+            { title: 'Rotational Motion & Rolling Dynamics', type: 'DPP Problem Solving', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' }
+          ]
+        },
+        {
+          chapter: 'Module 2: Advanced Calculus & Differential Equations',
+          duration: '4 Weeks • 24 Live Classes',
+          lessons: [
+            { title: 'Limits, Continuity & Differentiability', type: 'Live Video Class', duration: '100 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' },
+            { title: 'Definite Integrals & Area Under Curve', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' }
+          ]
+        },
+        {
+          chapter: 'Module 3: Physical & Organic Chemistry Masterclass',
+          duration: '3 Weeks • 18 Live Classes',
+          lessons: [
+            { title: 'Chemical Equilibrium & Ionic Reactions', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/chemistry-notes.pdf' },
+            { title: 'Reaction Mechanisms & GOC Hydrocarbons', type: 'Practice MCQ Quiz', duration: '75 Mins', pdfUrl: '/downloads/chemistry-notes.pdf' }
+          ]
+        }
+      ]
     },
     {
       id: 'b-medical',
@@ -67,7 +96,25 @@ export default function BatchesPage() {
         title: 'NEET 10,000 MCQ Bank + Biology Flashcard Box Set',
         booksCount: 4,
         value: 2999
-      }
+      },
+      curriculum: [
+        {
+          chapter: 'Module 1: Human Physiology & Cell Biology',
+          duration: '4 Weeks • 20 Live Classes',
+          lessons: [
+            { title: 'Cell Structure, Organelles & Cell Division', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' },
+            { title: 'Digestion, Respiration & Circulation Physiology', type: 'NCERT Line-by-Line', duration: '110 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' }
+          ]
+        },
+        {
+          chapter: 'Module 2: Genetics, Biotechnology & Evolution',
+          duration: '3 Weeks • 15 Live Classes',
+          lessons: [
+            { title: 'Molecular Basis of Inheritance & DNA Replication', type: 'Live Video Class', duration: '95 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' },
+            { title: 'Recombinant DNA Tech & Gene Cloning', type: 'Interactive Video', duration: '85 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' }
+          ]
+        }
+      ]
     }
   ]
 
@@ -322,6 +369,57 @@ export default function BatchesPage() {
                     </div>
                     <p className="text-teal-800 font-medium">{batch.includedBookBox.title}</p>
                   </div>
+
+                  {/* Expandable Batch Curriculum Syllabus Accordion */}
+                  {batch.curriculum && (
+                    <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                      <button
+                        onClick={() => setExpandedCurriculumBatchId(expandedCurriculumBatchId === batch.id ? null : batch.id)}
+                        className="w-full p-4 flex justify-between items-center text-xs font-black text-slate-800 hover:bg-slate-100 transition cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4 text-teal-600" />
+                          <span>View Full Cohort Curriculum & Syllabus ({batch.curriculum.length} Modules)</span>
+                        </div>
+                        {expandedCurriculumBatchId === batch.id ? (
+                          <ChevronUp className="w-4 h-4 text-slate-500" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-slate-500" />
+                        )}
+                      </button>
+
+                      {expandedCurriculumBatchId === batch.id && (
+                        <div className="p-4 pt-0 space-y-4 border-t border-slate-200/80 bg-white">
+                          {batch.curriculum.map((mod, mIdx) => (
+                            <div key={mIdx} className="space-y-2 pt-3">
+                              <div className="flex justify-between items-center text-[11px]">
+                                <span className="font-extrabold text-teal-700">{mod.chapter}</span>
+                                <span className="text-[10px] text-slate-400 font-bold">{mod.duration}</span>
+                              </div>
+                              <div className="space-y-1.5">
+                                {mod.lessons.map((les, lIdx) => (
+                                  <div key={lIdx} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between text-[11px]">
+                                    <div className="flex items-center gap-2">
+                                      <PlayCircle className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                                      <span className="font-bold text-slate-800">{les.title}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="px-2 py-0.5 bg-teal-50 text-teal-700 font-bold rounded text-[9px]">{les.type}</span>
+                                      {les.pdfUrl && (
+                                        <a href={les.pdfUrl} download className="p-1 text-slate-400 hover:text-teal-600 transition" title="Download Practice Sheet">
+                                          <FileText className="w-3.5 h-3.5" />
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-8 pt-0 space-y-4 border-t border-slate-100">
