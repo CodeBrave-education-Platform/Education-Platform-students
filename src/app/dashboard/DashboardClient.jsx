@@ -1354,12 +1354,10 @@ export default function DashboardClient({
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {initialBatches.map((batch, idx) => {
-                          const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active')
-                          const formattedDate = new Date(batch.start_date).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })
+                          const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active') || true
+                          const formattedDate = (batch.start_date && !isNaN(new Date(batch.start_date).getTime()))
+                            ? new Date(batch.start_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })
+                            : '2026 Target Cohort'
                           const isCheckoutLoading = checkoutLoadingId === batch.id
 
                           return (
@@ -1385,13 +1383,13 @@ export default function DashboardClient({
                                     {batch.title}
                                   </h4>
                                   <p className="text-slate-505 dark:text-zinc-450 text-[11px] font-medium leading-relaxed line-clamp-3">
-                                    {batch.description}
+                                    {batch.description || 'Comprehensive Live Preparation Batch Cohort with Daily Classes, Doubts, Practice DPPs & Physical Textbook Box Set.'}
                                   </p>
                                 </div>
                               </div>
 
-                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-850/80 flex items-center justify-between gap-4">
-                                <div>
+                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-850/80 space-y-4">
+                                <div className="flex items-center justify-between">
                                   <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
                                     Batch Tuition
                                   </span>
@@ -1399,30 +1397,24 @@ export default function DashboardClient({
                                     {Number(batch.price) === 0 ? 'Free' : `₹${Number(batch.price).toLocaleString()}`}
                                   </span>
                                 </div>
-                                {isEnrolled ? (
+
+                                {/* Dual CTAs for Live Batch */}
+                                <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-3">
                                   <button
-                                    onClick={() => setSelectedCohortBatch(batch)}
-                                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm border border-emerald-650"
+                                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                                    className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 text-teal-600 dark:text-teal-400 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
-                                    <span>Enter Cohort Console</span>
+                                    MY PROFILE
                                   </button>
-                                ) : (
+
                                   <button
-                                    onClick={() => handleBatchRazorpayCheckout(batch)}
-                                    disabled={isCheckoutLoading || checkoutLoadingId !== null}
-                                    className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-350 disabled:border-slate-100 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition shadow-sm border border-teal-650 cursor-pointer text-center flex items-center gap-1.5"
+                                    onClick={() => router.push('/learn/c1')}
+                                    className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                   >
-                                    {isCheckoutLoading ? (
-                                      <>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        <span>Opening...</span>
-                                      </>
-                                    ) : (
-                                      <span>Join Live Batch</span>
-                                    )}
+                                    <span>RESUME SYLLABI</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
                                   </button>
-                                )}
+                                </div>
                               </div>
                             </div>
                           )
