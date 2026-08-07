@@ -23,6 +23,33 @@ export default function CoursesCatalogPage() {
 
   const courses = [
     {
+      id: 'c-demo',
+      title: '🎯 Demo Course: JEE Ultimate 2026 Ranker Super Bundle (Books + Mock Tests Included)',
+      instructor: 'Dr. H.C. Verma & AIIMS Faculty Team',
+      instructorRole: 'Ex-IIT & AIIMS Department Heads',
+      subject: 'All',
+      level: 'JEE Advanced 2026',
+      rating: 5.0,
+      studentsCount: '3,850+ Enrolled Aspirants',
+      price: 1,
+      originalPrice: 14999,
+      duration: '350 Hours Live + 25 CBT Tests',
+      lessonsCount: 120,
+      cover: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+      badge: '🧪 DEMO TEST COURSE (₹1)',
+      checklist: [
+        'Full 6-Volume Hardcopy Printed Textbook Box Set Delivered via Bluedart Courier',
+        '25 Full-Length Proctored NTA CBT Mock Exam Papers with AIR Benchmarking',
+        'Complete Physics, Chemistry & Math Video Classroom & Lecture Notes',
+        'Instant Automatic Hardcopy Book Kit Dispatch to /books/my-orders Portal'
+      ],
+      includedBookKit: {
+        title: 'Full 6-Volume JEE Hardcopy Textbook Box Set + Formula Flashcards + Instant PDF Vault',
+        booksCount: 6,
+        value: 3999
+      }
+    },
+    {
       id: 'c1',
       title: 'JEE Mains & Advanced Complete Physics Mastery 2026',
       instructor: 'Dr. H.C. Verma & CodeBrave Team',

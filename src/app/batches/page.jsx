@@ -24,6 +24,48 @@ export default function BatchesPage() {
 
   const batches = [
     {
+      id: 'b-demo',
+      title: '🧪 Demo Batch: 2026 AIR-1 Super Elite Ranker Cohort (₹1 Test Checkout)',
+      targetYear: '2026 Target',
+      faculty: 'Dr. H.C. Verma & AIIMS Lead Authors',
+      facultyRole: 'Senior Department Heads',
+      schedule: 'Mon - Sat (10:00 AM - 2:00 PM)',
+      price: 1,
+      originalPrice: 15999,
+      studentsEnrolled: '495 / 500 Seats Filled',
+      seatsLeft: 5,
+      badge: '🧪 DEMO BATCH (₹1)',
+      checklist: [
+        'Full 6-Volume Hardcopy Printed Textbook Set Delivered via Bluedart Courier',
+        '25 Full-Length Proctored NTA CBT Mock Exam Papers with AIR Benchmarking',
+        'Interactive Live Video Classroom, DPP Worksheets & Lecture Notes',
+        'Instant Automatic Hardcopy Book Kit Dispatch to /books/my-orders Portal'
+      ],
+      includedBookBox: {
+        title: 'Full 6-Volume JEE/NEET Hardcopy Textbook Box Set + Digital PDF Vault',
+        booksCount: 6,
+        value: 3999
+      },
+      curriculum: [
+        {
+          chapter: 'Module 1: Physics Mechanics & Rotational Dynamics',
+          duration: '3 Weeks • 18 Live Classes',
+          lessons: [
+            { title: 'Vector Algebra & Kinematics 2D Masterclass', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
+            { title: 'Newton Laws of Motion & Friction Deep Dive', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/physics-formulas.pdf' }
+          ]
+        },
+        {
+          chapter: 'Module 2: NTA CBT Proctored Mock Exam Papers',
+          duration: '2 Full Papers • AIR Benchmark',
+          lessons: [
+            { title: 'JEE Advanced All-India Mock Paper 1', type: 'NTA CBT Exam', duration: '180 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' },
+            { title: 'JEE Advanced All-India Mock Paper 2', type: 'NTA CBT Exam', duration: '180 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' }
+          ]
+        }
+      ]
+    },
+    {
       id: 'b-achievers',
       title: 'JEE Advanced 2026 Top Rankers Achievers Cohort',
       targetYear: '2026 Target',
