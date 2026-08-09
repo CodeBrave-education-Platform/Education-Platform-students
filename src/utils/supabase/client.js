@@ -54,7 +54,7 @@ export function createClient() {
         }),
         signInWithIdToken: async () => ({
           data: {
-            user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' }
+            user: { id: 'student-01', email: 'student@Asentra.edu.in', role: 'student' }
           },
           error: null
         }),
@@ -65,7 +65,7 @@ export function createClient() {
         resetPasswordForEmail: async () => { throw new Error("Missing Supabase Environment Variables.") },
         exchangeCodeForSession: async () => { throw new Error("Missing Supabase Environment Variables.") },
         getUser: async () => ({
-          data: { user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' } },
+          data: { user: { id: 'student-01', email: 'student@Asentra.edu.in', role: 'student' } },
           error: null
         }),
         signOut: async () => {},
@@ -103,7 +103,7 @@ export function createClient() {
     } catch (err) {
       console.warn('[Supabase Auth Fetch Suppressed]: Using local student session fallback')
       return {
-        data: { user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' } },
+        data: { user: { id: 'student-01', email: 'student@Asentra.edu.in', role: 'student' } },
         error: null
       }
     }

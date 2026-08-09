@@ -40,7 +40,7 @@ export default function MyBookOrdersPage() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('codebrave_book_orders')
+      const stored = localStorage.getItem('Asentra_book_orders')
       if (stored) {
         const parsed = JSON.parse(stored)
         setOrders([...parsed, ...defaultOrders])
@@ -125,7 +125,7 @@ export default function MyBookOrdersPage() {
                 <p className="text-[11px] text-slate-600 font-medium pl-5">
                   {order.shippingAddress 
                     ? `${order.shippingAddress.name} (${order.shippingAddress.phone}) • ${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}`
-                    : 'CodeBrave Student Campus Registry • Flat 402, Block A, Jubilee Hills, Hyderabad, TS - 500033 (Ph: +91 9876543210)'
+                    : 'Asentra Student Campus Registry • Flat 402, Block A, Jubilee Hills, Hyderabad, TS - 500033 (Ph: +91 9876543210)'
                   }
                 </p>
               </div>

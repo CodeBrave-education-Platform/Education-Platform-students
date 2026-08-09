@@ -58,12 +58,20 @@ export async function updateSession(request) {
   } = await supabase.auth.getUser()
 
   // Route Protection Rules
-  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
-  const isLoginRoute = request.nextUrl.pathname.startsWith('/login')
+  const pathname = request.nextUrl.pathname
+  const isProtectedRoute = 
+    pathname.startsWith('/dashboard') || 
+    pathname.startsWith('/learn') || 
+    pathname.startsWith('/books') || 
+    pathname.startsWith('/test-series') ||
+    pathname.startsWith('/checkout')
+    
+  const isLoginRoute = pathname.startsWith('/login')
 
-  if (isDashboardRoute && !user) {
+  if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.searchParams.set('next', pathname)
     return NextResponse.redirect(url)
   }
 

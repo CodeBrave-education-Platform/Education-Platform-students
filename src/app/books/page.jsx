@@ -20,7 +20,7 @@ export default function BookStorePage() {
     {
       id: 'b1',
       title: 'IIT JEE Physics Mastery: Mechanics & Waves',
-      author: 'Dr. H.C. Verma & CodeBrave Faculty',
+      author: 'Dr. H.C. Verma & Asentra Faculty',
       category: 'JEE Advanced',
       subject: 'Physics',
       price: 699,
@@ -35,7 +35,7 @@ export default function BookStorePage() {
     {
       id: 'b2',
       title: 'Organic Chemistry 20-Year Chapterwise PYQs',
-      author: 'CodeBrave JEE Editorial Team',
+      author: 'Asentra JEE Editorial Team',
       category: 'JEE Mains',
       subject: 'Chemistry',
       price: 499,
@@ -111,7 +111,7 @@ export default function BookStorePage() {
         <div className="max-w-7xl mx-auto space-y-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/10 border border-teal-500/20 text-teal-400 rounded-full text-xs font-bold uppercase">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Official CodeBrave Academic Press</span>
+            <span>Official Asentra Academic Press</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
             Competitive Exam Books & <span className="text-teal-400">eBook Modules</span>

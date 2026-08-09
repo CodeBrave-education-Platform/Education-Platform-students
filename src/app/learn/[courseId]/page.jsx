@@ -27,7 +27,7 @@ export default async function LearnCoursePage(props) {
     .eq('status', 'active')
     .maybeSingle()
 
-  const isMockStudent = user?.email === 'student@codebrave.edu.in' || user?.id === 'student-01'
+  const isMockStudent = user?.email === 'student@Asentra.edu.in' || user?.id === 'student-01'
   if ((enrollError || !enrollment) && !isMockStudent && process.env.NODE_ENV === 'production') {
     // Gracefully render unauthorized block card in the page
     return (

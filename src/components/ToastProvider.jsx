@@ -5,11 +5,13 @@ import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react'
 
 const ToastContext = createContext(null)
 
+let nextToastId = 0
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
 
   const addToast = (message, type = 'success', duration = 4000) => {
-    const id = Date.now() + Math.random()
+    const id = `toast_${nextToastId++}`
     setToasts(prev => [...prev, { id, message, type }])
 
     setTimeout(() => {

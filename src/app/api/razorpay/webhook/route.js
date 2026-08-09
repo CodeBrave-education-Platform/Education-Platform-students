@@ -29,7 +29,31 @@ export async function POST(request) {
       const paymentEntity = payload.payload?.payment?.entity || {};
       const orderId = paymentEntity.order_id || `order_${Date.now()}`;
       const amount = (paymentEntity.amount || 49900) / 100;
-      const studentEmail = paymentEntity.email || 'student@codebrave.edu.in';
+      const studentEmail = paymentEntity.email || 'student@Asentra.edu.in';
+      const notes = paymentEntity.notes || {};
+      const userId = notes.userId;
+      const courseId = notes.courseId;
+
+      if (userId && courseId) {
+        // Create an admin client bypassing RLS to insert webhook data securely
+        const { createClient } = require('@supabase/supabase-js');
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY // fallback for dev
+        );
+
+        const { error: enrollError } = await supabaseAdmin
+          .from('enrollments')
+          .insert([{
+            user_id: userId,
+            course_id: courseId,
+            status: 'ACTIVE'
+          }]);
+
+        if (enrollError) {
+          console.error("Webhook enrollment error:", enrollError);
+        }
+      }
 
       return NextResponse.json({
         success: true,

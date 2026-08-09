@@ -46,11 +46,11 @@ export async function createClient() {
     return {
       auth: {
         getUser: async () => ({
-          data: { user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' } },
+          data: { user: { id: 'student-01', email: 'student@Asentra.edu.in', role: 'student' } },
           error: null
         }),
         getSession: async () => ({
-          data: { session: { user: { id: 'student-01', email: 'student@codebrave.edu.in', role: 'student' } } },
+          data: { session: { user: { id: 'student-01', email: 'student@Asentra.edu.in', role: 'student' } } },
           error: null
         })
       },

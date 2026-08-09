@@ -168,7 +168,7 @@ export default function CourseraShowcase() {
     const newCourse = {
       id: Date.now(),
       title: 'New Custom Course Pathway',
-      partner: 'CodeBrave University',
+      partner: 'Asentra University',
       partnerLogo: 'AU',
       rating: 5.0,
       reviews: '1',
@@ -259,7 +259,7 @@ export default function CourseraShowcase() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-black uppercase tracking-widest text-[#E1E1E1]">CodeBrave Admin Framework</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#E1E1E1]">Asentra Admin Framework</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -466,7 +466,7 @@ export default function CourseraShowcase() {
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-3 w-48 bg-white border border-[#E1E1E1] shadow-xl rounded-lg py-1.5 z-40 animate-in fade-in duration-100">
                     <div className="px-4 py-2 border-b border-[#E1E1E1]">
-                      <p className="text-xs font-bold text-[#1F1F1F]">CodeBrave Student</p>
+                      <p className="text-xs font-bold text-[#1F1F1F]">Asentra Student</p>
                       <p className="text-[10px] text-[#5C5C5C] truncate">student@asentra.edu</p>
                     </div>
                     <Link href="/dashboard" className="block px-4 py-2 text-xs font-semibold text-[#1F1F1F] hover:bg-[#F5F7FA]">

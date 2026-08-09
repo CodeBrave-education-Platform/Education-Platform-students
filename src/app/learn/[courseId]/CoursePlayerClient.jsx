@@ -3,9 +3,12 @@
 import React, { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { LiveKitRoom, VideoConference, RoomAudioRenderer } from '@livekit/components-react'
+import '@livekit/components-styles'
 import { createClient } from '@/utils/supabase/client'
 import { useTokenRefresh } from '@/hooks/useTokenRefresh'
 import { useWriteBehindQueue } from '@/hooks/useWriteBehindQueue'
+import { useToast } from '@/components/ToastProvider'
 import { 
   Play, 
   CheckCircle2, 
@@ -44,7 +47,7 @@ export default function CoursePlayerClient({
 
   const router = useRouter()
   const searchParams = useSearchParams()
-
+  const { addToast } = useToast()
 
   
   // Read active lesson from URL search parameter '?lesson='
@@ -103,6 +106,44 @@ export default function CoursePlayerClient({
     })
   }
   
+  // LiveKit State
+  const [activeLiveSession, setActiveLiveSession] = useState(null)
+  const [liveKitToken, setLiveKitToken] = useState('')
+  const [liveKitServerUrl, setLiveKitServerUrl] = useState('')
+  const [isJoiningLive, setIsJoiningLive] = useState(false)
+  
+  const joinLiveClass = async (session) => {
+    try {
+      setIsJoiningLive(true)
+      const res = await fetch('/api/live/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomName: `room_${course.id}_${session.id}`,
+          identity: user.id,
+          participantName: user.email
+        })
+      })
+      const data = await res.json()
+      if (res.ok && data.token) {
+        setLiveKitToken(data.token)
+        setLiveKitServerUrl(data.serverUrl)
+        setActiveLiveSession(session)
+        // Switch tab back to notes so the player is the focus
+        handleTabChange('NOTES')
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        addToast(data.error || 'Failed to join live class. Make sure you have an active enrollment.', 'error')
+      }
+    } catch (err) {
+      console.error(err)
+      addToast('Network error connecting to live class.', 'error')
+    } finally {
+      setIsJoiningLive(false)
+    }
+  }
+
   // Live doubt forum state
   const [doubts, setDoubts] = useState(initialDoubts)
   const [newDoubt, setNewDoubt] = useState('')
@@ -263,8 +304,7 @@ export default function CoursePlayerClient({
 
     const handleKeyDown = (e) => {
       if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('')
-        alert('[DRM GUARD] Screenshot captures are strictly forbidden.')
+        addToast('[DRM GUARD] Screenshot captures are strictly forbidden.', 'error')
         e.preventDefault()
       }
       if (
@@ -273,7 +313,7 @@ export default function CoursePlayerClient({
         (e.metaKey && e.altKey && e.key === 'i') || 
         (e.metaKey && e.altKey && e.key === 'I')
       ) {
-        alert('[DRM GUARD] Developer inspect options are disabled in focus mode.')
+        addToast('[DRM GUARD] Developer inspect options are disabled in focus mode.', 'error')
         e.preventDefault()
       }
       if (
@@ -486,16 +526,34 @@ export default function CoursePlayerClient({
               </div>
             )}
 
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${currentLesson?.video_id || getYouTubeIdFromUrl(currentLesson?.video_url)}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`}
-              title={currentLesson?.title || 'Lecture Video'}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="w-full h-full select-none"
-            />
+            {activeLiveSession && liveKitToken ? (
+              <LiveKitRoom
+                video={true}
+                audio={true}
+                token={liveKitToken}
+                serverUrl={liveKitServerUrl}
+                data-lk-theme="default"
+                className="w-full h-full"
+                onDisconnected={() => {
+                  setActiveLiveSession(null)
+                  setLiveKitToken('')
+                }}
+              >
+                <VideoConference />
+                <RoomAudioRenderer />
+              </LiveKitRoom>
+            ) : (
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${currentLesson?.video_id || getYouTubeIdFromUrl(currentLesson?.video_url)}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`}
+                title={currentLesson?.title || 'Lecture Video'}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full select-none"
+              />
+            )}
           </div>
 
           {/* Premium Tablet & Mobile Optimized Tabbed Interface Panel */}
@@ -1155,15 +1213,14 @@ export default function CoursePlayerClient({
                             </div>
 
                             {!isEnded && (
-                              <a
-                                href={session.meeting_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-sm border border-emerald-600 cursor-pointer"
+                              <button
+                                onClick={() => joinLiveClass(session)}
+                                disabled={isJoiningLive}
+                                className={`w-full sm:w-auto px-4 py-2.5 ${isJoiningLive ? 'bg-slate-400 border-slate-400' : 'bg-emerald-600 hover:bg-emerald-700 border-emerald-600'} text-white font-bold rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-sm border cursor-pointer`}
                               >
-                                <span>Join Live Class</span>
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
+                                <span>{isJoiningLive ? 'Connecting...' : 'Join Live Class'}</span>
+                                {!isJoiningLive && <ExternalLink className="w-3.5 h-3.5" />}
+                              </button>
                             )}
                           </div>
                         )

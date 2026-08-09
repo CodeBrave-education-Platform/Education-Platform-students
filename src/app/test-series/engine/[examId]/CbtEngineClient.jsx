@@ -217,6 +217,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
       try {
         // Safe evaluation
         const sanitized = calcInput.replace(/×/g, '*').replace(/÷/g, '/')
+        // eslint-disable-next-line react-hooks/unsupported-syntax
         setCalcResult(eval(sanitized).toString())
       } catch {
         setCalcResult('Error')
@@ -229,48 +230,32 @@ export default function CbtEngineClient({ user, profile, exam }) {
     }
   }
 
-  const handleSubmitExam = async () => {
-    let correct = 0
-    let incorrect = 0
-    let unanswered = 0
-    let score = 0
-
-    questions.forEach(q => {
-      const ans = answers[q.id]
-      if (!ans || ans.selected_option === undefined || ans.selected_option === null) {
-        unanswered++
-      } else if (ans.selected_option === q.correct_option_index) {
-        correct++
-        score += marksScheme.positive_marks
-      } else {
-        incorrect++
-        score += marksScheme.negative_marks
-      }
-    })
-
+  async function handleSubmitExam() {
     try {
-      const { data } = await supabase
-        .from('test_attempts')
-        .insert([{
-          user_id: user.id,
-          exam_id: exam.id,
-          answers_payload: answers,
-          score,
-          correct_count: correct,
-          incorrect_count: incorrect,
-          unanswered_count: unanswered,
-          total_duration_seconds: (exam.duration_minutes * 60) - secondsRemaining,
-          completed_at: new Date().toISOString()
-        }])
-        .select()
-        .single()
+      const res = await fetch('/api/test-series/grade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          examId: exam.id,
+          answers,
+          secondsRemaining,
+          durationMinutes: exam.duration_minutes
+        })
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to grade exam securely')
+      }
 
       await clearExamState(exam.id)
       if (document.fullscreenElement) {
         await document.exitFullscreen()
       }
-      router.push(`/test-series/analytics/${data?.id || 'attempt-mock-001'}`)
+      router.push(`/test-series/analytics/${result.attemptId}`)
     } catch (err) {
+      console.error('Failed to submit exam:', err)
       await clearExamState(exam.id)
       if (document.fullscreenElement) {
         await document.exitFullscreen()

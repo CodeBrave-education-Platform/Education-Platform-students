@@ -190,8 +190,8 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
                   }
                 ]
               };
-              const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]');
-              localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]));
+              const existingOrders = JSON.parse(localStorage.getItem('Asentra_book_orders') || '[]');
+              localStorage.setItem('Asentra_book_orders', JSON.stringify([newBookOrder, ...existingOrders]));
             } catch (e) {
               console.warn('Book provision error:', e);
             }

@@ -53,7 +53,7 @@ export default function CoursesCatalogPage() {
     {
       id: 'c1',
       title: 'JEE Mains & Advanced Complete Physics Mastery 2026',
-      instructor: 'Dr. H.C. Verma & CodeBrave Team',
+      instructor: 'Dr. H.C. Verma & Asentra Team',
       instructorRole: 'Ex-IIT Faculty • 22+ Yrs Experience',
       subject: 'Physics',
       level: 'JEE Advanced',
@@ -163,7 +163,7 @@ export default function CoursesCatalogPage() {
   useEffect(() => {
     setIsMounted(true)
     try {
-      const stored = localStorage.getItem('codebrave_enrolled_courses')
+      const stored = localStorage.getItem('Asentra_enrolled_courses')
       if (stored) {
         const parsed = JSON.parse(stored)
         setEnrolledCourseIds(parsed.map(c => c.id || c))
@@ -204,9 +204,9 @@ export default function CoursesCatalogPage() {
 
       const saveSuccessfulEnrollment = () => {
         try {
-          const existingCourses = JSON.parse(localStorage.getItem('codebrave_enrolled_courses') || '[]')
+          const existingCourses = JSON.parse(localStorage.getItem('Asentra_enrolled_courses') || '[]')
           const updatedCourses = [course, ...existingCourses.filter(c => (c.id || c) !== course.id)]
-          localStorage.setItem('codebrave_enrolled_courses', JSON.stringify(updatedCourses))
+          localStorage.setItem('Asentra_enrolled_courses', JSON.stringify(updatedCourses))
         } catch (e) {}
 
         const trackingId = `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`
@@ -229,8 +229,8 @@ export default function CoursesCatalogPage() {
         }
 
         try {
-          const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]')
-          localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]))
+          const existingOrders = JSON.parse(localStorage.getItem('Asentra_book_orders') || '[]')
+          localStorage.setItem('Asentra_book_orders', JSON.stringify([newBookOrder, ...existingOrders]))
         } catch (e) {}
 
         setEnrolledCourseIds(prev => [...prev, course.id])
@@ -242,7 +242,7 @@ export default function CoursesCatalogPage() {
         key: orderData.key || 'rzp_test_mockkey123',
         amount: Math.round(finalEnrollPrice * 100),
         currency: 'INR',
-        name: 'CodeBrave Education Platform',
+        name: 'Asentra Education Platform',
         description: `${course.title} + Free Book Kit`,
         order_id: orderData.orderId,
         handler: function (response) {
@@ -250,7 +250,7 @@ export default function CoursesCatalogPage() {
         },
         prefill: {
           name: 'Student Candidate',
-          email: 'student@codebrave.edu.in',
+          email: 'student@Asentra.edu.in',
           contact: '9876543210'
         },
         theme: {

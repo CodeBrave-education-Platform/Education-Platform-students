@@ -11,7 +11,7 @@ export default async function CbtEnginePage({ params }) {
 
   // Authenticate user session
   const { data: { user } } = await supabase.auth.getUser()
-  const authenticatedUser = user || { id: 'test-user-01', email: 'candidate@codebrave.edu.in' }
+  const authenticatedUser = user || { id: 'test-user-01', email: 'candidate@Asentra.edu.in' }
 
   // Fetch student profile
   const { data: profile } = await supabase

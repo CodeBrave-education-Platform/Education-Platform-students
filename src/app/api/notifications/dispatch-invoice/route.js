@@ -9,11 +9,11 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Missing invoice receipt payload' }, { status: 400 });
     }
 
-    const recipientEmail = studentEmail || receiptData.studentEmail || 'student@codebrave.edu.in';
+    const recipientEmail = studentEmail || receiptData.studentEmail || 'student@Asentra.edu.in';
     const recipientPhone = studentPhone || '+91 98765 43210';
 
     // Formatted WhatsApp Message Text
-    const whatsappText = `🎓 *CODEBRAVE EDUCATION PLATFORM*
+    const whatsappText = `🎓 *Asentra EDUCATION PLATFORM*
 Tax Invoice & Payment Receipt
 
 *Invoice No:* ${receiptData.invoiceNo}
@@ -24,7 +24,7 @@ Tax Invoice & Payment Receipt
 *Total Paid:* ₹${receiptData.totalAmount}
 
 Thank you ${receiptData.studentName}! Your access has been instantly unlocked.
-Download Official Invoice PDF: https://codebrave.edu.in/invoices/${receiptData.invoiceNo}`;
+Download Official Invoice PDF: https://Asentra.edu.in/invoices/${receiptData.invoiceNo}`;
 
     // Return successful dispatch confirmation payload
     return NextResponse.json({

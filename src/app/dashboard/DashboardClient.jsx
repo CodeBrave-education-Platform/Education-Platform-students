@@ -6,12 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
+import Link from 'next/link'
 import { 
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 
   Info, Loader2, Sparkles, User, Mail, Phone, ShieldAlert,
   ArrowUpRight, AlertCircle, FileText, Clock, ChevronLeft, ChevronRight, Menu,
-  TrendingUp, BarChart3
+  TrendingUp, BarChart3, Flame, Target, Trophy
 } from 'lucide-react'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -220,36 +221,7 @@ export default function DashboardClient({
   const [myExams, setMyExams] = useState([])
   const [loadingMyExams, setLoadingMyExams] = useState(false)
 
-  // Sync enrolled courses & purchased batches from localStorage into enrollments state
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('codebrave_enrolled_courses')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        const mockEnrollments = parsed.map(course => ({
-          id: `local_e_${course.id || course}`,
-          course_id: course.id || course,
-          enrolled_at: new Date().toISOString(),
-          courses: {
-            id: course.id || course,
-            title: course.title || 'Enrolled Course Mastery',
-            description: course.description || 'Comprehensive Competitive Preparation Course',
-            thumbnail_url: course.cover || course.thumbnail_url || 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
-            level: course.level || 'JEE Advanced',
-            price: course.price || 0,
-            aspirant_info: 'For IIT-JEE Aspirants',
-            batch_info: 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
-          }
-        }))
-
-        setEnrollments(prev => {
-          const ids = new Set(prev.map(e => e.course_id))
-          const toAdd = mockEnrollments.filter(e => !ids.has(e.course_id))
-          return [...toAdd, ...prev]
-        })
-      }
-    } catch (e) {}
-  }, [])
+  // [SEC-REMEDIATION]: Removed insecure localStorage mock enrollment injection. All enrollments must come from secure backend SSR.
 
   React.useEffect(() => {
     if (!selectedCohortBatch) return
@@ -1257,6 +1229,43 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6"
                   >
+                    {/* Gamification Stats Widget */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                      <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[2rem] p-6 text-white shadow-xl shadow-orange-500/20 flex flex-col justify-between">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Flame className="w-5 h-5 text-orange-200" />
+                          <span className="text-sm font-black uppercase tracking-wider text-orange-100">Learning Streak</span>
+                        </div>
+                        <div className="text-4xl font-black">{profile.streak || 0} <span className="text-lg text-orange-200">Days</span></div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-[2rem] p-6 text-white shadow-xl shadow-teal-500/20 flex flex-col justify-between">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Target className="w-5 h-5 text-teal-200" />
+                          <span className="text-sm font-black uppercase tracking-wider text-teal-100">Total XP</span>
+                        </div>
+                        <div className="text-4xl font-black">{(profile.xp || 0).toLocaleString()} <span className="text-lg text-teal-200">XP</span></div>
+                      </div>
+
+                      <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <Trophy className="w-24 h-24" />
+                        </div>
+                        <div className="flex items-center gap-2 mb-2 relative z-10">
+                          <Trophy className="w-5 h-5 text-slate-400" />
+                          <span className="text-sm font-black uppercase tracking-wider text-slate-400">Current Rank</span>
+                        </div>
+                        <div className="relative z-10">
+                          <div className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-200 to-slate-400">
+                            {profile.rank_badge || 'Unranked'}
+                          </div>
+                          <Link href="/leaderboard" className="text-xs text-teal-400 hover:text-teal-300 font-bold mt-2 inline-flex items-center gap-1">
+                            View Global Leaderboard &rarr;
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
                       <BookOpenCheck className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                       <span>My Learning Catalog ({enrollments.length})</span>

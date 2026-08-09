@@ -4,15 +4,19 @@ import { ToastProvider } from "@/components/ToastProvider";
 import { Suspense } from "react";
 import Script from "next/script";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
+import { Inter, Outfit } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata = {
-  title: "CodeBrave Education Platform",
+  title: "Asentra Education Platform",
   description: "Modern JEE & NEET Competitive Exam Preparation Platform",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="font-sans">
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className={`${inter.variable} ${outfit.variable} font-sans`}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ToastProvider>

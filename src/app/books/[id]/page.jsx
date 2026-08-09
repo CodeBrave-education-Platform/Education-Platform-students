@@ -13,7 +13,7 @@ export default function BookDetailPage({ params }) {
   const book = {
     id: 'b1',
     title: 'IIT JEE Physics Mastery: Mechanics & Waves',
-    author: 'Dr. H.C. Verma & CodeBrave Academic Faculty',
+    author: 'Dr. H.C. Verma & Asentra Academic Faculty',
     category: 'JEE Advanced',
     subject: 'Physics',
     price: 699,

@@ -2,22 +2,24 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 export function useWriteBehindQueue(userId, courseId, initialCompletedIds) {
-  const [completedIds, setCompletedIds] = useState(new Set(initialCompletedIds))
+  const [completedIds, setCompletedIds] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(`asentra:progress:${courseId}`)
+      if (cached) {
+        try {
+          return new Set(JSON.parse(cached))
+        } catch (e) {
+          console.error('Failed to parse cached progress state:', e)
+        }
+      }
+    }
+    return new Set(initialCompletedIds)
+  })
+  
   const pendingSyncRef = useRef({ add: new Set(), remove: new Set() })
   const syncTimeoutRef = useRef(null)
   
   const supabase = createClient()
-
-  useEffect(() => {
-    const cached = localStorage.getItem(`asentra:progress:${courseId}`)
-    if (cached) {
-      try {
-        setCompletedIds(new Set(JSON.parse(cached)))
-      } catch (e) {
-        console.error('Failed to parse cached progress state:', e)
-      }
-    }
-  }, [courseId])
 
   // Centralized, atomic synchronization routine
   const flushQueueToDatabase = async () => {
@@ -84,6 +86,7 @@ export function useWriteBehindQueue(userId, courseId, initialCompletedIds) {
       // Fire the mutation hook immediately on unmount to save pending user progress data
       flushQueueToDatabase()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return [completedIds, toggleProgress]

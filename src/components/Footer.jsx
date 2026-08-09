@@ -43,7 +43,7 @@ export default function Footer() {
             </svg>
           </Link>
           <p className="text-xs leading-relaxed max-w-sm text-slate-400">
-            India's premiere virtual learning matrix for IIT JEE Main, Advanced, and elite foundational engineering curriculums. Engineered to cultivate absolute intellectual excellence.
+            India&apos;s premiere virtual learning matrix for IIT JEE Main, Advanced, and elite foundational engineering curriculums. Engineered to cultivate absolute intellectual excellence.
           </p>
         </div>
 
@@ -79,9 +79,9 @@ export default function Footer() {
           <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest mb-4">Support Matrix</h4>
           <ul className="space-y-2.5 text-xs font-semibold">
             <li>
-              <a href="mailto:support@asentra.edu" className="hover:text-slate-200 transition-colors flex items-center gap-2">
+              <a href="mailto:support@asentra.edu.in" className="hover:text-slate-200 transition-colors flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5" />
-                <span>support@asentra.edu</span>
+                <span>support@asentra.edu.in</span>
               </a>
             </li>
             <li>
@@ -106,10 +106,11 @@ export default function Footer() {
         <div>
           © {new Date().getFullYear()} ASENTRA Technologies. All rights reserved.
         </div>
-        <div className="flex gap-4">
-          <Link href="/login" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
-          <Link href="/login" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
-          <Link href="/login" className="hover:text-slate-300 transition-colors">SLA Agreement</Link>
+        <div className="flex flex-wrap gap-4 justify-center sm:justify-end">
+          <Link href="/policies/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+          <Link href="/policies/terms" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
+          <Link href="/policies/refund" className="hover:text-slate-300 transition-colors">Refund & Cancellation</Link>
+          <Link href="/policies/contact" className="hover:text-slate-300 transition-colors">Contact Us</Link>
         </div>
       </div>
     </footer>

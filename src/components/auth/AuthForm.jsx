@@ -52,35 +52,7 @@ export default function AuthForm({
       {/* Redesigned Brand Wordmark: Replaced "A" block with pristine SVG wordmark logo */}
       <div className="flex flex-col items-start gap-2 mb-8">
         <Link href="/" className="flex items-center group">
-          <svg className="w-36 h-7 text-slate-900" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Geometric letter 'A' */}
-            <path d="M12 44 L28 10 L44 44" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M20 32 L36 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-            
-            {/* Geometric letter 'S' */}
-            <path d="M76 16 C76 12, 56 12, 56 18 C56 24, 76 26, 76 32 C76 38, 56 38, 56 34" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            
-            {/* Geometric letter 'E' */}
-            <path d="M110 12 L92 12 L92 42 L110 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M92 27 L106 27" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-            
-            {/* Geometric letter 'N' */}
-            <path d="M122 42 L122 12 L142 42 L142 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            
-            {/* Geometric letter 'T' */}
-            <path d="M152 12 L178 12" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M165 12 L165 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-            
-            {/* Geometric letter 'R' */}
-            <path d="M188 42 L188 12 L206 12 C214 12, 214 26, 206 26 L188 26" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M198 26 L210 42" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            
-            {/* Geometric letter 'A' with RED accented leg */}
-            <path d="M220 44 L236 10" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            {/* Red accent leg matching logo image */}
-            <path d="M236 10 L252 44" stroke="#DC2626" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M228 32 L244 32" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
-          </svg>
+          <img src="/asentra-logo.png" alt="ASENTRA Logo" className="h-10 w-auto object-contain" />
         </Link>
         <span className="text-[8.5px] font-extrabold tracking-[0.22em] text-slate-400 uppercase leading-none mt-1">
           IIT JEE MAINS • ADVANCED • FOUNDATIONS

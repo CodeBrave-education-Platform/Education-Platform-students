@@ -99,7 +99,7 @@ export default function TestSeriesHubClient({
               <span>Official NTA CBT Test Center</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900">
-              CodeBrave Test Series Hub
+              Asentra Test Series Hub
             </h1>
             <p className="text-xs md:text-sm text-slate-600 max-w-xl leading-relaxed font-medium">
               Examine your speed, accuracy, and subject mastery with proctored computer-based test drills matching official NTA competitive testing parameters.

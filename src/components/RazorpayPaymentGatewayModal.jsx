@@ -16,12 +16,6 @@ export default function RazorpayPaymentGatewayModal({
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
 
-  if (!isOpen || !item) return null;
-
-  const itemPrice = Number(item.price || 499);
-  const gstAmount = Math.round(itemPrice * 0.18);
-  const totalAmount = itemPrice + gstAmount;
-
   const [shippingName, setShippingName] = useState(studentUser?.user_metadata?.full_name || 'Student Candidate');
   const [shippingPhone, setShippingPhone] = useState('+91 9876543210');
   const [shippingStreet, setShippingStreet] = useState('Flat 402, Block A, Jubilee Hills');
@@ -30,6 +24,12 @@ export default function RazorpayPaymentGatewayModal({
   const [shippingPincode, setShippingPincode] = useState('500033');
 
   const [dispatchStatus, setDispatchStatus] = useState(null);
+
+  if (!isOpen || !item) return null;
+
+  const itemPrice = Number(item.price || 499);
+  const gstAmount = Math.round(itemPrice * 0.18);
+  const totalAmount = itemPrice + gstAmount;
 
   const handleRazorpayPay = () => {
     setProcessing(true);
@@ -44,7 +44,7 @@ export default function RazorpayPaymentGatewayModal({
         transactionId,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
         studentName: shippingName || studentUser?.user_metadata?.full_name || 'Student Member',
-        studentEmail: studentUser?.email || 'student@codebrave.edu.in',
+        studentEmail: studentUser?.email || 'student@Asentra.edu.in',
         itemTitle: item.title,
         itemType: item.type || 'Test Series Package',
         basePrice: itemPrice,
@@ -56,37 +56,38 @@ export default function RazorpayPaymentGatewayModal({
       setProcessing(false);
       setPaymentCompleted(true);
 
-      // Auto-Provision Included Printed Book Kit into Book Orders Portal with Shipping Address
+      // Secure Auto-Provision Included Printed Book Kit into Book Orders Portal with Shipping Address
       try {
         const bookKitTitle = item.bookKit || `${item.title} - Complete Textbook & Formula Box Set`;
-        const newBookOrder = {
-          id: `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-          source: `${item.type || 'Course'} Enrollment`,
-          date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          totalAmount: 0,
-          status: 'Dispatched & In Transit',
-          courier: 'Bluedart Express',
-          trackingNumber: `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`,
-          trackingLink: 'https://track.bluedart.com/',
-          shippingAddress: {
-            name: shippingName,
-            phone: shippingPhone,
-            street: shippingStreet,
-            city: shippingCity,
-            state: shippingState,
-            pincode: shippingPincode
-          },
-          items: [
-            {
-              title: bookKitTitle,
-              format: 'Hardcopy Textbook Kit + Instant eBook PDF',
-              downloadUrl: '/downloads/physics-formulas.pdf'
+        
+        // Use secure backend processing instead of localStorage hack
+        const verifyRes = await fetch('/api/razorpay/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_payment_id: transactionId,
+            razorpay_order_id: invoiceNo,
+            razorpay_signature: 'mock_signature',
+            courseId: item.type === 'Course' ? item.id : null,
+            batchId: item.type === 'Test Series' ? item.id : null,
+            amount: totalAmount * 100, // paise
+            bookId: item.bookId || 'book-mock-001',
+            bookTitle: bookKitTitle,
+            shippingAddress: {
+              name: shippingName,
+              phone: shippingPhone,
+              street: shippingStreet,
+              city: shippingCity,
+              state: shippingState,
+              pincode: shippingPincode
             }
-          ]
-        };
+          })
+        });
 
-        const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]');
-        localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]));
+        if (!verifyRes.ok) {
+           console.error('[Verify Failed]', await verifyRes.json());
+        }
+
       } catch (e) {
         console.warn('[Book Auto-Provisioning Notice]:', e);
       }
@@ -285,8 +286,9 @@ export default function RazorpayPaymentGatewayModal({
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
                 <div className="p-3 bg-white border border-slate-200 rounded-xl max-w-[160px] mx-auto shadow-sm">
                   {/* Simulated Razorpay Dynamic UPI QR */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=razorpay@codebrave&pn=CodeBrave&am=${totalAmount}&cu=INR`} 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=razorpay@Asentra&pn=Asentra&am=${totalAmount}&cu=INR`} 
                     alt="Razorpay UPI QR" 
                     className="w-full h-auto rounded" 
                   />
@@ -358,8 +360,8 @@ export default function RazorpayPaymentGatewayModal({
             <div id="printable-invoice" className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 text-xs font-medium text-slate-800">
               <div className="flex justify-between items-start border-b border-slate-200 pb-3">
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">CodeBrave Edu Platform</h3>
-                  <p className="text-[10px] text-slate-500">GSTIN: 36ABCDE1234F1Z5 • Support: admin@codebrave.edu.in</p>
+                  <h3 className="font-black text-slate-900 text-base">Asentra Edu Platform</h3>
+                  <p className="text-[10px] text-slate-500">GSTIN: 36ABCDE1234F1Z5 • Support: admin@Asentra.edu.in</p>
                 </div>
                 <div className="text-right">
                   <span className="font-black text-slate-900 text-sm block">{receiptData?.invoiceNo}</span>

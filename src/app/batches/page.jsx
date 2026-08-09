@@ -162,7 +162,7 @@ export default function BatchesPage() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('codebrave_joined_batches')
+      const stored = localStorage.getItem('Asentra_joined_batches')
       if (stored) {
         const parsed = JSON.parse(stored)
         setJoinedBatchIds(parsed.map(b => b.id || b))
@@ -203,13 +203,13 @@ export default function BatchesPage() {
 
       const saveSuccessfulJoin = () => {
         try {
-          const existingBatches = JSON.parse(localStorage.getItem('codebrave_joined_batches') || '[]')
+          const existingBatches = JSON.parse(localStorage.getItem('Asentra_joined_batches') || '[]')
           const updatedBatches = [batch, ...existingBatches.filter(b => (b.id || b) !== batch.id)]
-          localStorage.setItem('codebrave_joined_batches', JSON.stringify(updatedBatches))
+          localStorage.setItem('Asentra_joined_batches', JSON.stringify(updatedBatches))
         } catch (e) {}
 
         try {
-          const existingCourses = JSON.parse(localStorage.getItem('codebrave_enrolled_courses') || '[]')
+          const existingCourses = JSON.parse(localStorage.getItem('Asentra_enrolled_courses') || '[]')
           const courseRef = {
             id: batch.id,
             title: batch.title,
@@ -219,7 +219,7 @@ export default function BatchesPage() {
             cover: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
             price: finalEnrollPrice
           }
-          localStorage.setItem('codebrave_enrolled_courses', JSON.stringify([courseRef, ...existingCourses]))
+          localStorage.setItem('Asentra_enrolled_courses', JSON.stringify([courseRef, ...existingCourses]))
         } catch (e) {}
 
         const trackingId = `TRK-DT-${Math.floor(100000000 + Math.random() * 900000000)}`
@@ -242,8 +242,8 @@ export default function BatchesPage() {
         }
 
         try {
-          const existingOrders = JSON.parse(localStorage.getItem('codebrave_book_orders') || '[]')
-          localStorage.setItem('codebrave_book_orders', JSON.stringify([newBookOrder, ...existingOrders]))
+          const existingOrders = JSON.parse(localStorage.getItem('Asentra_book_orders') || '[]')
+          localStorage.setItem('Asentra_book_orders', JSON.stringify([newBookOrder, ...existingOrders]))
         } catch (e) {}
 
         setJoinedBatchIds(prev => [...prev, batch.id])
@@ -255,7 +255,7 @@ export default function BatchesPage() {
         key: orderData.key || 'rzp_test_mockkey123',
         amount: Math.round(finalEnrollPrice * 100),
         currency: 'INR',
-        name: 'CodeBrave Education Platform',
+        name: 'Asentra Education Platform',
         description: `${batch.title} + Free Book Box`,
         order_id: orderData.orderId,
         handler: function (response) {
@@ -263,7 +263,7 @@ export default function BatchesPage() {
         },
         prefill: {
           name: 'Student Candidate',
-          email: 'student@codebrave.edu.in',
+          email: 'student@Asentra.edu.in',
           contact: '9876543210'
         },
         theme: {
