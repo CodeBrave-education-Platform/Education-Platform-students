@@ -1,6 +1,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
+import Script from 'next/script'
 import Navbar from '@/components/Navbar'
 import LiveTicker from '@/components/landing/LiveTicker'
 import HeroInteractive from '@/components/landing/HeroInteractive'
@@ -33,6 +34,24 @@ export default async function Home() {
   return (
     <div className="min-h-[100dvh] bg-slate-50 overflow-x-hidden font-sans select-none text-slate-800 flex flex-col justify-between">
       
+      {/* 0. AUTHENTICATION ERROR CATCHER */}
+      <Script id="auth-error-handler" strategy="afterInteractive" dangerouslySetInnerHTML={{
+        __html: `
+          if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const error = params.get('error');
+            if (error) {
+              if (error.includes('PKCE')) {
+                alert('Login Failed: You opened an email link on a different device/browser than the one you requested it from. Please request a new code on this device.');
+              } else {
+                alert('Authentication Failed: ' + decodeURIComponent(error));
+              }
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }
+        `
+      }} />
+
       <div>
         {/* 1. THE LIVE TELEMETRY TICKER */}
         <LiveTicker />

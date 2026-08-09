@@ -6,6 +6,14 @@ export async function updateSession(request) {
     request,
   })
 
+  // Intercept Supabase OAuth IP fallback redirects (where Supabase ignores redirectTo and sends code to '/')
+  const currentPath = request.nextUrl.pathname
+  if (currentPath === '/' && request.nextUrl.searchParams.has('code')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    return NextResponse.redirect(url)
+  }
+
   // Prevent server-side crash if environment variables are missing or are placeholders
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
