@@ -26,7 +26,7 @@ export default function AnalyticsDashboard() {
         // Fetch user's test attempts
         const { data: attempts, error: attemptsError } = await supabase
           .from('test_attempts')
-          .select('*, exams(questions_payload, marks_scheme)')
+          .select('*, test_exams(questions, marks_scheme)')
           .eq('user_id', user.id)
           .order('completed_at', { ascending: true });
 
@@ -44,7 +44,7 @@ export default function AnalyticsDashboard() {
         const recentScores = [];
 
         attempts.forEach(attempt => {
-          const questions = attempt.exams?.questions_payload || [];
+          const questions = attempt.test_exams?.questions || [];
           const answers = attempt.answers_payload || {};
           let attemptScore = 0;
           let maxPossible = 0;
@@ -59,13 +59,13 @@ export default function AnalyticsDashboard() {
 
             topicStats[topic].total += 1;
             totalQuestions += 1;
-            maxPossible += (attempt.exams?.marks_scheme?.positive_marks || 4);
+            maxPossible += (attempt.test_exams?.marks_scheme?.positive_marks || 4);
 
             const ans = answers[q.id];
             if (ans && ans.selected_option === q.correct_option_index) {
               topicStats[topic].correct += 1;
               totalCorrect += 1;
-              attemptScore += (attempt.exams?.marks_scheme?.positive_marks || 4);
+              attemptScore += (attempt.test_exams?.marks_scheme?.positive_marks || 4);
             }
           });
 

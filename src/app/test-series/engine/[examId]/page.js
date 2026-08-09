@@ -34,7 +34,7 @@ export default async function CbtEnginePage({ params }) {
   // High-fidelity fallback exam paper with 6 multi-format questions for testing NTA CBT features
   if (!examData) {
     examData = {
-      id: examId || 'nta-grand-mock-1',
+      id: examId === 'nta-grand-mock-1' ? '00000000-0000-0000-0000-000000000001' : (examId || '00000000-0000-0000-0000-000000000001'),
       title: examId === 'jee-physics-sprint-1' ? 'JEE Physics Mechanics Speed Sprint 01' : 'NTA JEE Mains All India Grand Mock Test 2026',
       duration_minutes: 180,
       total_questions: 75,

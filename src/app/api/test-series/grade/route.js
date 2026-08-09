@@ -20,20 +20,16 @@ export async function POST(request) {
 
     // Securely fetch questions and marks scheme from database (not trusting client)
     const { data: examData, error: examError } = await supabase
-      .from('exams')
-      .select('id, questions_payload, marks_scheme')
+      .from('test_exams')
+      .select('id, questions, marks_scheme')
       .eq('id', examId)
       .single()
 
     if (examError || !examData) {
-      // In local dev/mock mode, if not found, we gracefully fallback
-      if (examId === 'EXAM-JEE-001') {
-         return NextResponse.json({ success: true, attemptId: 'attempt-mock-001' })
-      }
       return NextResponse.json({ error: 'Exam not found' }, { status: 404 })
     }
 
-    const questions = examData.questions_payload || []
+    const questions = examData.questions || []
     const marksScheme = examData.marks_scheme || { positive_marks: 4, negative_marks: -1 }
 
     let correct = 0
