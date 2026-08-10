@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { redisGet, redisSet } from '@/utils/redis'
@@ -12,6 +13,10 @@ export default async function DashboardPage(props) {
 
   // Retrieve authenticated user session
   const { data: { user } } = await supabase.auth.getUser()
+
+  const cookieStore = await cookies()
+  console.log('[DASHBOARD DEBUG] User:', user ? user.id : 'null')
+  console.log('[DASHBOARD DEBUG] All cookies:', cookieStore.getAll().map(c => c.name))
 
   if (!user) {
     redirect('/')

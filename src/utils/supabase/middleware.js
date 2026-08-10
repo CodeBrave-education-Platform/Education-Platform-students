@@ -44,6 +44,13 @@ export async function updateSession(request) {
             request.cookies.set(name, value, updatedOptions)
           })
 
+          // Manually synchronize the cookie header so downstream Server Components see the refreshed session!
+          const newCookieHeader = request.cookies
+            .getAll()
+            .map(c => `${c.name}=${encodeURIComponent(c.value)}`)
+            .join('; ')
+          request.headers.set('cookie', newCookieHeader)
+
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -64,6 +71,9 @@ export async function updateSession(request) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  console.log('[MIDDLEWARE DEBUG] User:', user ? user.id : 'null')
+  console.log('[MIDDLEWARE DEBUG] All cookies:', request.cookies.getAll().map(c => c.name))
 
   // Route Protection Rules
   const pathname = request.nextUrl.pathname
