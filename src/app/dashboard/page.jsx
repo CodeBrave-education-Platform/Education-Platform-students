@@ -19,7 +19,19 @@ export default async function DashboardPage(props) {
   console.log('[DASHBOARD DEBUG] All cookies:', cookieStore.getAll().map(c => c.name))
 
   if (!user) {
-    redirect('/')
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-red-50 text-red-900 p-8 rounded-xl max-w-md w-full border border-red-200">
+          <h1 className="text-xl font-bold mb-4">Diagnostic Auth Error</h1>
+          <p className="mb-4">The dashboard received your request, but the server component could not find a valid user session.</p>
+          <div className="bg-black/10 p-4 rounded font-mono text-xs overflow-x-auto mb-4">
+            <p><strong>Cookies Received:</strong> {cookieStore.getAll().map(c => c.name).join(', ') || 'None'}</p>
+            <p><strong>Time:</strong> {new Date().toISOString()}</p>
+          </div>
+          <p className="text-sm opacity-80">Please copy this screen and send it to JARVIS.</p>
+        </div>
+      </div>
+    )
   }
 
   // Retrieve matching profile
