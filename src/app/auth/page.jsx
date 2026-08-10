@@ -113,6 +113,18 @@ export default function AuthPage() {
         // Cache the password for setting post-verification
         setCachedPassword(password)
 
+        // ZOMBIE COOKIE EVICTION: Aggressively purge all old auth cookies across all paths
+        const projectId = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0]?.replace('https://', '')
+        if (projectId) {
+          const cookieNames = [`sb-${projectId}-auth-token`, `sb-${projectId}-auth-token.0`, `sb-${projectId}-auth-token.1`]
+          cookieNames.forEach(name => {
+            ['/', '/auth'].forEach(path => {
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}`
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${window.location.hostname}`
+            })
+          })
+        }
+
         // Send OTP confirmation to verify email address
         const { error: signUpError } = await supabase.auth.signInWithOtp({
           email,
@@ -134,6 +146,18 @@ export default function AuthPage() {
           setSuccess('')
         }, 800)
       } else {
+        // ZOMBIE COOKIE EVICTION: Aggressively purge all old auth cookies across all paths
+        const projectId = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('.')[0]?.replace('https://', '')
+        if (projectId) {
+          const cookieNames = [`sb-${projectId}-auth-token`, `sb-${projectId}-auth-token.0`, `sb-${projectId}-auth-token.1`]
+          cookieNames.forEach(name => {
+            ['/', '/auth'].forEach(path => {
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}`
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${window.location.hostname}`
+            })
+          })
+        }
+
         // Sign In Flow (Direct Password Sign In)
         const { error: loginError } = await supabase.auth.signInWithPassword({
           email,
@@ -154,6 +178,7 @@ export default function AuthPage() {
             setStep('VERIFY_OTP')
             setSuccess('')
           }, 800)
+        } else {
           setSuccess('Successfully authenticated! Redirecting...')
           setTimeout(() => {
             const params = new URLSearchParams(window.location.search)
