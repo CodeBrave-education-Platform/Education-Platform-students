@@ -181,7 +181,14 @@ export default function AuthPage() {
         } else {
           setSuccess('Successfully authenticated! Redirecting...')
           setTimeout(() => {
-            alert('Debug: Navigating to /dashboard');
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                  registration.unregister();
+                }
+              });
+            }
+            alert('Debug: Navigating to /dashboard (SW destroyed)');
             window.location.href = '/dashboard'
           }, 1000)
         }
