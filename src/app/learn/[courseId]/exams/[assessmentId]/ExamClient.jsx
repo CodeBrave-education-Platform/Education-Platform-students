@@ -220,24 +220,29 @@ export default function ExamClient({
     if (!activeAttempt) return
 
     const cacheAssessmentOffline = async () => {
-      await saveOfflineData('exams', assessment.id, {
-        assessment,
-        questions,
-        courseId: course.id
-      })
-      
-      // Load previously saved answers to prevent crash data loss
-      const cachedAnswers = await getOfflineData('answers', activeAttempt.id)
-      if (cachedAnswers && cachedAnswers.payload) {
-        setSavedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
-        setSelectedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
-        setStatuses(prev => {
-          const updated = { ...prev }
-          Object.keys(cachedAnswers.payload).forEach(qId => {
-            updated[qId] = 'answered'
-          })
-          return updated
+      try {
+        await saveOfflineData('exams', assessment.id, {
+          assessment,
+          questions,
+          courseId: course.id
         })
+        
+        // Load previously saved answers to prevent crash data loss
+        const cachedAnswers = await getOfflineData('answers', activeAttempt.id)
+        if (cachedAnswers && cachedAnswers.payload) {
+          setSavedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
+          setSelectedAnswers(prev => ({ ...prev, ...cachedAnswers.payload }))
+          setStatuses(prev => {
+            const updated = { ...prev }
+            Object.keys(cachedAnswers.payload).forEach(qId => {
+              updated[qId] = 'answered'
+            })
+            return updated
+          })
+        }
+      } catch (err) {
+        console.warn('IndexedDB blocked or unavailable in Exam engine.', err)
+        alert('Strict Privacy Mode Detected: Offline auto-save is disabled. Your progress will not be saved if you lose connection.')
       }
     }
 
@@ -380,21 +385,11 @@ export default function ExamClient({
     }
   }
 
-  const handleManualSubmit = () => {
+  function handleManualSubmit() {
     setShowConfirmSubmit(true)
   }
 
-  const handleAutoSubmit = async () => {
-    console.warn('Autorun countdown expired. Initiating secure automatic grading submission.')
-    await performGradingSubmission(savedAnswers)
-  }
-
-  const handleConfirmSubmit = async () => {
-    setShowConfirmSubmit(false)
-    await performGradingSubmission(savedAnswers)
-  }
-
-  const performGradingSubmission = async (answersToSubmit) => {
+  async function performGradingSubmission(answersToSubmit) {
     // Check offline state
     if (typeof window !== 'undefined' && !navigator.onLine) {
       await saveOfflineData('answers', attempt.id, { payload: answersToSubmit })
@@ -456,6 +451,17 @@ export default function ExamClient({
       alert('Network submit error')
     }
   }
+
+  async function handleAutoSubmit() {
+    console.warn('Autorun countdown expired. Initiating secure automatic grading submission.')
+    await performGradingSubmission(savedAnswers)
+  }
+
+  async function handleConfirmSubmit() {
+    setShowConfirmSubmit(false)
+    await performGradingSubmission(savedAnswers)
+  }
+
 
   // Helper stats count for JEE Question Palette Grid
   const answeredCount = Object.values(statuses).filter(s => s === 'answered').length

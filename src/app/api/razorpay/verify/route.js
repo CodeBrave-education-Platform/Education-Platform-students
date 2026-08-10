@@ -18,17 +18,12 @@ export async function POST(request) {
     const secret = process.env.RAZORPAY_KEY_SECRET || 'mock_secret'
     let isValid = false
 
-    // Allow mock/sandbox payments to bypass signature for demo purposes but STILL securely process via server
-    if (razorpay_payment_id && (razorpay_payment_id.startsWith('pay_rzp_') || razorpay_payment_id.startsWith('mock_'))) {
-      isValid = true
-    } else {
-      if (!razorpay_order_id || !razorpay_signature) {
-        return NextResponse.json({ error: 'Missing payment details for verification' }, { status: 400 })
-      }
-      // 2. Verify signature using edge-safe constant-time bitwise comparisons
-      const text = razorpay_order_id + '|' + razorpay_payment_id
-      isValid = await verifyWebhookSignature(text, razorpay_signature, secret)
+    if (!razorpay_order_id || !razorpay_signature || !razorpay_payment_id) {
+      return NextResponse.json({ error: 'Missing payment details for verification' }, { status: 400 })
     }
+    // 2. Verify signature using edge-safe constant-time bitwise comparisons
+    const text = razorpay_order_id + '|' + razorpay_payment_id
+    isValid = await verifyWebhookSignature(text, razorpay_signature, secret)
 
     if (!isValid) {
       console.error('Signature verification failed.')

@@ -154,10 +154,11 @@ export default function AuthPage() {
             setStep('VERIFY_OTP')
             setSuccess('')
           }, 800)
-        } else {
           setSuccess('Successfully authenticated! Redirecting...')
           setTimeout(() => {
-            router.push('/dashboard')
+            const params = new URLSearchParams(window.location.search)
+            const next = params.get('next') || '/dashboard'
+            window.location.href = next
           }, 1000)
         }
       }
@@ -202,12 +203,16 @@ export default function AuthPage() {
 
         setSuccess('Account set up complete! Accessing dashboard...')
         setTimeout(() => {
-          router.push('/dashboard')
+          const params = new URLSearchParams(window.location.search)
+          const next = params.get('next') || '/dashboard'
+          window.location.href = next
         }, 1000)
       } else {
         setSuccess('Successfully authenticated! Accessing portal...')
         setTimeout(() => {
-          router.push('/dashboard')
+          const params = new URLSearchParams(window.location.search)
+          const next = params.get('next') || '/dashboard'
+          window.location.href = next
         }, 1000)
       }
     } catch (err) {

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronDown, User, LogOut, Loader2, Monitor, Sun, Moon, Search, Grid, BookOpen, Users, Award } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { useTheme } from 'next-themes'
@@ -72,7 +73,7 @@ export default function Navbar({ user, profile }) {
       {/* Left side: Logo & Explore button */}
       <div className="flex items-center gap-4 lg:gap-6">
         <Link href="/" className="flex flex-col items-start group mt-1">
-          <img src="/asentra-logo.png" alt="ASENTRA Logo" className="h-10 sm:h-12 w-auto object-contain" />
+          <Image src="/asentra-logo.png" alt="ASENTRA Logo" width={160} height={48} className="h-10 sm:h-12 w-auto object-contain" />
         </Link>
 
         {/* Explore Button & Mega-Menu */}

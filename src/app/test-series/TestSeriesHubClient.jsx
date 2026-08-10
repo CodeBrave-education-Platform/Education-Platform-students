@@ -5,13 +5,16 @@ import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
+import Script from 'next/script'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import RazorpayPaymentGatewayModal from '@/components/RazorpayPaymentGatewayModal'
 import { 
   BookOpen, Search, GraduationCap, Award, ClipboardList, 
   ArrowRight, ShieldAlert, Clock, Sparkles, CheckCircle2,
-  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity, RotateCcw, Image as ImageIcon
+  Lock, Unlock, ChevronDown, ChevronUp, BarChart3, Activity, RotateCcw, Image as ImageIcon,
+  Loader2
 } from 'lucide-react'
 
 export default function TestSeriesHubClient({
@@ -35,6 +38,94 @@ export default function TestSeriesHubClient({
   // Razorpay In-Website Payment Gateway State
   const [paymentModalItem, setPaymentModalItem] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [loadingPkgId, setLoadingPkgId] = useState(null);
+  const [receiptData, setReceiptData] = useState(null);
+
+  const handleUnlockPackage = async (pkg, price) => {
+    setLoadingPkgId(pkg.id)
+    try {
+      const orderResponse = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchId: pkg.id, price: price })
+      })
+
+      const orderData = await orderResponse.json()
+      if (!orderResponse.ok || orderData.error) {
+        throw new Error(orderData.error || 'Failed to initialize payment order.')
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mockkey123',
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'ASENTRA TEST SERIES',
+        description: pkg.title,
+        order_id: orderData.orderId,
+        theme: { color: '#0D9488' },
+        prefill: { email: user?.email, name: user?.user_metadata?.full_name },
+        handler: async function (response) {
+          try {
+            setLoadingPkgId(pkg.id)
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                batchId: pkg.id,
+                amount: orderData.amount
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (!verifyRes.ok || verifyData.error) {
+              throw new Error(verifyData.error || 'Payment verification failed.')
+            }
+
+            const transactionId = response.razorpay_payment_id
+            const invoiceNo = `INV-CB-${Math.floor(100000 + Math.random() * 900000)}`
+            const receipt = {
+              invoiceNo,
+              transactionId,
+              date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+              studentName: user?.user_metadata?.full_name || 'Student Member',
+              studentEmail: user?.email || 'student@Asentra.edu.in',
+              itemTitle: pkg.title,
+              itemType: 'Test Series Package',
+              basePrice: price,
+              gstAmount: Math.round(price * 0.18),
+              totalAmount: price + Math.round(price * 0.18)
+            }
+            
+            setReceiptData(receipt)
+            setIsPaymentModalOpen(true)
+            startTransition(() => {
+              router.refresh()
+            })
+          } catch (err) {
+            console.error('Checkout verification error:', err)
+            alert(err.message || 'Payment Verification failed. Please contact support.')
+          } finally {
+            setLoadingPkgId(null)
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setLoadingPkgId(null)
+          }
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+    } catch (err) {
+      console.error('Checkout error:', err)
+      alert(err.message || 'Failed to initialize secure checkout.')
+      setLoadingPkgId(null)
+    }
+  }
 
   // Extract unique competitive tag filters
   const tags = React.useMemo(() => {
@@ -83,7 +174,7 @@ export default function TestSeriesHubClient({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between select-none font-sans overflow-x-hidden">
-      
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       {/* Light Theme Navbar */}
       <div className="z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 shadow-sm">
         <Navbar user={user} profile={profile} />
@@ -175,10 +266,11 @@ export default function TestSeriesHubClient({
                 >
                   {/* Package Thumbnail & Header */}
                   <div className="relative h-40 overflow-hidden bg-slate-100">
-                    <img 
+                    <Image 
                       src={pkg.thumbnail_url || 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=800&q=80'} 
                       alt={pkg.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent p-4 flex flex-col justify-between">
                       <div className="flex justify-between items-start">
@@ -217,18 +309,15 @@ export default function TestSeriesHubClient({
 
                     {isPremium && (
                       <button
-                        onClick={() => {
-                          setPaymentModalItem({
-                            id: pkg.id,
-                            title: pkg.title,
-                            price: ledger.price || 499,
-                            type: 'Test Series Package'
-                          });
-                          setIsPaymentModalOpen(true);
-                        }}
-                        className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                        onClick={() => handleUnlockPackage(pkg, ledger.price || 499)}
+                        disabled={loadingPkgId === pkg.id}
+                        className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
                       >
-                        <Lock className="w-3.5 h-3.5" />
+                        {loadingPkgId === pkg.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Lock className="w-3.5 h-3.5" />
+                        )}
                         <span>Unlock Package via Razorpay (₹{ledger.price || 499})</span>
                       </button>
                     )}
@@ -336,15 +425,11 @@ export default function TestSeriesHubClient({
       </div>
 
       <div className="z-10 mt-10">
-        {/* Razorpay In-Website Payment Gateway & Tax Invoice Modal */}
+        {/* Post-Payment Tax Invoice Modal */}
         <RazorpayPaymentGatewayModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
-          item={paymentModalItem}
-          studentUser={user}
-          onSuccessPayment={(receipt) => {
-            console.log('[Razorpay Payment Success]:', receipt);
-          }}
+          receiptData={receiptData}
         />
 
         <Footer />

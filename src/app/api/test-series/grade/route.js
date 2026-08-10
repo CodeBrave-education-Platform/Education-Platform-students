@@ -29,7 +29,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Exam not found' }, { status: 404 })
     }
 
-    const questions = examData.questions || []
+    let questions = []
+    if (typeof examData.questions === 'string') {
+      try {
+        questions = JSON.parse(examData.questions)
+      } catch (e) {
+        questions = []
+      }
+    } else if (Array.isArray(examData.questions)) {
+      questions = examData.questions
+    }
     const marksScheme = examData.marks_scheme || { positive_marks: 4, negative_marks: -1 }
 
     let correct = 0
@@ -72,8 +81,7 @@ export async function POST(request) {
 
     if (insertError) {
       console.error('Failed to insert test attempt:', insertError)
-      // Fallback for demo
-      return NextResponse.json({ success: true, attemptId: 'attempt-mock-001' })
+      return NextResponse.json({ error: 'Failed to record test attempt. Please contact support.' }, { status: 500 })
     }
 
     // --- GAMIFICATION ENGINE: Calculate and Award XP ---

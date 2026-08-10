@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, User, Phone, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
@@ -52,7 +53,7 @@ export default function AuthForm({
       {/* Redesigned Brand Wordmark: Replaced "A" block with pristine SVG wordmark logo */}
       <div className="flex flex-col items-start gap-2 mb-8">
         <Link href="/" className="flex items-center group">
-          <img src="/asentra-logo.png" alt="ASENTRA Logo" className="h-10 w-auto object-contain" />
+          <Image src="/asentra-logo.png" alt="ASENTRA Logo" width={160} height={40} className="h-10 w-auto object-contain" />
         </Link>
         <span className="text-[8.5px] font-extrabold tracking-[0.22em] text-slate-400 uppercase leading-none mt-1">
           IIT JEE MAINS • ADVANCED • FOUNDATIONS

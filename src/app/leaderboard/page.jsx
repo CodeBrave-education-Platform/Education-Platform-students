@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Trophy, Flame, Target, ArrowLeft, Crown, Medal } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60 // ISR edge caching every 60 seconds
 
 export default async function LeaderboardPage() {
   const supabase = await createClient()

@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import Script from 'next/script'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { ShieldCheck, Truck, CreditCard, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react'
@@ -17,17 +18,93 @@ export default function BookCheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const handlePlaceOrder = (e) => {
+  const handleRazorpayCheckout = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const orderResponse = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookId: 'book-cart-001', // Ideally from cart context
+          price: 699
+        })
+      })
+
+      const orderData = await orderResponse.json()
+      if (!orderResponse.ok || orderData.error) {
+        throw new Error(orderData.error || 'Failed to initialize payment order.')
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mockkey123',
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'ASENTRA PUBLICATIONS',
+        description: 'Hardcopy Textbook Checkout',
+        order_id: orderData.orderId,
+        theme: {
+          color: '#0D9488'
+        },
+        prefill: {
+          name: fullName,
+          contact: mobile
+        },
+        handler: async function (response) {
+          try {
+            setLoading(true)
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                bookId: 'book-cart-001',
+                amount: orderData.amount,
+                shippingAddress: {
+                  name: fullName,
+                  phone: mobile,
+                  street: address,
+                  city: city,
+                  pincode: pincode
+                }
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (!verifyRes.ok || verifyData.error) {
+              throw new Error(verifyData.error || 'Payment verification failed.')
+            }
+
+            setSuccess(true)
+          } catch (err) {
+            console.error('Checkout verification error:', err)
+            alert(err.message || 'Payment Verification failed. Please contact support.')
+          } finally {
+            setLoading(false)
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false)
+          }
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+    } catch (err) {
+      console.error('Checkout error:', err)
+      alert(err.message || 'Failed to initialize secure checkout.')
       setLoading(false)
-      setSuccess(true)
-    }, 1000)
+    }
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
 
       <main className="max-w-3xl mx-auto w-full px-6 py-10 flex-1 space-y-8">
@@ -44,7 +121,7 @@ export default function BookCheckoutPage() {
             <div className="space-y-2">
               <h1 className="text-2xl font-black text-slate-900">Order Placed Successfully!</h1>
               <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                Your order #ORD-2026-9041 has been confirmed. Hardcopy books will be dispatched via courier and eBook PDFs are available in your library.
+                Your order has been confirmed. Hardcopy books will be dispatched via courier and eBook PDFs are available in your library.
               </p>
             </div>
 
@@ -66,7 +143,7 @@ export default function BookCheckoutPage() {
               </span>
             </div>
 
-            <form onSubmit={handlePlaceOrder} className="space-y-4 text-xs font-bold">
+            <form onSubmit={handleRazorpayCheckout} className="space-y-4 text-xs font-bold">
               <div className="space-y-1">
                 <label className="text-slate-500 uppercase text-[10px]">Student Full Name</label>
                 <input

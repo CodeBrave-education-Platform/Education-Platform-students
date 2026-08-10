@@ -1,71 +1,52 @@
 'use client'
 
-import * as React from 'react'
-import { AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
+import { useEffect } from 'react'
+import { AlertTriangle, RefreshCcw, Home } from 'lucide-react'
 
-export default function GlobalErrorBoundary({ error, reset }) {
-  React.useEffect(() => {
-    // Enterprise Observability pipeline: log uncaught crashes to APM system console
-    console.error('ASENTRA Global Observability Exception Boundary:', error)
+export default function Error({ error, reset }) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error('Next.js Caught Error:', error)
   }, [error])
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-[#F8FAFC] dark:bg-zinc-950 transition-colors duration-300 font-sans relative overflow-hidden select-none">
-      
-      {/* Decorative premium visual elements */}
-      <div className="absolute w-[500px] h-[500px] bg-rose-500/5 dark:bg-rose-500/10 rounded-full blur-[80px] -top-20 -left-20 pointer-events-none" />
-      <div className="absolute w-[500px] h-[500px] bg-teal-500/5 dark:bg-teal-500/10 rounded-full blur-[80px] -bottom-20 -right-20 pointer-events-none" />
-
-      {/* Premium Glassmorphic Error Container */}
-      <div className="relative w-full max-w-lg bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-zinc-800/50 shadow-2xl p-8 sm:p-12 rounded-[2.5rem] flex flex-col items-center text-center space-y-6">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 select-none font-sans">
+      <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-xl flex flex-col items-center text-center relative overflow-hidden">
         
-        {/* Warning Badge Indicator */}
-        <div className="w-16 h-16 rounded-3xl bg-rose-50 dark:bg-rose-950/20 flex items-center justify-center text-rose-600 dark:text-rose-500 shadow-inner border border-rose-100/10">
-          <AlertCircle className="w-8 h-8" />
+        {/* Background glow */}
+        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-rose-50 to-transparent"></div>
+        
+        <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mb-6 relative z-10 shadow-inner">
+          <AlertTriangle className="w-10 h-10 text-rose-600" />
         </div>
-
-        {/* Dynamic Details block */}
-        <div className="space-y-3">
-          <span className="text-[10px] font-black uppercase tracking-widest bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 px-3 py-1 rounded-full border border-rose-100/10">
-            System Observability Boundary
-          </span>
-          
-          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-zinc-150 leading-tight">
-            Runtime Exception Captured
-          </h2>
-          
-          <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-semibold max-w-sm mx-auto">
-            An unexpected runtime or rendering error has been successfully isolated. Transactional ledger keys, active course progress, and grading structures remain completely secure.
-          </p>
-
-          {error?.message && (
-            <div className="mt-4 p-4 bg-slate-100/50 dark:bg-zinc-950/50 rounded-2xl text-left border border-slate-200/30 dark:border-zinc-850 w-full max-h-32 overflow-y-auto">
-              <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-450 break-all leading-normal">
-                {error.message}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Highly Interactive CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full pt-4 border-t border-slate-100 dark:border-zinc-800/60">
+        
+        <h2 className="text-2xl font-black text-slate-800 mb-2 relative z-10">Systems Overloaded</h2>
+        
+        <p className="text-sm font-semibold text-slate-500 mb-8 relative z-10">
+          We are currently experiencing extremely high traffic volumes or a temporary database timeout. You have been placed in a queue. Please hold or refresh the page.
+        </p>
+        
+        <div className="w-full flex flex-col gap-3 relative z-10">
           <button
             onClick={() => reset()}
-            className="flex-1 py-3.5 px-6 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white text-xs font-bold transition-all shadow-sm shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/35 flex items-center justify-center gap-2 cursor-pointer group"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2 shadow-md shadow-slate-900/20"
           >
-            <RefreshCw className="w-4 h-4 group-hover:rotate-45 transition-transform" />
-            <span>Try Again</span>
+            <RefreshCcw className="w-4 h-4" />
+            Retry Connection
           </button>
           
           <button
-            onClick={() => window.location.href = '/dashboard'}
-            className="py-3.5 px-6 rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-[0.98] text-slate-700 dark:text-zinc-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            onClick={() => window.location.href = '/'}
+            className="w-full bg-white hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl border border-slate-200 transition flex justify-center items-center gap-2"
           >
-            <LayoutDashboard className="w-4 h-4" />
-            <span>Dashboard</span>
+            <Home className="w-4 h-4" />
+            Return to Dashboard
           </button>
         </div>
-
+        
+        <div className="mt-8 text-[10px] font-black uppercase tracking-widest text-slate-400 relative z-10">
+          ASENTRA High-Availability Infrastructure
+        </div>
       </div>
     </div>
   )

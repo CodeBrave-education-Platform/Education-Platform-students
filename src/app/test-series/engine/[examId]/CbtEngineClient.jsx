@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { saveExamState, getExamState, clearExamState } from '@/utils/indexeddb'
 import KatexRenderer from '@/components/KatexRenderer'
@@ -16,7 +17,16 @@ export default function CbtEngineClient({ user, profile, exam }) {
   const router = useRouter()
   const supabase = createClient()
   
-  const rawQuestions = exam.questions || []
+  let rawQuestions = []
+  if (typeof exam.questions === 'string') {
+    try {
+      rawQuestions = JSON.parse(exam.questions)
+    } catch (e) {
+      rawQuestions = []
+    }
+  } else if (Array.isArray(exam.questions)) {
+    rawQuestions = exam.questions
+  }
   
   // Ensure default robust NTA question fallback if rawQuestions is short or missing properties
   const questions = React.useMemo(() => {
@@ -154,6 +164,8 @@ export default function CbtEngineClient({ user, profile, exam }) {
           if (cached.markedReview) setMarkedReview(new Set(cached.markedReview))
         }
       } catch (err) {
+        console.warn('IndexedDB blocked or unavailable. Falling back to memory state.', err)
+        alert('Strict Privacy Mode Detected: Offline auto-save is disabled. Please ensure a stable connection before submitting.')
       } finally {
         setLoading(false)
       }
@@ -260,7 +272,8 @@ export default function CbtEngineClient({ user, profile, exam }) {
       if (document.fullscreenElement) {
         await document.exitFullscreen()
       }
-      router.push('/test-series/analytics/attempt-mock-001')
+      alert('Error submitting exam: ' + err.message + '\nYour progress has been cleared. Please contact support if this issue persists.')
+      router.push('/test-series')
     }
   }
 
@@ -412,11 +425,12 @@ export default function CbtEngineClient({ user, profile, exam }) {
               </div>
 
               {(currentQuestion?.diagram_url || currentQuestion?.diagramUrl) && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg">
-                  <img 
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-w-lg relative h-56 w-full">
+                  <Image 
                     src={currentQuestion.diagram_url || currentQuestion.diagramUrl} 
                     alt="Question Diagram" 
-                    className="max-h-56 object-contain rounded-xl" 
+                    fill
+                    className="object-contain rounded-xl" 
                   />
                 </div>
               )}
