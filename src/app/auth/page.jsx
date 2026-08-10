@@ -188,8 +188,9 @@ export default function AuthPage() {
                 }
               });
             }
-            alert('Debug: Navigating to /dashboard (SW destroyed)');
-            window.location.href = '/dashboard'
+            const params = new URLSearchParams(window.location.search)
+            const next = params.get('next') || '/dashboard'
+            window.location.href = next
           }, 1000)
         }
       }
