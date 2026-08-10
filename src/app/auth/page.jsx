@@ -181,9 +181,8 @@ export default function AuthPage() {
         } else {
           setSuccess('Successfully authenticated! Redirecting...')
           setTimeout(() => {
-            const params = new URLSearchParams(window.location.search)
-            const next = params.get('next') || '/dashboard'
-            window.location.href = next
+            alert('Debug: Navigating to /dashboard');
+            window.location.href = '/dashboard'
           }, 1000)
         }
       }
