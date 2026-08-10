@@ -74,7 +74,7 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              const updatedOptions = { ...options }
+              const updatedOptions = { path: '/', sameSite: 'lax', ...options }
               if (cookieDomain) {
                 updatedOptions.domain = cookieDomain
               }

@@ -37,7 +37,7 @@ export async function updateSession(request) {
           const cookieDomain = (host.endsWith('institute.com') || host.includes('institute.com')) ? '.institute.com' : undefined
 
           cookiesToSet.forEach(({ name, value, options }) => {
-            const updatedOptions = { ...options }
+            const updatedOptions = { path: '/', sameSite: 'lax', ...options }
             if (cookieDomain) {
               updatedOptions.domain = cookieDomain
             }
@@ -49,7 +49,7 @@ export async function updateSession(request) {
           })
 
           cookiesToSet.forEach(({ name, value, options }) => {
-            const updatedOptions = { ...options }
+            const updatedOptions = { path: '/', sameSite: 'lax', ...options }
             if (cookieDomain) {
               updatedOptions.domain = cookieDomain
             }

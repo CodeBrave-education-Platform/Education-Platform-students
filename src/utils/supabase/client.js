@@ -74,7 +74,10 @@ export function createClient() {
     }
   }
 
-  const cookieOptions = {}
+  const cookieOptions = {
+    path: '/',
+    sameSite: 'lax'
+  }
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
     if (hostname.endsWith('institute.com') || hostname.includes('institute.com')) {
