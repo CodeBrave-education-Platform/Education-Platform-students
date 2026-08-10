@@ -44,10 +44,11 @@ export async function updateSession(request) {
             request.cookies.set(name, value, updatedOptions)
           })
 
-          // Manually synchronize the cookie header so downstream Server Components see the refreshed session!
+          // Synchronize the cookie header so downstream Server Components see the refreshed session!
+          // We DO NOT use encodeURIComponent because Next.js/Supabase already manages URL encoding.
           const newCookieHeader = request.cookies
             .getAll()
-            .map(c => `${c.name}=${encodeURIComponent(c.value)}`)
+            .map(c => `${c.name}=${c.value}`)
             .join('; ')
           request.headers.set('cookie', newCookieHeader)
 
