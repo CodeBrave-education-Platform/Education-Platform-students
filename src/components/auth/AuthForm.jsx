@@ -453,33 +453,38 @@ export default function AuthForm({
           </div>
 
           {/* Google Auth Button */}
-          <button
-            type="button"
-            onClick={onGoogleLogin}
-            disabled={loading}
-            className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 bg-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2.5 cursor-pointer shadow-sm hover:shadow transition-all disabled:opacity-50 select-none"
-          >
-            {/* Minimal clean Google SVG icon */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-.1.8-1.5 2.1l2.33 1.8c1.36-1.25 2.22-3.1 2.22-5.75z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-2.33-1.8c-1.07.72-2.45 1.16-4.1 1.16-3.14 0-5.8-2.11-6.75-4.96L4.35 17.3c2 3.97 6.1 6.7 10.87 6.7z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.25 15.49c-.25-.72-.39-1.5-.39-2.3 0-.8.14-1.58.39-2.3L2.83 8.78c-1.05 2.1-1.63 4.46-1.63 6.94 0 2.48.58 4.84 1.63 6.94l2.42-2.17z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.24 0 12 0 7.23 0 3.13 2.73 1.13 6.7l3.27 2.54c.95-2.85 3.6-4.96 6.75-4.96z"
-              />
-            </svg>
-            <span>Continue with Google</span>
-          </button>
+          <div className="flex flex-col gap-2 w-full mt-1">
+            <p className="text-[9px] font-extrabold text-teal-600 text-center uppercase tracking-widest bg-teal-50 py-1.5 rounded-lg border border-teal-100">
+              ✨ Sign in with Google option is best
+            </p>
+            <button
+              type="button"
+              onClick={onGoogleLogin}
+              disabled={loading}
+              className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 bg-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2.5 cursor-pointer shadow-sm hover:shadow transition-all disabled:opacity-50 select-none"
+            >
+              {/* Minimal clean Google SVG icon */}
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-.1.8-1.5 2.1l2.33 1.8c1.36-1.25 2.22-3.1 2.22-5.75z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-2.33-1.8c-1.07.72-2.45 1.16-4.1 1.16-3.14 0-5.8-2.11-6.75-4.96L4.35 17.3c2 3.97 6.1 6.7 10.87 6.7z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.25 15.49c-.25-.72-.39-1.5-.39-2.3 0-.8.14-1.58.39-2.3L2.83 8.78c-1.05 2.1-1.63 4.46-1.63 6.94 0 2.48.58 4.84 1.63 6.94l2.42-2.17z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.24 0 12 0 7.23 0 3.13 2.73 1.13 6.7l3.27 2.54c.95-2.85 3.6-4.96 6.75-4.96z"
+                />
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+          </div>
         </div>
       )}
 
