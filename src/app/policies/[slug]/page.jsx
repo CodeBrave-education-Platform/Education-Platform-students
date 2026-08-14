@@ -1,117 +1,157 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
+import React from 'react'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import { FileText, ArrowLeft, ShieldCheck, HelpCircle, RefreshCcw } from 'lucide-react'
+import { notFound } from 'next/navigation'
 
+// Pre-render these static routes
 export function generateStaticParams() {
   return [
     { slug: 'privacy' },
     { slug: 'terms' },
     { slug: 'refund' },
     { slug: 'contact' },
-  ];
+  ]
 }
 
-const policyData = {
+const policyContent = {
   privacy: {
-    title: 'Privacy Policy',
-    lastUpdated: 'August 2026',
-    content: `
-      ASENTRA Technologies ("we", "our", "us") respects your privacy and is committed to protecting your personal data. This privacy policy informs you how we look after your personal data when you visit our website (regardless of where you visit it from) and tells you about your privacy rights and how the law protects you.
-      
-      1. Information We Collect
-      We collect, use, store and transfer different kinds of personal data about you, including Identity Data (first name, last name, username), Contact Data (billing address, delivery address, email address, telephone numbers), Financial Data (payment card details), and Transaction Data (details about payments to and from you and other details of products and services you have purchased from us).
-      
-      2. How We Use Your Data
-      We will only use your personal data when the law allows us to. Most commonly, we will use your personal data to perform the contract we are about to enter into or have entered into with you (such as enrolling you in a test series), or where it is necessary for our legitimate interests.
-      
-      3. Data Security
-      We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorised way, altered or disclosed. Your data is encrypted at rest and in transit via enterprise-grade secure databases and Razorpay secure payment gateways.
-      
-      4. Data Retention
-      We will only retain your personal data for as long as reasonably necessary to fulfil the purposes we collected it for, including for the purposes of satisfying any legal, regulatory, tax, accounting or reporting requirements.
-    `
+    title: "Privacy Policy",
+    icon: <ShieldCheck className="w-8 h-8 text-teal-600" />,
+    lastUpdated: "August 15, 2026",
+    content: (
+      <div className="space-y-6">
+        <p>At Asentra Education Platform, we prioritize the protection of your personal and academic data. This Privacy Policy outlines how we collect, use, and safeguard your information.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">1. Information We Collect</h3>
+        <p>We collect information you provide directly to us when creating an account, including your name, email, target examination year, and phone number. We also automatically collect telemetry data related to your course progress, video watch times, test scores, and platform interactions to power our Gamification and AI Mentor systems.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">2. How We Use Your Data</h3>
+        <p>Your data is exclusively used to:</p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Provide and maintain the learning platform.</li>
+          <li>Personalize your learning experience via the AI Mentor.</li>
+          <li>Calculate your XP, Levels, and Study Streaks.</li>
+          <li>Process transactions and send physical book kits.</li>
+        </ul>
+
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">3. Data Security</h3>
+        <p>We implement state-of-the-art security measures to protect your data. All transactions are securely processed via Razorpay. We do not store your credit card information on our servers.</p>
+      </div>
+    )
   },
   terms: {
-    title: 'Terms & Conditions',
-    lastUpdated: 'August 2026',
-    content: `
-      Welcome to ASENTRA. By accessing our platform, you agree to these Terms and Conditions. Please read them carefully.
-      
-      1. Account Responsibility
-      You are responsible for maintaining the confidentiality of your account password and login credentials. You must not share your account details with any third party.
-      
-      2. Intellectual Property Rights
-      All content included on this platform, such as video lectures, mock tests, PDFs, graphics, logos, and software, is the property of ASENTRA Technologies or its content suppliers and protected by international copyright laws. You may not distribute, reproduce, or monetize any platform content.
-      
-      3. Acceptable Use
-      You agree to use the platform for lawful educational purposes only. You must not use the platform in any way that causes, or may cause, damage to the platform or impairment of the availability or accessibility of the platform.
-      
-      4. Termination and Suspension
-      We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach these Terms and Conditions or engage in content piracy.
-      
-      5. Governing Law
-      These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions.
-    `
+    title: "Terms of Service",
+    icon: <FileText className="w-8 h-8 text-indigo-600" />,
+    lastUpdated: "August 15, 2026",
+    content: (
+      <div className="space-y-6">
+        <p>By accessing or using the Asentra Education Platform, you agree to be bound by these Terms of Service.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">1. Account Responsibilities</h3>
+        <p>You are responsible for safeguarding your account credentials. Sharing your account or video access with third parties is strictly prohibited and will result in an immediate, non-refundable ban.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">2. Intellectual Property</h3>
+        <p>All content, including videos, PDFs, mock exams, and the AI Mentor software, are the exclusive intellectual property of Asentra Technologies. Unauthorized distribution constitutes piracy.</p>
+
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">3. Platform Conduct</h3>
+        <p>We expect all students to maintain a respectful environment. Any abuse of the Gamification system (e.g., botting to gain XP) or inappropriate behavior in live classes will lead to account suspension.</p>
+      </div>
+    )
   },
   refund: {
-    title: 'Refund & Cancellation Policy',
-    lastUpdated: 'August 2026',
-    content: `
-      We strive to provide the best educational experience at ASENTRA. However, we understand that situations may arise where you need to request a refund.
-      
-      1. Refund Eligibility Window
-      Refunds are only permitted within 7 days of the initial course or test series purchase. After 7 days, no refunds will be processed under any circumstances.
-      
-      2. Usage Limitations
-      To be eligible for a refund within the 7-day window, you must not have consumed more than 10% of the video content, and you must not have attempted any proctored mock tests or downloaded protected PDF materials.
-      
-      3. Cancellation Process
-      You can cancel your recurring subscriptions (if applicable) at any time from your account dashboard. Future recurring billing will be stopped immediately upon cancellation.
-      
-      4. Refund Processing Time
-      Approved refunds will be credited back to the original payment method (via Razorpay) within 5-7 business days. We do not support cash refunds or transfers to alternate bank accounts.
-    `
+    title: "Refund & Cancellation Policy",
+    icon: <RefreshCcw className="w-8 h-8 text-orange-600" />,
+    lastUpdated: "August 15, 2026",
+    content: (
+      <div className="space-y-6">
+        <p>We want you to be completely satisfied with your educational investment. Our refund policy is designed to be fair to both our students and our educators.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">1. Digital Courses & Subscriptions</h3>
+        <p>We offer a strict 7-day money-back guarantee for all digital-only courses. If you are not satisfied with the content within the first 7 days of purchase, you may request a full refund, provided you have watched less than 10% of the video content.</p>
+        
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">2. Courses with Physical Book Kits</h3>
+        <p>For hybrid courses that include physical book dispatches, the cost of the printed materials and shipping (standardized at ₹1,500) is strictly non-refundable once the tracking ID is generated. The remainder of the digital course fee is subject to the standard 7-day policy.</p>
+
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">3. How to Request a Cancellation</h3>
+        <p>To request a cancellation, please email support@asentra.edu.in with your Order ID. Refunds are processed back to the original payment method within 5-7 business days.</p>
+      </div>
+    )
   },
   contact: {
-    title: 'Contact Us',
-    lastUpdated: 'August 2026',
-    content: `
-      We are always here to help you succeed in your IIT JEE and academic journey.
-      
-      Corporate Headquarters:
-      ASENTRA Technologies
-      IIT Bombay Campus Link Road, Powai
-      Mumbai, Maharashtra 400076, India
-      
-      Contact Information:
-      Phone: +91 98765 43210 (Toll-Free within India)
-      Email: support@asentra.edu.in
-      Grievance Officer: legal@asentra.edu.in
-      
-      Operating Hours: 
-      Monday to Saturday, 9:00 AM - 6:00 PM IST
-      (Closed on National Holidays)
-    `
+    title: "Contact Us",
+    icon: <HelpCircle className="w-8 h-8 text-blue-600" />,
+    lastUpdated: "August 15, 2026",
+    content: (
+      <div className="space-y-6">
+        <p>Have a question or need technical support? The Asentra Team is here to help you achieve your academic dreams.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <h4 className="font-bold text-slate-900 mb-2">Technical Support</h4>
+            <p className="text-sm text-slate-600 mb-4">Having trouble with video playback, the AI Mentor, or your XP Streak?</p>
+            <p className="font-mono text-sm font-bold text-indigo-600">support@asentra.edu.in</p>
+          </div>
+          
+          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <h4 className="font-bold text-slate-900 mb-2">Academic Guidance</h4>
+            <p className="text-sm text-slate-600 mb-4">Need help choosing the right batch or configuring your study planner?</p>
+            <p className="font-mono text-sm font-bold text-indigo-600">academics@asentra.edu.in</p>
+          </div>
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-4">Corporate Headquarters</h3>
+        <div className="bg-slate-900 text-slate-300 p-8 rounded-3xl mt-4">
+          <p className="font-bold text-white mb-2">Asentra Technologies Pvt. Ltd.</p>
+          <p>IIT Bombay Campus Link Road,</p>
+          <p>Powai, Mumbai,</p>
+          <p>Maharashtra, India 400076</p>
+          <p className="mt-4 pt-4 border-t border-slate-800">Phone: +91 98765 43210 (Mon-Sat, 9AM-6PM IST)</p>
+        </div>
+      </div>
+    )
   }
-};
+}
 
 export default function PolicyPage({ params }) {
-  const { slug } = params;
-  const policy = policyData[slug];
+  const { slug } = params
+  const policy = policyContent[slug]
 
   if (!policy) {
-    notFound();
+    notFound()
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-24 px-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200">
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-2">{policy.title}</h1>
-        <p className="text-sm font-semibold text-slate-400 mb-8 uppercase tracking-widest">Last Updated: {policy.lastUpdated}</p>
-        
-        <div className="prose prose-slate max-w-none text-slate-600 font-medium whitespace-pre-line leading-relaxed">
-          {policy.content}
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <Navbar />
+      
+      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12 md:py-20">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
+
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-10 border-b border-slate-100">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100">
+                {policy.icon}
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{policy.title}</h1>
+                <p className="text-sm font-medium text-slate-500 mt-1">Last Updated: {policy.lastUpdated}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="prose prose-slate prose-indigo max-w-none prose-headings:font-black prose-p:font-medium prose-p:text-slate-600 prose-li:text-slate-600">
+            {policy.content}
+          </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
-  );
+  )
 }
