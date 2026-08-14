@@ -174,42 +174,10 @@ export default function DashboardClient({
   }
 
   // Rich Default Mock Enrollments Fallback
-  const defaultMockEnrollments = [
-    {
-      id: 'e-demo',
-      course_id: 'c-demo',
-      enrolled_at: new Date().toISOString(),
-      courses: {
-        id: 'c-demo',
-        title: '🎯 Demo Course: JEE Ultimate 2026 Ranker Super Bundle (Books + Mock Tests Included)',
-        description: 'Full 6-Volume Hardcopy Printed Textbook Box Set + 25 NTA CBT Mock Exams + Complete Physics, Chemistry & Math Video Classroom.',
-        thumbnail_url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-        level: 'JEE Advanced 2026',
-        price: 1,
-        aspirant_info: 'For IIT-JEE & NEET Aspirants',
-        batch_info: 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
-      }
-    },
-    {
-      id: 'e-c1',
-      course_id: 'c1',
-      enrolled_at: new Date().toISOString(),
-      courses: {
-        id: 'c1',
-        title: 'JEE Mains & Advanced Complete Physics Mastery 2026',
-        description: 'Daily Live 4-Hour Mechanics & Electrodynamics Masterclasses + 2 Vol. Printed Hardcopy Textbooks Delivered Free to Your Doorstep.',
-        thumbnail_url: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?auto=format&fit=crop&w=800&q=80',
-        level: 'JEE Advanced',
-        price: 2999,
-        aspirant_info: 'For IIT-JEE Aspirants',
-        batch_info: 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
-      }
-    }
-  ]
-
+  
   // Data states (locally updated for real-time reactivity)
   const [courses, setCourses] = useState(initialCourses)
-  const [enrollments, setEnrollments] = useState(initialEnrollments && initialEnrollments.length > 0 ? initialEnrollments : defaultMockEnrollments)
+  const [enrollments, setEnrollments] = useState(initialEnrollments || [])
   const [batchEnrollments, setBatchEnrollments] = useState(initialBatchEnrollments)
   const directory = allCourses
 
