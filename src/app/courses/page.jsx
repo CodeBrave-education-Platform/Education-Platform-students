@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
+import { createClient } from '@/utils/supabase/client'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { validateCoupon } from '@/utils/coupons'
@@ -22,146 +23,54 @@ export default function CoursesCatalogPage() {
   const [appliedCoupons, setAppliedCoupons] = useState({})
   const [couponErrors, setCouponErrors] = useState({})
 
-  const courses = [
-    {
-      id: 'c-demo',
-      title: '🎯 Demo Course: JEE Ultimate 2026 Ranker Super Bundle (Books + Mock Tests Included)',
-      instructor: 'Dr. H.C. Verma & AIIMS Faculty Team',
-      instructorRole: 'Ex-IIT & AIIMS Department Heads',
-      subject: 'All',
-      level: 'JEE Advanced 2026',
-      rating: 5.0,
-      studentsCount: '3,850+ Enrolled Aspirants',
-      price: 1,
-      originalPrice: 14999,
-      duration: '350 Hours Live + 25 CBT Tests',
-      lessonsCount: 120,
-      cover: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-      badge: '🧪 DEMO TEST COURSE (₹1)',
-      checklist: [
-        'Full 6-Volume Hardcopy Printed Textbook Box Set Delivered via Bluedart Courier',
-        '25 Full-Length Proctored NTA CBT Mock Exam Papers with AIR Benchmarking',
-        'Complete Physics, Chemistry & Math Video Classroom & Lecture Notes',
-        'Instant Automatic Hardcopy Book Kit Dispatch to /books/my-orders Portal'
-      ],
-      includedBookKit: {
-        title: 'Full 6-Volume JEE Hardcopy Textbook Box Set + Formula Flashcards + Instant PDF Vault',
-        booksCount: 6,
-        value: 3999
-      }
-    },
-    {
-      id: 'c1',
-      title: 'JEE Mains & Advanced Complete Physics Mastery 2026',
-      instructor: 'Dr. H.C. Verma & Asentra Team',
-      instructorRole: 'Ex-IIT Faculty • 22+ Yrs Experience',
-      subject: 'Physics',
-      level: 'JEE Advanced',
-      rating: 4.9,
-      studentsCount: '1,420 Aspirants',
-      price: 2999,
-      originalPrice: 4999,
-      duration: '120 Hours Live',
-      lessonsCount: 45,
-      cover: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=800&auto=format&fit=crop&q=80',
-      badge: '⭐ Bestseller',
-      checklist: [
-        'Daily Live 4-Hour Mechanics & Electrodynamics Masterclasses',
-        '2 Vol. Printed Hardcopy Textbooks Delivered Free to Your Doorstep',
-        '3,500+ Chapterwise PYQ Question Bank & Video Solutions',
-        'Weekly Proctored NTA CBT Mock Exams & AIR Benchmark Rank'
-      ],
-      includedBookKit: {
-        title: 'Mechanics & Wave Motion 2-Vol Hardcopy Kit + PDF Vault',
-        booksCount: 2,
-        value: 1299
-      }
-    },
-    {
-      id: 'c2',
-      title: 'Organic & Inorganic Chemistry Reaction Mechanics',
-      instructor: 'Prof. Ananya Ray',
-      instructorRole: 'Senior Organic Chemistry Specialist',
-      subject: 'Chemistry',
-      level: 'JEE Mains',
-      rating: 4.8,
-      studentsCount: '980 Aspirants',
-      price: 1999,
-      originalPrice: 3499,
-      duration: '90 Hours Live',
-      lessonsCount: 32,
-      cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
-      badge: '🔥 42% Off',
-      checklist: [
-        'Step-by-Step Reaction Mechanism Breakdown & Reagent Maps',
-        'Printed Chemistry PYQ Solution Handbook Included',
-        '100+ Mindmaps & Short Tricks for Inorganic Memory Work',
-        'Dedicated 1-on-1 Daily Doubt Resolution Sessions'
-      ],
-      includedBookKit: {
-        title: '20-Year Chapterwise Chemistry PYQ Solution Handbook',
-        booksCount: 1,
-        value: 750
-      }
-    },
-    {
-      id: 'c3',
-      title: 'NEET Medical Biology Complete NCERT Breakdown',
-      instructor: 'Dr. Vikram Sethi',
-      instructorRole: 'AIIMS Gold Medalist & Lead Mentor',
-      subject: 'Biology',
-      level: 'NEET UG',
-      rating: 4.9,
-      studentsCount: '2,150 Aspirants',
-      price: 2499,
-      originalPrice: 3999,
-      duration: '150 Hours Live',
-      lessonsCount: 60,
-      cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
-      badge: '🏆 Top Rated',
-      checklist: [
-        'Line-by-Line NCERT Biology Breakdown with 3D Diagrams',
-        '10,000+ Chapterwise NCERT Exemplar MCQ Practice Bank',
-        'NEET 2-Vol High-Yield Diagram & Flashcard Handbook Included',
-        'Bi-Weekly Full Syllabus Mock Tests on NTA Engine'
-      ],
-      includedBookKit: {
-        title: 'NEET Biology 10,000 MCQ Bank & Diagram Handbook',
-        booksCount: 2,
-        value: 1100
-      }
-    },
-    {
-      id: 'c4',
-      title: 'Calculus, Vectors & 3D Geometry Advanced Problem Set',
-      instructor: 'Prof. R.D. Sharma',
-      instructorRole: 'Ex-Department Head & Author',
-      subject: 'Mathematics',
-      level: 'JEE Advanced',
-      rating: 4.9,
-      studentsCount: '1,890 Aspirants',
-      price: 2199,
-      originalPrice: 3500,
-      duration: '110 Hours Live',
-      lessonsCount: 40,
-      cover: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
-      badge: '⚡ Rank Booster',
-      checklist: [
-        'Advanced Calculus & 3D Vector Geometry Shortcut Strategies',
-        'Advanced Calculus Formula & Problem Solution Handbook Included',
-        '1,200+ Challenging Multi-Correct & Integer Type Problems',
-        'Live Rank Booster Problem Solving Workshops'
-      ],
-      includedBookKit: {
-        title: 'Advanced Calculus Formula & Problem Solution Handbook',
-        booksCount: 1,
-        value: 650
-      }
-    }
-  ]
+  const [courses, setCourses] = useState([])
+  const [loadingCourses, setLoadingCourses] = useState(true)
+  const [userXp, setUserXp] = useState(0)
+  const supabase = createClient()
 
   useEffect(() => {
     setIsMounted(true)
+    const fetchCourses = async () => {
+      try {
+        const { data, error } = await supabase.from('courses').select('*')
+        if (data) {
+          const mappedData = data.map(c => ({
+             ...c,
+             instructor: c.instructor_name || 'Expert Faculty',
+             instructorRole: 'Senior Educator',
+             cover: c.thumbnail_url || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+             badge: c.badge || '',
+             rating: 4.9,
+             studentsCount: c.students_count ? `${c.students_count}+ Aspirants` : 'New Batch',
+             duration: 'Live & Recorded',
+             lessonsCount: 40,
+             checklist: [
+               'Comprehensive Video Lectures',
+               'Mock Exams & PYQs',
+               'Live Doubt Sessions'
+             ],
+             includedBookKit: c.book_kit || { title: 'Standard Digital Kit', booksCount: 0, value: 0 }
+          }))
+          setCourses(mappedData)
+        }
+      } catch (err) {
+        console.error('Error fetching courses:', err)
+      } finally {
+        setLoadingCourses(false)
+      }
+    }
+    fetchCourses()
+
+    const fetchUserXp = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('profiles').select('xp').eq('id', user.id).single()
+        if (data) setUserXp(data.xp || 0)
+      }
+    }
+    fetchUserXp()
+
+
     try {
       const stored = localStorage.getItem('Asentra_enrolled_courses')
       if (stored) {
@@ -334,7 +243,13 @@ export default function CoursesCatalogPage() {
             const appliedCoupon = appliedCoupons[course.id]
             const couponError = couponErrors[course.id]
 
-            const currentPrice = appliedCoupon ? appliedCoupon.finalPrice : course.price
+                        let basePrice = course.price
+            let xpDiscountApplied = false
+            if (userXp > 1000) {
+              basePrice = Math.max(1, Math.floor(course.price * 0.9)) // 10% off for >1000 XP
+              xpDiscountApplied = true
+            }
+            const currentPrice = appliedCoupon ? appliedCoupon.finalPrice : basePrice
             const discount = Math.round(((course.originalPrice - currentPrice) / course.originalPrice) * 100)
 
             return (
@@ -349,6 +264,11 @@ export default function CoursesCatalogPage() {
                     <span className="absolute bottom-4 right-4 px-3 py-1.5 bg-emerald-500 text-slate-950 text-[10px] font-black rounded-xl shadow-md">
                       Includes Book Kit (Worth ₹{course.includedBookKit.value})
                     </span>
+                    {xpDiscountApplied && (
+                      <span className="absolute top-4 right-4 px-3 py-1 bg-amber-400 text-amber-900 text-[10px] font-black rounded-full uppercase shadow-md flex items-center gap-1">
+                        <Star className="w-3 h-3" /> 10% Ranker Discount
+                      </span>
+                    )}
                   </div>
 
                   <div className="px-6 space-y-4">

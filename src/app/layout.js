@@ -1,4 +1,5 @@
 import "./globals.css";
+import AIAssistant from "@/components/AIAssistant";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ToastProvider";
 import { Suspense } from "react";
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ToastProvider>
             {children}
+        <AIAssistant />
             <Suspense fallback={null}>
               <MobileBottomNav />
             </Suspense>

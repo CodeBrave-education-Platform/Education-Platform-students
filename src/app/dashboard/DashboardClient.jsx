@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import Link from 'next/link'
+import GlobalLeaderboard from '@/components/GlobalLeaderboard'
 import { 
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
   Users, CheckCircle2, Award, Calendar, BookOpenCheck, ArrowRight, 

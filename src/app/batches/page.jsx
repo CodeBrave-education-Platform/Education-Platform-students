@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
+import { createClient } from '@/utils/supabase/client'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { validateCoupon } from '@/utils/coupons'
@@ -22,146 +23,47 @@ export default function BatchesPage() {
   const [appliedCoupons, setAppliedCoupons] = useState({})
   const [couponErrors, setCouponErrors] = useState({})
 
-  const batches = [
-    {
-      id: 'b-demo',
-      title: '🧪 Demo Batch: 2026 AIR-1 Super Elite Ranker Cohort (₹1 Test Checkout)',
-      targetYear: '2026 Target',
-      faculty: 'Dr. H.C. Verma & AIIMS Lead Authors',
-      facultyRole: 'Senior Department Heads',
-      schedule: 'Mon - Sat (10:00 AM - 2:00 PM)',
-      price: 1,
-      originalPrice: 15999,
-      studentsEnrolled: '495 / 500 Seats Filled',
-      seatsLeft: 5,
-      badge: '🧪 DEMO BATCH (₹1)',
-      checklist: [
-        'Full 6-Volume Hardcopy Printed Textbook Set Delivered via Bluedart Courier',
-        '25 Full-Length Proctored NTA CBT Mock Exam Papers with AIR Benchmarking',
-        'Interactive Live Video Classroom, DPP Worksheets & Lecture Notes',
-        'Instant Automatic Hardcopy Book Kit Dispatch to /books/my-orders Portal'
-      ],
-      includedBookBox: {
-        title: 'Full 6-Volume JEE/NEET Hardcopy Textbook Box Set + Digital PDF Vault',
-        booksCount: 6,
-        value: 3999
-      },
-      curriculum: [
-        {
-          chapter: 'Module 1: Physics Mechanics & Rotational Dynamics',
-          duration: '3 Weeks • 18 Live Classes',
-          lessons: [
-            { title: 'Vector Algebra & Kinematics 2D Masterclass', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
-            { title: 'Newton Laws of Motion & Friction Deep Dive', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/physics-formulas.pdf' }
-          ]
-        },
-        {
-          chapter: 'Module 2: NTA CBT Proctored Mock Exam Papers',
-          duration: '2 Full Papers • AIR Benchmark',
-          lessons: [
-            { title: 'JEE Advanced All-India Mock Paper 1', type: 'NTA CBT Exam', duration: '180 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' },
-            { title: 'JEE Advanced All-India Mock Paper 2', type: 'NTA CBT Exam', duration: '180 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'b-achievers',
-      title: 'JEE Advanced 2026 Top Rankers Achievers Cohort',
-      targetYear: '2026 Target',
-      faculty: 'Dr. H.C. Verma & Prof. R.D. Sharma',
-      facultyRole: 'Ex-IIT Department Heads',
-      schedule: 'Mon - Sat (4:00 PM - 8:30 PM)',
-      price: 6999,
-      originalPrice: 11999,
-      studentsEnrolled: '488 / 500 Seats Filled',
-      seatsLeft: 12,
-      badge: '🔥 12 Seats Left',
-      checklist: [
-        'Daily Live 4.5-Hour Interactive Problem-Solving Lectures',
-        'Full 6-Volume Hardcopy Printed Textbook Set Delivered Free',
-        'Unlimited 1-on-1 Faculty Doubt Resolution via Live Classroom',
-        'Weekly Full-Length NTA CBT Mock Exams with AIR Analysis'
-      ],
-      includedBookBox: {
-        title: 'Full 6-Volume Hardcopy Textbook Box Set + Digital PDF Vault',
-        booksCount: 6,
-        value: 3499
-      },
-      curriculum: [
-        {
-          chapter: 'Module 1: Physics Mechanics & Rotational Dynamics',
-          duration: '3 Weeks • 18 Live Classes',
-          lessons: [
-            { title: 'Vector Algebra & Kinematics 2D Masterclass', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
-            { title: 'Newton Laws of Motion & Friction Deep Dive', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/physics-formulas.pdf' },
-            { title: 'Rotational Motion & Rolling Dynamics', type: 'DPP Problem Solving', duration: '90 Mins', pdfUrl: '/downloads/physics-formulas.pdf' }
-          ]
-        },
-        {
-          chapter: 'Module 2: Advanced Calculus & Differential Equations',
-          duration: '4 Weeks • 24 Live Classes',
-          lessons: [
-            { title: 'Limits, Continuity & Differentiability', type: 'Live Video Class', duration: '100 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' },
-            { title: 'Definite Integrals & Area Under Curve', type: 'Interactive Video', duration: '120 Mins', pdfUrl: '/downloads/calculus-worksheets.pdf' }
-          ]
-        },
-        {
-          chapter: 'Module 3: Physical & Organic Chemistry Masterclass',
-          duration: '3 Weeks • 18 Live Classes',
-          lessons: [
-            { title: 'Chemical Equilibrium & Ionic Reactions', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/chemistry-notes.pdf' },
-            { title: 'Reaction Mechanisms & GOC Hydrocarbons', type: 'Practice MCQ Quiz', duration: '75 Mins', pdfUrl: '/downloads/chemistry-notes.pdf' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'b-medical',
-      title: 'NEET UG 2026 Dropper & Repeater Special Ranker Batch',
-      targetYear: '2026 Target',
-      faculty: 'Dr. Ananya Ray & Dr. Vikram Sethi',
-      facultyRole: 'AIIMS Gold Medalists & Authors',
-      schedule: 'Mon - Fri (9:00 AM - 1:30 PM)',
-      price: 5999,
-      originalPrice: 9999,
-      studentsEnrolled: '382 / 400 Seats Filled',
-      seatsLeft: 18,
-      badge: '⚡ NCERT Intensive',
-      checklist: [
-        '360-Degree NCERT Line-by-Line Biology & Chemistry Coverage',
-        'NEET 10,000 MCQ Bank & Biology Flashcard Box Delivered Free',
-        'Daily Practice Problem (DPP) Sets with Video Solutions',
-        'Personalized Ranker Mentorship & Time-Management Seminars'
-      ],
-      includedBookBox: {
-        title: 'NEET 10,000 MCQ Bank + Biology Flashcard Box Set',
-        booksCount: 4,
-        value: 2999
-      },
-      curriculum: [
-        {
-          chapter: 'Module 1: Human Physiology & Cell Biology',
-          duration: '4 Weeks • 20 Live Classes',
-          lessons: [
-            { title: 'Cell Structure, Organelles & Cell Division', type: 'Live Video Class', duration: '90 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' },
-            { title: 'Digestion, Respiration & Circulation Physiology', type: 'NCERT Line-by-Line', duration: '110 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' }
-          ]
-        },
-        {
-          chapter: 'Module 2: Genetics, Biotechnology & Evolution',
-          duration: '3 Weeks • 15 Live Classes',
-          lessons: [
-            { title: 'Molecular Basis of Inheritance & DNA Replication', type: 'Live Video Class', duration: '95 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' },
-            { title: 'Recombinant DNA Tech & Gene Cloning', type: 'Interactive Video', duration: '85 Mins', pdfUrl: '/downloads/biology-flashcards.pdf' }
-          ]
-        }
-      ]
-    }
-  ]
+  const [batches, setBatches] = useState([])
+  const [loadingBatches, setLoadingBatches] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const { data, error } = await supabase.from('batches').select('*')
+        if (data) {
+          const mappedData = data.map(b => ({
+             ...b,
+             title: b.title || 'Untitled Batch',
+             faculty: b.instructor_id || 'Expert Faculty',
+             facultyRole: 'Senior Educator',
+             cover: b.thumbnail_url || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
+             badge: b.badge || '',
+             rating: 4.9,
+             targetYear: b.level || '2026',
+             schedule: 'Mon-Fri Live Classes',
+             studentsEnrolled: 'New Batch',
+             seatsLeft: 50,
+             checklist: [
+               'Live Interactive Sessions',
+               'DPPs & Solutions',
+               'Weekly Mentorship'
+             ],
+             includedBookBox: b.book_kit || { title: 'Standard Digital Kit', booksCount: 0, value: 0 },
+             curriculum: []
+          }))
+          setBatches(mappedData)
+        }
+      } catch (err) {
+        console.error('Error fetching batches:', err)
+      } finally {
+        setLoadingBatches(false)
+      }
+    }
+    fetchBatches()
+    
     try {
+
       const stored = localStorage.getItem('Asentra_joined_batches')
       if (stored) {
         const parsed = JSON.parse(stored)
