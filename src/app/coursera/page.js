@@ -203,20 +203,6 @@ export default function CourseraShowcase() {
     setEditImageBg(course.imageBg)
   }
 
-  const handleSaveEdit = (id) => {
-    const updated = courses.map((c) => {
-      if (c.id === id) {
-        return {
-          ...c,
-          title: editTitle,
-          partner: editPartner,
-          rating: Number(editRating) || 4.5,
-          reviews: editReviews,
-          type: editType,
-          level: editLevel,
-          hours: editHours,
-          primarySkill: editSkill,
-          imageBg: editImageBg
   const handleSaveCourse = async () => {
     if (!editTitle.trim()) return
 
