@@ -114,8 +114,8 @@ const policyContent = {
   }
 }
 
-export default function PolicyPage({ params }) {
-  const { slug } = params
+export default async function PolicyPage({ params }) {
+  const { slug } = await params
   const policy = policyContent[slug]
 
   if (!policy) {

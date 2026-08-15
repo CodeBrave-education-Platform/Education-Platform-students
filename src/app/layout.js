@@ -5,6 +5,9 @@ import { ToastProvider } from "@/components/ToastProvider";
 import { Suspense } from "react";
 import Script from "next/script";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
+import ScrollToTop from "@/components/navigation/ScrollToTop";
+import CookieBanner from "@/components/CookieBanner";
+import UTMTracker from "@/components/UTMTracker";
 import { Inter, Outfit } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -20,9 +23,24 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className={`${inter.variable} ${outfit.variable} font-sans`}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {/* Skip to Content - Accessibility */}
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] bg-indigo-600 text-white px-4 py-2 font-bold rounded-lg shadow-xl">
+            Skip to content
+          </a>
+
           <ToastProvider>
-            {children}
-        <AIAssistant />
+            <Suspense fallback={null}>
+              <UTMTracker />
+            </Suspense>
+            
+            <div id="main-content">
+              {children}
+            </div>
+
+            <AIAssistant />
+            <ScrollToTop />
+            <CookieBanner />
+            
             <Suspense fallback={null}>
               <MobileBottomNav />
             </Suspense>

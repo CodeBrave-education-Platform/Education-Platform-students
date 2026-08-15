@@ -279,6 +279,13 @@ export default function AuthForm({
                           disabled={loading}
                           className={inputClass}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
 
@@ -297,6 +304,13 @@ export default function AuthForm({
                           disabled={loading}
                           className={inputClass}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -357,22 +371,17 @@ export default function AuthForm({
 
                   {/* Password */}
                   <div className={inputContainerClass}>
-                    <div className="flex justify-between items-center mb-0.5">
+                    <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Password</label>
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-[10px] font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        <span>{showPassword ? 'Hide' : 'Show'}</span>
-                      </button>
+                      <Link href="/forgot-password" onClick={() => setFocusedInput(null)} className="text-[10px] font-bold text-teal-600 hover:text-teal-700 hover:underline transition-colors">
+                        Forgot password?
+                      </Link>
                     </div>
                     <div className="relative">
                       <Lock className={iconClass} />
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="••••••"
+                        placeholder="••••••••"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -381,14 +390,13 @@ export default function AuthForm({
                         disabled={loading}
                         className={inputClass}
                       />
-                    </div>
-                    <div className="flex justify-end mt-1.5">
-                      <Link
-                        href="/forgot-password"
-                        className="text-[10px] font-bold text-teal-600 hover:text-teal-700 transition"
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
                       >
-                        Forgot Password?
-                      </Link>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                 </motion.div>

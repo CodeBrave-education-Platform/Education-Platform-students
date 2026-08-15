@@ -116,6 +116,44 @@ export default async function Home() {
 
         {/* 4. SCROLL-TRIGGERED TOURS */}
         <FeatureScroll />
+
+        {/* Expandable FAQ Section */}
+        <section className="py-20 bg-slate-50 border-t border-slate-200">
+          <div className="max-w-3xl mx-auto px-6">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 text-center mb-12 tracking-tight">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              <details className="group bg-white border border-slate-200 rounded-2xl p-6 open:shadow-md transition-all cursor-pointer">
+                <summary className="flex justify-between items-center font-bold text-slate-800 focus:outline-none">
+                  How does the AI Mentor work?
+                  <span className="transition group-open:rotate-180 text-blue-600">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
+                <p className="text-slate-500 mt-4 leading-relaxed font-medium">The AI Mentor uses advanced contextual retrieval to analyze your specific course materials, including PDF notes and video transcripts, to provide personalized, citation-backed answers to your doubts instantly.</p>
+              </details>
+              
+              <details className="group bg-white border border-slate-200 rounded-2xl p-6 open:shadow-md transition-all cursor-pointer">
+                <summary className="flex justify-between items-center font-bold text-slate-800 focus:outline-none">
+                  Can I download the test series offline?
+                  <span className="transition group-open:rotate-180 text-blue-600">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
+                <p className="text-slate-500 mt-4 leading-relaxed font-medium">Yes! Our platform supports Progressive Web App (PWA) capabilities. You can download the app to your device and cache your test papers for offline Computer Based Testing (CBT) environments.</p>
+              </details>
+              
+              <details className="group bg-white border border-slate-200 rounded-2xl p-6 open:shadow-md transition-all cursor-pointer">
+                <summary className="flex justify-between items-center font-bold text-slate-800 focus:outline-none">
+                  Are the live classes recorded?
+                  <span className="transition group-open:rotate-180 text-blue-600">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
+                <p className="text-slate-500 mt-4 leading-relaxed font-medium">Absolutely. All hybrid batch live sessions are automatically recorded and uploaded to your dashboard vault within 2 hours, complete with auto-generated chapters and searchable transcripts.</p>
+              </details>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* 5. UNIFIED SYSTEM FOOTER */}
