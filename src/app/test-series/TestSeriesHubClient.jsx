@@ -289,7 +289,7 @@ export default function TestSeriesHubClient({
                         }`}>
                           {isPremium ? (
                             <>
-                              <span className="line-through opacity-50">₹{Math.round((ledger.price || 499) * 2.5)}</span>
+                              <span className="line-through opacity-50">₹{ledger.original_price || Math.round((ledger.price || 499) * 2.5)}</span>
                               <span>₹{ledger.price || 499}</span>
                             </>
                           ) : 'FREE'}
