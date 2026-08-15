@@ -166,6 +166,7 @@ export default async function DashboardPage(props) {
     const { data: invoicesData } = await supabase
       .from('invoices')
       .select('*, courses(title), batches(title)')
+      .eq('user_id', user.id)
       .order('invoice_date', { ascending: false })
 
     if (invoicesData) {

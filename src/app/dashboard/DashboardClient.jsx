@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import Link from 'next/link'
+import InvoiceModal from '@/components/InvoiceModal'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
 import { 
   BookOpen, Plus, Search, GraduationCap, LayoutDashboard, 
@@ -181,6 +182,7 @@ export default function DashboardClient({
   const [batchEnrollments, setBatchEnrollments] = useState(initialBatchEnrollments)
   const directory = allCourses
 
+  const [selectedInvoice, setSelectedInvoice] = useState(null)
   const [selectedCohortBatch, setSelectedCohortBatch] = useState(null)
   const [cohortLiveSessions, setCohortLiveSessions] = useState([])
   const [cohortExams, setCohortExams] = useState([])
