@@ -19,34 +19,22 @@ export default async function LeaderboardPage() {
       .order('xp', { ascending: false })
       .limit(50)
       
-    if (dbUsers && dbUsers.length > 0 && dbUsers[0].xp !== undefined) {
+    if (dbUsers) {
       topUsers = dbUsers
-    } else {
-      throw new Error('XP column not found')
     }
-  } catch (err) {
-    // Mock Data Fallback since we didn't run DB migrations for XP column yet
-    topUsers = Array.from({ length: 50 }).map((_, i) => ({
+  } catch (err) {}
+
+  // Pad with mock data if we have less than 50 real users for demo purposes
+  if (topUsers.length < 50) {
+    const mockUsers = Array.from({ length: 50 - topUsers.length }).map((_, i) => ({
       id: `mock-${i}`,
-      full_name: i === 0 ? 'Anjali Sharma' : i === 1 ? 'Rahul Verma' : i === 2 ? 'Vikram Singh' : `Student ${i + 1}`,
+      full_name: i === 0 && topUsers.length === 0 ? 'Anjali Sharma' : i === 1 && topUsers.length === 0 ? 'Rahul Verma' : `Student ${topUsers.length + i + 1}`,
       xp: 15000 - (i * 250) - Math.floor(Math.random() * 50),
       streak: Math.floor(Math.random() * 30) + 1,
       rank_badge: i === 0 ? 'Grandmaster' : i < 10 ? 'Master' : i < 25 ? 'Diamond' : 'Platinum'
     }))
-
-    // Insert the current user in a random position if logged in
-    if (user) {
-      const { data: profile } = await supabase.from('profiles').select('full_name, xp, streak').eq('id', user.id).maybeSingle()
-      if (profile) {
-        topUsers[15] = {
-          id: user.id,
-          full_name: profile.full_name || user.email,
-          xp: profile.xp || 11050,
-          streak: profile.streak || 4,
-          rank_badge: 'Diamond'
-        }
-      }
-    }
+    topUsers = [...topUsers, ...mockUsers]
+    topUsers.sort((a, b) => (b.xp || 0) - (a.xp || 0))
   }
 
   const top3 = topUsers.slice(0, 3)

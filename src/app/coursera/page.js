@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Footer from '@/components/Footer'
+import { createClient } from '@/utils/supabase/client'
 import {
   Search,
   Bell,
@@ -107,6 +108,7 @@ export default function CourseraShowcase() {
   const [viewMode, setViewMode] = useState('student') // 'student' | 'admin'
 
   // Admin dynamic options (stored in state & loaded from localStorage)
+  const supabase = createClient()
   const [courses, setCourses] = useState(DEFAULT_COURSES)
   const [themeColor, setThemeColor] = useState('#0056D2') // Coursera Brand Blue
   const [promoTitle, setPromoTitle] = useState('Google Advanced Data Analytics')
@@ -144,7 +146,12 @@ export default function CourseraShowcase() {
       const savedToastTitle = localStorage.getItem('cs_toastTitle')
       const savedToastDesc = localStorage.getItem('cs_toastDesc')
 
-      if (savedCourses) setCourses(JSON.parse(savedCourses))
+      const fetchCourses = async () => {
+        const { data, error } = await supabase.from('coursera_courses').select('*').order('created_at', { ascending: true })
+        if (data && data.length > 0) setCourses(data)
+      }
+      fetchCourses()
+
       if (savedTheme) setThemeColor(savedTheme)
       if (savedPromoTitle) setPromoTitle(savedPromoTitle)
       if (savedPromoPartner) setPromoPartner(savedPromoPartner)
@@ -210,18 +217,41 @@ export default function CourseraShowcase() {
           hours: editHours,
           primarySkill: editSkill,
           imageBg: editImageBg
-        }
-      }
-      return c
-    })
-    saveState('cs_courses', updated, setCourses)
-    setEditingCourseId(null)
+  const handleSaveCourse = async () => {
+    if (!editTitle.trim()) return
+
+    const newCourse = {
+      id: editingCourseId || Date.now(),
+      title: editTitle,
+      partner: editPartner,
+      partnerLogo: editPartner ? editPartner.substring(0, 2).toUpperCase() : 'CC',
+      rating: editRating,
+      reviews: editReviews,
+      type: editType,
+      level: editLevel,
+      hours: editHours,
+      imageBg: editImageBg,
+      badgeColor: 'text-blue-700 bg-blue-50 border-blue-100',
+      primarySkill: editSkill
+    }
+
+    if (editingCourseId) {
+      await supabase.from('coursera_courses').update(newCourse).eq('id', editingCourseId)
+      const updated = courses.map(c => c.id === editingCourseId ? newCourse : c)
+      setCourses(updated)
+    } else {
+      await supabase.from('coursera_courses').insert([newCourse])
+      const updated = [...courses, newCourse]
+      setCourses(updated)
+    }
+
+    closeCourseModal()
   }
 
-  const handleDeleteCourse = (id) => {
-    const updated = courses.filter((c) => c.id !== id)
-    saveState('cs_courses', updated, setCourses)
-    if (editingCourseId === id) setEditingCourseId(null)
+  const handleDeleteCourse = async (id) => {
+    await supabase.from('coursera_courses').delete().eq('id', id)
+    const updated = courses.filter(c => c.id !== id)
+    setCourses(updated)
   }
 
   const handleResetDefaults = () => {
