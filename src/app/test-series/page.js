@@ -39,8 +39,7 @@ export default async function TestSeriesHubPage() {
   } catch (e) {}
 
   // Fallback sample test series packages for testing NTA CBT features
-  if (packages.length === 0) {
-    packages = [
+  const mockPackages = [
       {
         id: 'pkg-1',
         title: 'NTA JEE Mains 2026 All India Grand Mock Series',
@@ -65,11 +64,11 @@ export default async function TestSeriesHubPage() {
         test_distribution: { full_mocks: 12, chapter_drills: 8, live_papers: 6 },
         price_ledger: { status: 'free', price: 0 }
       }
-    ]
-  }
+  ]
+  
+  packages = [...packages, ...mockPackages]
 
-  if (exams.length === 0) {
-    exams = [
+  const mockExams = [
       {
         id: 'nta-grand-mock-1',
         package_id: 'pkg-1',
@@ -102,8 +101,9 @@ export default async function TestSeriesHubPage() {
         total_questions: 180,
         is_live_ranking: true
       }
-    ]
-  }
+  ]
+
+  exams = [...exams, ...mockExams]
 
   // Fetch user attempts to show scorecards
   let attempts = []

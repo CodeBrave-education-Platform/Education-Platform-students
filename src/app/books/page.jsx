@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { createClient } from '@/utils/supabase/client'
 import { 
   BookOpen, Search, ShoppingBag, Star, Download, Truck, 
   CheckCircle2, ArrowRight, ShieldCheck, Filter, Sparkles, X, Plus, Minus 
@@ -15,6 +16,7 @@ export default function BookStorePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const supabase = createClient()
 
   const sampleBooks = [
     {
@@ -79,6 +81,32 @@ export default function BookStorePage() {
     }
   ]
 
+  const [books, setBooks] = useState(sampleBooks)
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const { data, error } = await supabase.from('books').select('*')
+        if (data && data.length > 0) {
+          const formatted = data.map(b => ({
+            ...b,
+            author: b.author || 'Asentra Faculty',
+            category: b.category || 'Standard',
+            subject: b.subject || 'General',
+            rating: 4.8,
+            reviewsCount: 120,
+            stock: b.stock || 50,
+            format: 'Hardcopy + PDF',
+            cover: b.thumbnail_url || 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&auto=format&fit=crop&q=80',
+            samplePdf: '/downloads/physics-sample.pdf'
+          }))
+          setBooks([...sampleBooks, ...formatted])
+        }
+      } catch (err) {}
+    }
+    fetchBooks()
+  }, [])
+
   const addToCart = (book) => {
     const existing = cart.find(item => item.id === book.id)
     if (existing) {
@@ -95,7 +123,7 @@ export default function BookStorePage() {
 
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
 
-  const filteredBooks = sampleBooks.filter(book => {
+  const filteredBooks = books.filter(book => {
     const matchSubject = selectedSubject === 'All' || book.subject === selectedSubject
     const matchCategory = selectedCategory === 'All' || book.category === selectedCategory
     const matchQuery = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || book.author.toLowerCase().includes(searchQuery.toLowerCase())

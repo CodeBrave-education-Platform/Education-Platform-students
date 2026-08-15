@@ -128,7 +128,7 @@ export default async function DashboardPage(props) {
       coursesData = data || []
 
       if (coursesData.length > 0) {
-        await redisSet('asentra:course:catalog', JSON.stringify(coursesData), { ex: 3600 })
+        await redisSet('asentra:course:catalog', JSON.stringify(coursesData), { ex: 30 })
       }
     }
     allCourses = coursesData || []
