@@ -38,72 +38,19 @@ export default async function TestSeriesHubPage() {
     if (dbExams && dbExams.length > 0) exams = dbExams
   } catch (e) {}
 
-  // Fallback sample test series packages for testing NTA CBT features
-  const mockPackages = [
-      {
-        id: 'pkg-1',
-        title: 'NTA JEE Mains 2026 All India Grand Mock Series',
-        target_exam_tag: 'JEE Mains',
-        total_tests_count: 15,
-        test_distribution: { full_mocks: 10, chapter_drills: 5, live_papers: 5 },
-        price_ledger: { status: 'free', price: 0 }
-      },
-      {
-        id: 'pkg-2',
-        title: 'JEE Advanced Multi-Format Paper 1 & 2 Series',
-        target_exam_tag: 'JEE Advanced',
-        total_tests_count: 10,
-        test_distribution: { full_mocks: 6, chapter_drills: 4, live_papers: 4 },
-        price_ledger: { status: 'premium', price: 499 }
-      },
-      {
-        id: 'pkg-3',
-        title: 'NEET Medical All India 720 Marks Mock Series',
-        target_exam_tag: 'NEET UG',
-        total_tests_count: 20,
-        test_distribution: { full_mocks: 12, chapter_drills: 8, live_papers: 6 },
-        price_ledger: { status: 'free', price: 0 }
-      }
-  ]
-  
-  packages = [...packages, ...mockPackages]
-
-  const mockExams = [
-      {
-        id: 'nta-grand-mock-1',
-        package_id: 'pkg-1',
-        title: 'NTA JEE Mains Grand Mock Test - 01 (Full Syllabus)',
-        duration_minutes: 180,
-        total_questions: 75,
-        is_live_ranking: true
-      },
-      {
-        id: 'jee-physics-sprint-1',
-        package_id: 'pkg-1',
-        title: 'Physics Mechanics Speed & Accuracy Sprint',
-        duration_minutes: 60,
-        total_questions: 25,
-        is_live_ranking: false
-      },
-      {
-        id: 'jee-adv-paper-1',
-        package_id: 'pkg-2',
-        title: 'JEE Advanced Paper 1 (MCQ, MSQ & 4x5 Matrix Grid)',
-        duration_minutes: 180,
-        total_questions: 54,
-        is_live_ranking: true
-      },
-      {
-        id: 'neet-ug-mock-1',
-        package_id: 'pkg-3',
-        title: 'NEET Medical All India Grand Mock Test - 720 Marks',
-        duration_minutes: 200,
-        total_questions: 180,
-        is_live_ranking: true
-      }
-  ]
-
-  exams = [...exams, ...mockExams]
+  // Fetch user's purchased test packages from invoices
+  let purchasedPackageIds = []
+  try {
+    const { data: invoices } = await supabase
+      .from('invoices')
+      .select('package_id')
+      .eq('profile_id', authenticatedUser.id)
+      .not('package_id', 'is', null)
+      
+    if (invoices) {
+      purchasedPackageIds = invoices.map(inv => inv.package_id)
+    }
+  } catch (e) {}
 
   // Fetch user attempts to show scorecards
   let attempts = []
@@ -123,6 +70,7 @@ export default async function TestSeriesHubPage() {
       initialPackages={packages}
       initialExams={exams}
       initialAttempts={attempts}
+      purchasedPackageIds={purchasedPackageIds}
     />
   )
 }

@@ -22,14 +22,38 @@ export default async function CbtEnginePage({ params }) {
 
   // Fetch target exam blueprint from database
   let examData = null
+  let isAuthorized = true
+
   try {
     const { data: exam } = await supabase
       .from('test_exams')
-      .select('*')
+      .select('*, test_packages(price_ledger)')
       .eq('id', examId)
       .single()
-    examData = exam
+      
+    if (exam) {
+      examData = exam
+      const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
+
+      if (isPremium) {
+        // Verify invoice
+        const { data: invoice } = await supabase
+          .from('invoices')
+          .select('id')
+          .eq('profile_id', authenticatedUser.id)
+          .eq('package_id', exam.package_id)
+          .single()
+
+        if (!invoice) {
+          isAuthorized = false
+        }
+      }
+    }
   } catch (e) {}
+
+  if (!isAuthorized) {
+    redirect('/test-series')
+  }
 
   // High-fidelity fallback exam paper with 6 multi-format questions for testing NTA CBT features
   if (!examData) {

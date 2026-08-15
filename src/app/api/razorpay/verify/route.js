@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request) {
   try {
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, courseId, batchId, amount, bookId, bookTitle, shippingAddress } = await request.json()
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, courseId, batchId, packageId, amount, bookId, bookTitle, shippingAddress } = await request.json()
 
     // 1. Authenticate user securely using getUser() to prevent unauthenticated/spoofed updates
     const supabase = await createClient()
@@ -52,7 +52,27 @@ export async function POST(request) {
       }
     }
 
-    // 5. Enroll user atomically using supabase rpc
+    // 5. Handle Test Series Package unlocking
+    if (packageId) {
+      const { error: pkgError } = await supabase.from('invoices').insert([{
+        profile_id: user.id,
+        package_id: packageId,
+        razorpay_payment_id: razorpay_payment_id,
+        razorpay_order_id: razorpay_order_id,
+        amount_paid: amountPaid,
+        status: 'captured',
+        invoice_date: new Date().toISOString()
+      }]);
+
+      if (pkgError) {
+        throw new Error(pkgError.message || JSON.stringify(pkgError));
+      }
+
+      console.log(`Verification: Student Test Package unlocking completed successfully for payment ${razorpay_payment_id}`);
+      return NextResponse.json({ success: true, message: 'Test Package unlocking verified and completed successfully' });
+    }
+
+    // 6. Enroll user atomically using supabase rpc
     if (batchId) {
       const { data, error: rpcError } = await supabase.rpc('execute_atomic_batch_onboarding', {
         _user_id: user.id,

@@ -6,11 +6,11 @@ export const dynamic = 'force-dynamic'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { courseId, batchId, bookId, price, amount } = body
+    const { courseId, batchId, bookId, packageId, price, amount } = body
     const orderPrice = Number(price || amount || 0)
 
-    if (!courseId && !batchId && !bookId) {
-      return NextResponse.json({ error: 'courseId, batchId, or bookId is required' }, { status: 400 })
+    if (!courseId && !batchId && !bookId && !packageId) {
+      return NextResponse.json({ error: 'courseId, batchId, packageId, or bookId is required' }, { status: 400 })
     }
 
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
@@ -32,7 +32,8 @@ export async function POST(request) {
       notes: { 
         courseId: courseId || '', 
         batchId: batchId || '',
-        bookId: bookId || ''
+        bookId: bookId || '',
+        packageId: packageId || ''
       }
     }
 

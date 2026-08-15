@@ -22,7 +22,8 @@ export default function TestSeriesHubClient({
   profile,
   initialPackages,
   initialExams,
-  initialAttempts
+  initialAttempts,
+  purchasedPackageIds = []
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -47,7 +48,7 @@ export default function TestSeriesHubClient({
       const orderResponse = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batchId: pkg.id, price: price })
+        body: JSON.stringify({ packageId: pkg.id, price: price })
       })
 
       const orderData = await orderResponse.json()
@@ -74,7 +75,7 @@ export default function TestSeriesHubClient({
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
-                batchId: pkg.id,
+                packageId: pkg.id,
                 amount: orderData.amount
               })
             })
@@ -312,7 +313,7 @@ export default function TestSeriesHubClient({
                       </p>
                     </div>
 
-                    {isPremium && (
+                    {isPremium && !purchasedPackageIds.includes(pkg.id) && (
                       <button
                         onClick={() => handleUnlockPackage(pkg, ledger.price || 499)}
                         disabled={loadingPkgId === pkg.id}
@@ -375,7 +376,16 @@ export default function TestSeriesHubClient({
                                   </div>
 
                                   {/* Action Buttons */}
-                                  {attempt ? (
+                                  {isPremium && !purchasedPackageIds.includes(pkg.id) ? (
+                                    <button
+                                      disabled
+                                      className="flex items-center gap-1 px-3.5 py-2 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 cursor-not-allowed"
+                                      title="Unlock package to access this exam"
+                                    >
+                                      <Lock className="w-3 h-3" />
+                                      <span>Locked</span>
+                                    </button>
+                                  ) : attempt ? (
                                     <div className="flex items-center gap-1.5 shrink-0">
                                       <button
                                         onClick={() => router.push(`/test-series/analytics/${attempt.id}`)}
