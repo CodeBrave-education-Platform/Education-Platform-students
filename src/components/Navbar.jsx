@@ -80,7 +80,7 @@ export default function Navbar({ user, profile }) {
         <div ref={exploreRef} className="relative hidden md:block">
           <button
             onClick={toggleExplore}
-            className="flex items-center gap-2 bg-[#0056D2] hover:bg-[#00419e] text-white px-4 py-2 rounded-lg font-bold text-sm cursor-pointer transition-colors shadow-sm select-none"
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-black px-4 py-2 rounded-lg font-bold text-sm cursor-pointer transition-colors shadow-sm select-none"
           >
             <Grid className="w-4 h-4" />
             <span>Explore</span>
@@ -92,28 +92,28 @@ export default function Navbar({ user, profile }) {
               {/* Col 1: Subjects */}
               <div>
                 <h4 className="text-xs font-black text-slate-800 dark:text-zinc-200 uppercase tracking-wider mb-3 flex items-center gap-1">
-                  <BookOpen className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
+                  <BookOpen className="w-3.5 h-3.5 text-slate-900 dark:text-white animate-pulse" />
                   <span>Subjects</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/dashboard?tab=browse&q=Physics" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Physics (Mechanics, Optics)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Chemistry" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Chemistry (Organic, Physical)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Mathematics" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Mathematics (Calculus, Algebra)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Foundation" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Foundation Science</Link></li>
+                  <li><Link href="/dashboard?tab=browse&q=Physics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Physics (Mechanics, Optics)</Link></li>
+                  <li><Link href="/dashboard?tab=browse&q=Chemistry" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Chemistry (Organic, Physical)</Link></li>
+                  <li><Link href="/dashboard?tab=browse&q=Mathematics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Mathematics (Calculus, Algebra)</Link></li>
+                  <li><Link href="/dashboard?tab=browse&q=Foundation" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Foundation Science</Link></li>
                 </ul>
               </div>
 
               {/* Col 2: Batches */}
               <div>
                 <h4 className="text-xs font-black text-slate-800 dark:text-zinc-200 uppercase tracking-wider mb-3 flex items-center gap-1">
-                  <Users className="w-3.5 h-3.5 text-blue-600" />
+                  <Users className="w-3.5 h-3.5 text-slate-900 dark:text-white" />
                   <span>Featured Batches</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">JEE Rankers Batch 2026</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">JEE Advanced Focus Batch</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Quick Revision Crash Course</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Rankers Cohort A</Link></li>
+                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">JEE Rankers Batch 2026</Link></li>
+                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">JEE Advanced Focus Batch</Link></li>
+                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Quick Revision Crash Course</Link></li>
+                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Rankers Cohort A</Link></li>
                 </ul>
               </div>
 
@@ -124,9 +124,9 @@ export default function Navbar({ user, profile }) {
                   <span>Test Center</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 font-bold text-blue-600 dark:text-blue-400 transition-colors block">🚀 CBT Test Series Hub</Link></li>
-                  <li><Link href="/dashboard?tab=exams" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Scheduled Mock Exams</Link></li>
-                  <li><Link href="/dashboard?tab=analytics" onClick={() => setIsExploreOpen(false)} className="hover:text-blue-600 transition-colors block">Performance Analytics</Link></li>
+                  <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white font-bold text-slate-900 dark:text-white dark:text-slate-800 dark:text-slate-200 transition-colors block">🚀 CBT Test Series Hub</Link></li>
+                  <li><Link href="/dashboard?tab=exams" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Scheduled Mock Exams</Link></li>
+                  <li><Link href="/dashboard?tab=analytics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Performance Analytics</Link></li>
                 </ul>
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function Navbar({ user, profile }) {
           href="/test-series"
           className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/80 rounded-lg text-xs font-bold text-slate-700 dark:text-zinc-300 transition shadow-2xs select-none"
         >
-          <Award className="w-4 h-4 text-blue-600 dark:text-blue-450" />
+          <Award className="w-4 h-4 text-slate-900 dark:text-white dark:text-blue-450" />
           <span>Test Series Hub</span>
         </Link>
 
@@ -179,9 +179,9 @@ export default function Navbar({ user, profile }) {
           placeholder="What do you want to learn today?"
           value={searchVal}
           onChange={(e) => setSearchVal(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-zinc-800 text-xs sm:text-sm pl-4 pr-10 py-2 rounded-full border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-zinc-200"
+          className="w-full bg-slate-50 dark:bg-zinc-800 text-xs sm:text-sm pl-4 pr-10 py-2 rounded-full border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-slate-900 dark:focus:ring-white text-slate-800 dark:text-zinc-200"
         />
-        <button type="submit" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 cursor-pointer">
+        <button type="submit" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:text-white cursor-pointer">
           <Search className="w-4 h-4" />
         </button>
       </form>
@@ -201,7 +201,7 @@ export default function Navbar({ user, profile }) {
               <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 leading-tight truncate max-w-[120px]">
                 {displayName}
               </p>
-              <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-0.5 leading-none">
+              <p className="text-[9px] font-bold text-slate-900 dark:text-white dark:text-slate-800 dark:text-slate-200 uppercase tracking-widest mt-0.5 leading-none">
                 {displayRole}
               </p>
             </div>
@@ -229,13 +229,13 @@ export default function Navbar({ user, profile }) {
                 <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg">
                   <button 
                     onClick={() => setTheme('light')} 
-                    className={`p-1.5 rounded-md cursor-pointer ${theme === 'light' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
+                    className={`p-1.5 rounded-md cursor-pointer ${theme === 'light' ? 'bg-white text-slate-900 dark:text-white shadow-sm' : 'text-slate-400'}`}
                   >
                     <Sun className="w-3.5 h-3.5" />
                   </button>
                   <button 
                     onClick={() => setTheme('dark')} 
-                    className={`p-1.5 rounded-md cursor-pointer ${theme === 'dark' ? 'bg-zinc-800 text-blue-400 shadow-sm' : 'text-slate-400'}`}
+                    className={`p-1.5 rounded-md cursor-pointer ${theme === 'dark' ? 'bg-zinc-800 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-400'}`}
                   >
                     <Moon className="w-3.5 h-3.5" />
                   </button>

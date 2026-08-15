@@ -75,7 +75,7 @@ const handleImageError = (e, level) => {
 const CourseSkeletonGrid = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {[1, 2, 3].map((idx) => (
-      <div key={idx} className="bg-white/40 dark:bg-zinc-900/40 border border-zinc-205/30 dark:border-zinc-800/40 shadow-sm rounded-[2.5rem] overflow-hidden flex flex-col justify-between p-6 min-h-[480px] animate-pulse">
+      <div key={idx} className="bg-white/40 dark:bg-zinc-900/40 border border-zinc-200/30 dark:border-zinc-800/40 shadow-sm rounded-[2.5rem] overflow-hidden flex flex-col justify-between p-6 min-h-[480px] animate-pulse">
         <div className="space-y-4 w-full">
           <div className="w-full h-40 bg-slate-200/50 dark:bg-zinc-800/50 rounded-2xl animate-pulse" />
           <div className="h-4 bg-slate-200/50 dark:bg-zinc-800/50 rounded-full w-2/3 animate-pulse" />
@@ -750,15 +750,15 @@ export default function DashboardClient({
 
   // Dynamic Metrics definitions
   const teacherStats = [
-    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
-    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
-    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'My Courses', value: courses.length, icon: BookOpen, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
+    { title: 'Students Enrolled', value: enrollments.length, icon: Users, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
+    { title: 'Peer Instructors', value: '14', icon: Award, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
   ]
 
   const studentStats = [
-    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
-    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
-    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/40 dark:text-teal-400' },
+    { title: 'Enrolled Courses', value: enrollments.length, icon: BookOpenCheck, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
+    { title: 'Available Catalog', value: directory.length, icon: GraduationCap, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
+    { title: 'Study Timeline', value: 'Active', icon: Calendar, color: 'text-slate-800 bg-slate-100 dark:bg-zinc-800 dark:text-white' },
   ]
 
   const stats = isTeacher ? teacherStats : studentStats
@@ -771,7 +771,7 @@ export default function DashboardClient({
       <div className="relative z-10 flex min-h-[calc(100dvh-57px)] pt-0 pb-12 w-full max-w-none px-0">
         
         {/* Sidebar Nav (Seamless flush connection under sticky navbar - Premium Glass theme) */}
-        <aside className="w-20 bg-white/70 dark:bg-zinc-955/70 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800/20 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100dvh-57px)] sticky top-[57px] z-40">
+        <aside className="w-20 bg-white/70 dark:bg-zinc-950 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100dvh-57px)] sticky top-[57px] z-40">
           <div className="space-y-6">
             <nav className="space-y-4">
               {isTeacher ? (
@@ -780,12 +780,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_COURSES', 'courses')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'MY_COURSES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'MY_COURSES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Courses</span>
@@ -794,12 +794,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ROSTER', 'roster')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'ROSTER' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'ROSTER' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Roster</span>
@@ -809,12 +809,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'PROFILE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -826,12 +826,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'MY_LEARNING' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'MY_LEARNING' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <BookOpenCheck className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Learning</span>
@@ -840,12 +840,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BROWSE', 'browse')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'BROWSE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'BROWSE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <Search className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Browse</span>
@@ -854,12 +854,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('BATCHES', 'batches')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'BATCHES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'BATCHES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <Users className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Batches</span>
@@ -868,12 +868,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('EXAMS', 'exams')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'EXAMS' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'EXAMS' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <Award className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Exams</span>
@@ -882,26 +882,26 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'ANALYTICS' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'ANALYTICS' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <TrendingUp className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Analytics</span>
                   </button>
                   <button 
                     onClick={() => router.push('/test-series')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
                   >
-                    <Award className="w-5 h-5 shrink-0 text-teal-600 dark:text-teal-400" />
+                    <Award className="w-5 h-5 shrink-0 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                     <span className="text-[10px] tracking-tight mt-0.5">Test Series</span>
                   </button>
                   <button 
                     onClick={() => router.push('/books/my-orders')}
-                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
+                    className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold`}
                   >
                     <BookOpen className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <span className="text-[10px] tracking-tight mt-0.5">Book Library</span>
@@ -911,12 +911,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('PROFILE', 'profile')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'PROFILE' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'PROFILE' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <User className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
@@ -925,12 +925,12 @@ export default function DashboardClient({
                     onClick={() => handleTabChange('INVOICES', 'invoices')}
                     className={`relative w-full flex flex-col items-center justify-center text-center gap-1 py-3 px-1 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] tactile-press group ${
                       activeTab === 'INVOICES' 
-                        ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.15)] border border-teal-200/40 dark:border-teal-500/20' 
-                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-550 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
+                        ? 'bg-slate-100 text-slate-900 dark:bg-white dark:text-black font-extrabold shadow-sm border border-slate-200 dark:border-white' 
+                        : 'text-slate-500 border border-transparent hover:text-slate-800 hover:bg-slate-50 dark:text-zinc-500 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/30 font-semibold'
                     }`}
                   >
                     {activeTab === 'INVOICES' && (
-                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-teal-600 dark:bg-blue-400 rounded-r-md" />
+                      <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-slate-900 dark:bg-black rounded-r-md" />
                     )}
                     <FileText className="w-5 h-5 shrink-0" />
                     <span className="text-[10px] tracking-tight mt-0.5">Invoices</span>
@@ -958,8 +958,8 @@ export default function DashboardClient({
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
                   {isTeacher ? 'Instructor Control Panel' : 'Student Learning Hub'}
                 </h1>
-                <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-555 mt-1 uppercase tracking-wider">
-                  Dashboard &bull; Signed in as <span className="text-teal-600 dark:text-teal-400 font-bold lowercase">{user.email}</span>
+                <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">
+                  Dashboard &bull; Signed in as <span className="text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 font-bold lowercase">{user.email}</span>
                 </p>
               </div>
             </div>
@@ -970,7 +970,7 @@ export default function DashboardClient({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-750 text-white font-extrabold text-xs rounded-full border border-transparent shadow-md cursor-pointer select-none transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-extrabold text-xs rounded-full border border-transparent shadow-md cursor-pointer select-none transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Course</span>
@@ -981,18 +981,18 @@ export default function DashboardClient({
           <div className="flex-1 p-6 md:p-8 space-y-8 w-full max-w-none">
             
             {/* PW / Unacademy Style Welcome Banner & Gamified Streak Header */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 select-none shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 select-none shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div className="max-w-2xl space-y-2">
                 <div className="flex items-center gap-2 select-none">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 bg-slate-100 dark:text-black dark:bg-white px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-white">
                     AIR Ranker Hub Active
                   </span>
                 </div>
-                <h2 className="text-2xl font-black tracking-tight text-slate-900">
+                <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                   Welcome back, {displayName}!
                 </h2>
-                <p className="text-xs font-medium text-slate-600 leading-relaxed">
+                <p className="text-xs font-medium text-slate-600 dark:text-zinc-400 leading-relaxed">
                   {isTeacher 
                     ? 'Manage student course enrollments, publish syllabus modules, and inspect proctored exam scorecards.' 
                     : 'Track your JEE/NEET prep progress, access enrolled textbooks, and practice with mock tests.'
@@ -1016,7 +1016,7 @@ export default function DashboardClient({
                 return (
                   <div
                     key={stat.title}
-                    className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-teal-500/20 dark:hover:border-blue-400/20 group cursor-pointer"
+                    className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-800/30 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl shadow-sm flex items-center gap-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 group cursor-pointer"
                   >
                     <div className={`p-3.5 rounded-2xl shrink-0 ${stat.color} transition-transform duration-300 group-hover:scale-110 shadow-sm`}>
                       <IconComponent className="w-5 h-5" />
@@ -1060,7 +1060,7 @@ export default function DashboardClient({
                   >
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                        <BookOpen className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                         <span>Created Courses ({courses.length})</span>
                       </h3>
                     </div>
@@ -1076,7 +1076,7 @@ export default function DashboardClient({
                         </div>
                         <button
                           onClick={() => setIsCreateOpen(true)}
-                          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-slate-700 dark:from-teal-600 dark:to-teal-700 dark:text-white font-extrabold text-xs rounded-full border border-teal-600 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
+                          className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-slate-700 dark:bg-white dark:text-white font-extrabold text-xs rounded-full border border-slate-900 dark:border-white shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Create First Course
                         </button>
@@ -1093,15 +1093,15 @@ export default function DashboardClient({
                               className="p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
                             >
                               <div className="space-y-2">
-                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full">
+                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-zinc-8000/10 dark:bg-slate-100 dark:bg-zinc-8000/20 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 rounded-full">
                                   Course
                                 </span>
                                 <h4 className="text-base font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
-                                <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                <p className="text-xs text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                   {course.description || 'No description provided.'}
                                 </p>
                               </div>
-                              <div className="border-t border-zinc-150/40 dark:border-zinc-800/40 pt-4 mt-4 flex justify-between items-center">
+                              <div className="border-t border-zinc-100/40 dark:border-zinc-800/40 pt-4 mt-4 flex justify-between items-center">
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
                                   <Users className="w-3.5 h-3.5" />
                                   <span>{studentCount} Students</span>
@@ -1128,7 +1128,7 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                      <Users className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                       <span>Student Enrolls Ledger ({enrollments.length})</span>
                     </h3>
 
@@ -1155,10 +1155,10 @@ export default function DashboardClient({
                           </thead>
                           <tbody className="divide-y divide-slate-200/30 dark:divide-zinc-800/30 text-xs font-semibold text-slate-900 dark:text-zinc-200">
                             {enrollments.map((enroll, idx) => (
-                              <tr key={enroll.id || `enroll_tr_${idx}`} className="hover:bg-slate-50/50 dark:hover:bg-zinc-955/20 transition-all">
+                              <tr key={enroll.id || `enroll_tr_${idx}`} className="hover:bg-slate-50/50 dark:hover:bg-zinc-950/20 transition-all">
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center font-bold text-slate-700 dark:text-teal-400">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-zinc-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-500 dark:text-zinc-300">
                                       {(enroll.profiles?.full_name || 'ST').substring(0, 2).toUpperCase()}
                                     </div>
                                     <div>
@@ -1208,12 +1208,12 @@ export default function DashboardClient({
                         <div className="text-4xl font-black">{profile.streak || 0} <span className="text-lg text-orange-200">Days</span></div>
                       </div>
                       
-                      <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-[2rem] p-6 text-white shadow-xl shadow-teal-500/20 flex flex-col justify-between">
+                      <div className="bg-gradient-to-br from-slate-900 to-zinc-800 dark:from-zinc-100 dark:to-zinc-300 rounded-[2rem] p-6 text-white shadow-xl shadow-teal-500/20 flex flex-col justify-between">
                         <div className="flex items-center gap-2 mb-2">
-                          <Target className="w-5 h-5 text-teal-200" />
-                          <span className="text-sm font-black uppercase tracking-wider text-teal-100">Total XP</span>
+                          <Target className="w-5 h-5 text-slate-300 dark:text-zinc-500" />
+                          <span className="text-sm font-black uppercase tracking-wider text-slate-300 dark:text-zinc-500">Total XP</span>
                         </div>
-                        <div className="text-4xl font-black">{(profile.xp || 0).toLocaleString()} <span className="text-lg text-teal-200">XP</span></div>
+                        <div className="text-4xl font-black">{(profile.xp || 0).toLocaleString()} <span className="text-lg text-slate-300 dark:text-zinc-500">XP</span></div>
                       </div>
 
                       <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
@@ -1228,7 +1228,7 @@ export default function DashboardClient({
                           <div className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-slate-200 to-slate-400">
                             {profile.rank_badge || 'Unranked'}
                           </div>
-                          <Link href="/leaderboard" className="text-xs text-teal-400 hover:text-teal-300 font-bold mt-2 inline-flex items-center gap-1">
+                          <Link href="/leaderboard" className="text-xs text-slate-500 dark:text-zinc-300 hover:text-slate-400 dark:text-zinc-400 font-bold mt-2 inline-flex items-center gap-1">
                             View Global Leaderboard &rarr;
                           </Link>
                         </div>
@@ -1236,7 +1236,7 @@ export default function DashboardClient({
                     </div>
 
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <BookOpenCheck className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                      <BookOpenCheck className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                       <span>My Learning Catalog ({enrollments.length})</span>
                     </h3>
 
@@ -1251,7 +1251,7 @@ export default function DashboardClient({
                         </div>
                         <button
                           onClick={() => handleTabChange('BROWSE', 'browse')}
-                          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-slate-700 dark:from-teal-600 dark:to-teal-700 dark:text-white font-extrabold text-xs rounded-full border border-teal-600 shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
+                          className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-slate-700 dark:bg-white dark:text-white font-extrabold text-xs rounded-full border border-slate-900 dark:border-white shadow-sm cursor-pointer hover:scale-[1.01] transition-all"
                         >
                           Browse Available Courses
                         </button>
@@ -1269,7 +1269,7 @@ export default function DashboardClient({
                               key={enroll.id || `enroll_div_${idx}`}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
+                              className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-800/30 shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
@@ -1291,13 +1291,13 @@ export default function DashboardClient({
                                 <div className="space-y-3">
                                   {/* Title Row */}
                                   <div className="flex items-start justify-between gap-2.5">
-                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-150 leading-snug line-clamp-2">
+                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-100 leading-snug line-clamp-2">
                                       {course.title}
                                     </h4>
                                   </div>
 
                                   {/* Description line */}
-                                  <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                  <p className="text-[11px] text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                     {course.description || 'No description provided.'}
                                   </p>
 
@@ -1336,14 +1336,14 @@ export default function DashboardClient({
                                   <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
                                     <button
                                       onClick={() => handleTabChange('PROFILE', 'profile')}
-                                      className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 dark:hover:bg-teal-950/20 text-teal-600 dark:text-blue-450 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                      className="border border-slate-900 dark:border-white hover:bg-slate-100 dark:bg-zinc-800/50 dark:border-slate-400 dark:border-zinc-500 dark:hover:dark:bg-zinc-800 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-400 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                     >
                                       MY PROFILE
                                     </button>
                                     
                                     <button
                                       onClick={() => router.push(`/learn/${course.id || 'c1'}`)}
-                                      className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                      className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                     >
                                       <span>RESUME SYLLABI</span>
                                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1369,7 +1369,7 @@ export default function DashboardClient({
                     className="space-y-6 animate-fade-in"
                   >
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                      <Users className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                       <span>Cohort-Based Live Batches ({initialBatches.length})</span>
                     </h3>
 
@@ -1402,7 +1402,7 @@ export default function DashboardClient({
                                   <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider select-none ${
                                     isEnrolled
                                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
-                                      : 'bg-teal-50 text-teal-700 border-blue-100 dark:bg-teal-950/20 dark:text-blue-450 dark:border-teal-500/20'
+                                      : 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white border-slate-200 dark:border-zinc-700 dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-400 dark:border-slate-300 dark:border-zinc-700'
                                   }`}>
                                     {isEnrolled ? 'Enrolled (Live)' : 'Open Enrollment'}
                                   </span>
@@ -1411,18 +1411,18 @@ export default function DashboardClient({
                                   </span>
                                 </div>
                                 <div className="space-y-1.5">
-                                  <h4 className="text-sm font-black text-slate-800 dark:text-zinc-150 leading-snug line-clamp-2">
+                                  <h4 className="text-sm font-black text-slate-800 dark:text-zinc-100 leading-snug line-clamp-2">
                                     {batch.title}
                                   </h4>
-                                  <p className="text-slate-505 dark:text-zinc-450 text-[11px] font-medium leading-relaxed line-clamp-3">
+                                  <p className="text-slate-505 dark:text-zinc-400 text-[11px] font-medium leading-relaxed line-clamp-3">
                                     {batch.description || 'Comprehensive Live Preparation Batch Cohort with Daily Classes, Doubts, Practice DPPs & Physical Textbook Box Set.'}
                                   </p>
                                 </div>
                               </div>
 
-                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-850/80 space-y-4">
+                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-800/80 space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                                  <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
                                     Batch Tuition
                                   </span>
                                   <span className="text-sm font-extrabold text-slate-700 dark:text-zinc-305">
@@ -1434,14 +1434,14 @@ export default function DashboardClient({
                                 <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-3">
                                   <button
                                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                                    className="border border-teal-600 hover:bg-teal-50/50 dark:border-teal-500/70 text-teal-600 dark:text-teal-400 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                    className="border border-slate-900 dark:border-white hover:bg-slate-100 dark:bg-zinc-800/50 dark:border-slate-400 dark:border-zinc-500 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
                                   >
                                     MY PROFILE
                                   </button>
 
                                   <button
                                     onClick={() => router.push('/learn/c1')}
-                                    className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                    className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                   >
                                     <span>RESUME SYLLABI</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1467,16 +1467,16 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-150 tracking-tight flex items-center gap-2">
-                        <Award className="w-5 h-5 text-teal-600 dark:text-teal-450" />
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                        <Award className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                         <span>My Scheduled Exams & CBT Mock Tests</span>
                       </h3>
-                      <p className="text-xs text-zinc-450 mt-1 font-semibold">Examine and start active multiple-choice tests scheduled for your enrolled courses and batch cohorts.</p>
+                      <p className="text-xs text-zinc-400 mt-1 font-semibold">Examine and start active multiple-choice tests scheduled for your enrolled courses and batch cohorts.</p>
                     </div>
 
                     {loadingMyExams ? (
                       <div className="flex justify-center items-center py-16">
-                        <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+                        <Loader2 className="w-8 h-8 text-slate-900 dark:text-white animate-spin" />
                       </div>
                     ) : myExams.length === 0 ? (
                       <div className="text-center text-zinc-455 text-xs py-16 bg-white/40 dark:bg-zinc-900/40 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl">
@@ -1505,12 +1505,12 @@ export default function DashboardClient({
                                   }`}>
                                     {isUpcoming ? 'Locked (Upcoming)' : isClosed ? 'Closed' : 'Active Test'}
                                   </span>
-                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-550">
+                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-500">
                                     Duration: {exam.duration_minutes} Mins
                                   </span>
                                 </div>
                                 
-                                <h4 className="text-sm font-extrabold text-slate-800 dark:text-zinc-150 leading-snug line-clamp-2">
+                                <h4 className="text-sm font-extrabold text-slate-800 dark:text-zinc-100 leading-snug line-clamp-2">
                                   {exam.title}
                                 </h4>
 
@@ -1524,7 +1524,7 @@ export default function DashboardClient({
                               <button
                                 onClick={() => router.push(`/learn/${exam.course_id || 'batch'}/exams/${exam.id}`)}
                                 disabled={!isActive}
-                                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-100 disabled:text-slate-355 disabled:border-slate-100 dark:disabled:bg-zinc-850 dark:disabled:border-zinc-800 dark:disabled:text-zinc-650 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition cursor-pointer text-center border border-teal-650"
+                                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 disabled:bg-slate-100 disabled:text-slate-355 disabled:border-slate-100 dark:disabled:bg-zinc-800 dark:disabled:border-zinc-800 dark:disabled:text-zinc-650 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition cursor-pointer text-center border border-slate-900 dark:border-white"
                               >
                                 {isUpcoming ? 'Test Locked' : isClosed ? 'Test Closed' : 'Enter Test Center'}
                               </button>
@@ -1546,25 +1546,25 @@ export default function DashboardClient({
                     className="space-y-6"
                   >
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                      <TrendingUp className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                       <span>My JEE Performance Dashboard</span>
                     </h3>
 
                     {(!studentAnalytics || Number(studentAnalytics.total_exams) === 0) ? (
                       <div className="p-12 text-center rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md space-y-6 max-w-xl mx-auto animate-fade-in shadow-sm">
-                        <div className="inline-flex p-5 rounded-3xl bg-teal-50 dark:bg-zinc-950 text-teal-600 dark:text-indigo-500 shadow-inner">
+                        <div className="inline-flex p-5 rounded-3xl bg-slate-100 dark:bg-zinc-800 dark:bg-zinc-950 text-slate-900 dark:text-white dark:text-slate-600 dark:text-zinc-400 shadow-inner">
                           <BarChart3 className="w-10 h-10 animate-pulse" />
                         </div>
                         <div className="space-y-2">
                           <h4 className="text-base font-extrabold text-slate-800 dark:text-zinc-200">No Exam Records Found</h4>
-                          <p className="text-xs text-slate-500 dark:text-zinc-450 leading-relaxed">
+                          <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
                             To unlock this dashboard and track your percentile growth, solve mock tests or chapter quizzes under the focus learning panel.
                           </p>
                         </div>
                         <div className="pt-2">
                           <button
                             onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                            className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl shadow-sm border border-teal-600 cursor-pointer hover:scale-[1.01] transition-all"
+                            className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-extrabold text-xs rounded-xl shadow-sm border border-slate-900 dark:border-white cursor-pointer hover:scale-[1.01] transition-all"
                           >
                             Take your first Mock Test
                           </button>
@@ -1574,40 +1574,40 @@ export default function DashboardClient({
                       <div className="space-y-8 animate-fade-in">
                         {/* KPI Cards Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
-                            <div className="w-12 h-12 bg-teal-50 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center shrink-0">
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-800/80 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 dark:dark:bg-zinc-800 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 rounded-2xl flex items-center justify-center shrink-0">
                               <BookOpenCheck className="w-6 h-6" />
                             </div>
                             <div>
-                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
                                 Exams Taken
                               </span>
-                              <span className="text-xl font-black text-slate-850 dark:text-zinc-150">
+                              <span className="text-xl font-black text-slate-850 dark:text-zinc-100">
                                 {studentAnalytics.total_exams}
                               </span>
                             </div>
                           </div>
 
-                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
-                            <div className="w-12 h-12 bg-teal-50 dark:bg-teal-950/20 text-teal-650 dark:text-teal-400 rounded-2xl flex items-center justify-center shrink-0">
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-800/80 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 dark:dark:bg-zinc-800 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 rounded-2xl flex items-center justify-center shrink-0">
                               <Award className="w-6 h-6" />
                             </div>
                             <div>
-                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
                                 Average Score
                               </span>
-                              <span className="text-xl font-black text-teal-600 dark:text-teal-400">
+                              <span className="text-xl font-black text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300">
                                 {Number(studentAnalytics.average_score).toFixed(1)}
                               </span>
                             </div>
                           </div>
 
-                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-850/80 shadow-sm flex items-center gap-4">
+                          <div className="bg-white/80 dark:bg-zinc-900/60 p-5 rounded-3xl border border-slate-200/60 dark:border-zinc-800/80 shadow-sm flex items-center gap-4">
                             <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center shrink-0">
                               <TrendingUp className="w-6 h-6" />
                             </div>
                             <div>
-                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-550 uppercase tracking-widest block">
+                              <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
                                 JEE Prep Standing
                               </span>
                               <span className="text-sm font-black text-slate-700 dark:text-zinc-300">
@@ -1625,9 +1625,9 @@ export default function DashboardClient({
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                           
                           {/* Radial Progress Score chart (1/3 width) */}
-                          <div className="lg:col-span-1 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-850/85 p-6 rounded-3xl flex flex-col justify-between items-center text-center shadow-sm">
+                          <div className="lg:col-span-1 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/85 p-6 rounded-3xl flex flex-col justify-between items-center text-center shadow-sm">
                             <div className="w-full text-left">
-                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-550 uppercase tracking-wider">
+                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                                 Percentile Gauge
                               </h4>
                               <p className="text-[10px] font-bold text-slate-400 mt-0.5">Average Performance Meter</p>
@@ -1653,7 +1653,7 @@ export default function DashboardClient({
                                 </RadialBarChart>
                               </ResponsiveContainer>
                               <div className="absolute flex flex-col items-center justify-center">
-                                <span className="text-2xl font-black text-teal-650 dark:text-teal-400">
+                                <span className="text-2xl font-black text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300">
                                   {Math.round((Number(studentAnalytics.average_score) / 20) * 100)}%
                                 </span>
                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
@@ -1668,9 +1668,9 @@ export default function DashboardClient({
                           </div>
 
                           {/* Attempt Progression BarChart (2/3 width) */}
-                          <div className="lg:col-span-2 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-850/85 p-6 rounded-3xl flex flex-col justify-between shadow-sm">
+                          <div className="lg:col-span-2 bg-white/85 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/85 p-6 rounded-3xl flex flex-col justify-between shadow-sm">
                             <div>
-                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-550 uppercase tracking-wider">
+                              <h4 className="text-xs font-black text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                                 Scores progression
                               </h4>
                               <p className="text-[10px] font-bold text-slate-900 mt-0.5">Attempt scores across last 5 tests</p>
@@ -1746,7 +1746,7 @@ export default function DashboardClient({
                   >
                     <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
                       <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                        <Search className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                        <Search className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                         <span>All Available Curriculums ({directory.length})</span>
                       </h3>
                       
@@ -1760,7 +1760,7 @@ export default function DashboardClient({
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search titles, descriptions..."
-                          className="w-full pl-9 pr-4 py-2 bg-white/70 dark:bg-zinc-900/60 border border-slate-200/50 dark:border-zinc-800/80 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 transition-all text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-inner"
+                          className="w-full pl-9 pr-4 py-2 bg-white/70 dark:bg-zinc-900/60 border border-slate-200/50 dark:border-zinc-800/80 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900/50 dark:focus:ring-white/50 focus:border-slate-900 dark:focus:border-white dark:focus:ring-slate-900/50 dark:focus:ring-white/50 dark:focus:border-slate-900 dark:focus:border-white transition-all text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-inner"
                         />
                       </div>
                     </div>
@@ -1774,7 +1774,7 @@ export default function DashboardClient({
 
                     {filteredDirectory.length === 0 ? (
                       <div className="p-12 text-center rounded-[2rem] border border-dashed border-zinc-200 dark:border-zinc-800 bg-white/20 dark:bg-zinc-900/20 backdrop-blur-md">
-                        <p className="text-xs text-zinc-450 dark:text-zinc-450 font-semibold">No courses matched your query. Try searching for other key phrases!</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-400 font-semibold">No courses matched your query. Try searching for other key phrases!</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1795,7 +1795,7 @@ export default function DashboardClient({
                               key={course.id || `course_dir_${idx}`}
                               whileHover={{ y: -8, scale: 1.01 }}
                               transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-850/30 shadow-sm hover:border-teal-500/20 dark:hover:border-blue-400/20 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
+                              className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-800/30 shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
                             >
                               {/* Premium Widescreen Banner Image Header */}
                               <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
@@ -1819,13 +1819,13 @@ export default function DashboardClient({
                                 <div className="space-y-3">
                                   {/* Title Row */}
                                   <div className="flex items-start justify-between gap-2.5">
-                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-150 leading-snug line-clamp-2">
+                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-100 leading-snug line-clamp-2">
                                       {course.title}
                                     </h4>
                                   </div>
 
                                   {/* Description line */}
-                                  <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                  <p className="text-[11px] text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                     {course.description || 'No description provided.'}
                                   </p>
 
@@ -1882,7 +1882,7 @@ export default function DashboardClient({
                                            <button
                                              onClick={() => handleEnroll(course.id)}
                                              disabled={loading}
-                                             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
+                                             className="w-full bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
                                            >
                                              {loading ? (
                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1894,7 +1894,7 @@ export default function DashboardClient({
                                            <button
                                              onClick={() => handleRazorpayCheckout(course)}
                                              disabled={loading}
-                                             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
+                                             className="w-full bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
                                            >
                                              {loading ? (
                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1934,8 +1934,8 @@ export default function DashboardClient({
                   >
                     {/* Header */}
                     <div className="flex justify-between items-center pb-2">
-                      <h3 className="text-xl font-black text-slate-900 dark:text-zinc-150 flex items-center gap-2 tracking-tight">
-                        <User className="w-5 h-5 text-teal-600" />
+                      <h3 className="text-xl font-black text-slate-900 dark:text-zinc-100 flex items-center gap-2 tracking-tight">
+                        <User className="w-5 h-5 text-slate-900 dark:text-white" />
                         <span>Academic Profile Info</span>
                       </h3>
                       <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 text-[10px] px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider select-none shadow-sm">
@@ -1945,7 +1945,7 @@ export default function DashboardClient({
 
                     {/* Personal & Contact Overview Card */}
                     <div className="bg-white/60 backdrop-blur-xl shadow-md shadow-zinc-100/50 dark:bg-zinc-900/60 dark:shadow-none rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-teal-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-md shrink-0 select-none">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-slate-900 to-slate-800 dark:from-white dark:to-zinc-200 flex items-center justify-center text-white font-black text-2xl shadow-md shrink-0 select-none">
                         {displayInitials}
                       </div>
                       <div className="space-y-2 text-center md:text-left flex-1">
@@ -1963,15 +1963,15 @@ export default function DashboardClient({
 
                         {/* Display extra student academic parameters */}
                         {(targetYear || academicBatch || preferredSubject) && (
-                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-teal-600 dark:text-teal-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
+                          <div className="flex flex-wrap gap-2 text-[9px] font-bold text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
                             {targetYear && (
-                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
+                              <span className="bg-slate-100 dark:bg-zinc-800 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700">Target: IIT JEE {targetYear}</span>
                             )}
                             {academicBatch && (
-                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
+                              <span className="bg-slate-100 dark:bg-zinc-800 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700">Batch: {academicBatch}</span>
                             )}
                             {preferredSubject && (
-                              <span className="bg-teal-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
+                              <span className="bg-slate-100 dark:bg-zinc-800 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700">Focus: {preferredSubject}</span>
                             )}
                           </div>
                         )}
@@ -1981,9 +1981,9 @@ export default function DashboardClient({
                     {/* Academic Performance Metrics Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {[
-                        { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-teal-600 bg-indigo-50 dark:bg-indigo-950/20 dark:text-teal-400', icon: Clock },
+                        { label: 'Daily Study Target', value: dailyStudyHours, desc: 'Hours logged per day', color: 'text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800 dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300', icon: Clock },
                         { label: 'Syllabus Covered', value: syllabusProgress, desc: 'Core curricula completion', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400', icon: BookOpenCheck },
-                        { label: 'Practice Assessment Avg', value: testAverage, desc: 'Average mock test score', color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/20 dark:text-teal-400', icon: Award },
+                        { label: 'Practice Assessment Avg', value: testAverage, desc: 'Average mock test score', color: 'text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800 dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300', icon: Award },
                         { label: 'Academic Strength', value: academicStrengths, desc: 'Top performing area', color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/20 dark:text-purple-400', icon: Sparkles }
                       ].map((item, index) => {
                         const IconComponent = item.icon
@@ -1996,7 +1996,7 @@ export default function DashboardClient({
                               </div>
                             </div>
                             <div>
-                              <p className="text-lg font-black text-slate-800 dark:text-zinc-150 leading-tight">{item.value}</p>
+                              <p className="text-lg font-black text-slate-800 dark:text-zinc-100 leading-tight">{item.value}</p>
                               <p className="text-[9px] font-semibold text-zinc-400 mt-1">{item.desc}</p>
                             </div>
                           </div>
@@ -2018,11 +2018,11 @@ export default function DashboardClient({
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
                             <span>Syllabus Progress Indicator</span>
-                            <span className="text-teal-600">{syllabusProgress}</span>
+                            <span className="text-slate-900 dark:text-white">{syllabusProgress}</span>
                           </div>
                           <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-teal-600 to-indigo-500 rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-slate-800 to-slate-700 dark:from-white dark:to-zinc-300 rounded-full transition-all duration-500"
                               style={{ width: syllabusProgress.includes('%') ? syllabusProgress : `${syllabusProgress}%` }}
                             />
                           </div>
@@ -2036,7 +2036,7 @@ export default function DashboardClient({
                           </div>
                           <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-slate-700 to-slate-600 dark:from-zinc-300 dark:to-zinc-400 rounded-full transition-all duration-500"
                               style={{ width: testAverage.includes('%') ? testAverage : `${testAverage}%` }}
                             />
                           </div>
@@ -2053,7 +2053,7 @@ export default function DashboardClient({
                             <span>Algebra & Limits (Done)</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
+                            <span className="w-1.5 h-1.5 bg-slate-100 dark:bg-zinc-8000 rounded-full animate-pulse" />
                             <span>Calculus & Derivatives (Active)</span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -2073,7 +2073,7 @@ export default function DashboardClient({
                         <div className="space-y-3.5 relative pl-4 border-l border-zinc-200 dark:border-zinc-800 mt-2">
                           {[
                             { title: 'Stage 1: Foundation Phase', desc: 'Core formulas, equations, and basic vectors.', status: 'COMPLETED', color: 'bg-emerald-500 text-emerald-100 border-emerald-500' },
-                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-teal-600 text-blue-100 border-teal-600 animate-pulse' },
+                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-slate-900 dark:bg-white text-white dark:text-black text-white dark:text-black border-slate-900 dark:border-white animate-pulse' },
                             { title: 'Stage 3: Advanced Curriculums', desc: 'Multi-concept modules and IIT PYQs.', status: 'LOCKED', color: 'bg-slate-200 dark:bg-zinc-800 text-zinc-400 border-transparent' }
                           ].map((stage, idx) => (
                             <div key={idx} className="relative space-y-1">
@@ -2081,7 +2081,7 @@ export default function DashboardClient({
                               <div className="flex justify-between items-center">
                                 <h5 className="text-xs font-bold text-slate-850 dark:text-zinc-200">{stage.title}</h5>
                                 <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-teal-50 text-teal-600' : 'bg-slate-50 text-slate-400'
+                                  stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white' : 'bg-slate-50 text-slate-400'
                                 }`}>{stage.status}</span>
                               </div>
                               <p className="text-[10px] text-zinc-400 leading-normal">{stage.desc}</p>
@@ -2111,7 +2111,7 @@ export default function DashboardClient({
                               value={profileName}
                               onChange={(e) => setProfileName(e.target.value)}
                               placeholder="Your full name"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
 
@@ -2122,7 +2122,7 @@ export default function DashboardClient({
                               value={profilePhone}
                               onChange={(e) => setProfilePhone(e.target.value)}
                               placeholder="Enter 10 digit number"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
                         </div>
@@ -2136,7 +2136,7 @@ export default function DashboardClient({
                               value={targetYear}
                               onChange={(e) => setTargetYear(e.target.value)}
                               placeholder="e.g. 2027"
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             />
                           </div>
 
@@ -2145,7 +2145,7 @@ export default function DashboardClient({
                             <select 
                               value={academicBatch}
                               onChange={(e) => setAcademicBatch(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             >
                               <option value="">Select Stream</option>
                               <option value="11th Standard Foundation">11th Standard Foundation</option>
@@ -2160,7 +2160,7 @@ export default function DashboardClient({
                             <select 
                               value={preferredSubject}
                               onChange={(e) => setPreferredSubject(e.target.value)}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                             >
                               <option value="">Select Subject</option>
                               <option value="Mathematics">Mathematics</option>
@@ -2172,7 +2172,7 @@ export default function DashboardClient({
                         </div>
 
                         {/* NEW: Extended Profile Parameters Section */}
-                        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-850/80 space-y-4">
+                        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4">
                           <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-350">Academic Profile Indicators</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
@@ -2182,7 +2182,7 @@ export default function DashboardClient({
                                 value={dailyStudyHours}
                                 onChange={(e) => setDailyStudyHours(e.target.value)}
                                 placeholder="e.g. 8 Hours"
-                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                               />
                             </div>
 
@@ -2193,7 +2193,7 @@ export default function DashboardClient({
                                 value={syllabusProgress}
                                 onChange={(e) => setSyllabusProgress(e.target.value)}
                                 placeholder="e.g. 45%"
-                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                               />
                             </div>
 
@@ -2204,7 +2204,7 @@ export default function DashboardClient({
                                 value={testAverage}
                                 onChange={(e) => setTestAverage(e.target.value)}
                                 placeholder="e.g. 82%"
-                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                               />
                             </div>
 
@@ -2215,7 +2215,7 @@ export default function DashboardClient({
                                 value={academicStrengths}
                                 onChange={(e) => setAcademicStrengths(e.target.value)}
                                 placeholder="e.g. Kinematics"
-                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                                className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                               />
                             </div>
                           </div>
@@ -2252,7 +2252,7 @@ export default function DashboardClient({
                             whileTap={{ scale: 0.99 }}
                             type="submit"
                             disabled={profileLoading}
-                            className="px-6 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
+                            className="px-6 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-semibold rounded-full shadow-md text-xs tracking-wide cursor-pointer disabled:opacity-50 select-none transition-all"
                           >
                             {profileLoading ? 'Updating Profile...' : 'Save Profile Details'}
                           </motion.button>
@@ -2271,15 +2271,15 @@ export default function DashboardClient({
                     exit={{ opacity: 0, y: -15 }}
                     className="space-y-6"
                   >
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-150 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-teal-600" />
+                    <h3 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-100 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-slate-900 dark:text-white" />
                       <span>Invoices Ledger</span>
                     </h3>
 
-                    <div className="overflow-x-auto rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-955/40 backdrop-blur-xl shadow-sm">
+                    <div className="overflow-x-auto rounded-[2rem] border border-slate-200/30 dark:border-zinc-800/30 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl shadow-sm">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-zinc-150/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">
+                          <tr className="border-b border-zinc-100/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">
                             <th className="px-6 py-4">Invoice ID</th>
                             <th className="px-6 py-4">Course</th>
                             <th className="px-6 py-4">Razorpay Payment ID</th>
@@ -2289,12 +2289,12 @@ export default function DashboardClient({
                             <th className="px-6 py-4 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100/60 dark:divide-zinc-850/80 text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                        <tbody className="divide-y divide-slate-100/60 dark:divide-zinc-800/80 text-xs font-semibold text-slate-800 dark:text-zinc-200">
                           {mockInvoices?.map((invoice, idx) => (
                             <tr key={invoice.id || invoice.razorpayId || `inv_${idx}`} className="hover:bg-slate-50/60 dark:hover:bg-zinc-950/20 transition-all duration-200">
                               <td className="px-6 py-4 font-mono font-bold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.id}</td>
                               <td className="px-6 py-4 font-medium text-slate-800 dark:text-zinc-300">{invoice.courseTitle}</td>
-                              <td className="px-6 py-4 font-mono text-[10px] text-slate-500 dark:text-zinc-550 tracking-wider">{invoice.razorpayId}</td>
+                              <td className="px-6 py-4 font-mono text-[10px] text-slate-500 dark:text-zinc-500 tracking-wider">{invoice.razorpayId}</td>
                               <td className="px-6 py-4 font-mono font-extrabold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.amount}</td>
                               <td className="px-6 py-4 font-mono text-[11px] text-slate-550 dark:text-zinc-400">{new Date(invoice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                               <td className="px-6 py-4 text-right">
@@ -2306,7 +2306,7 @@ export default function DashboardClient({
                                 <a 
                                   href="#" 
                                   onClick={(e) => { e.preventDefault(); alert(`Downloading invoice ${invoice.id} in PDF format...`) }}
-                                  className="text-teal-600 dark:text-teal-400 hover:underline font-semibold"
+                                  className="text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 hover:underline font-semibold"
                                 >
                                   Download PDF
                                 </a>
@@ -2350,7 +2350,7 @@ export default function DashboardClient({
               <div className="space-y-8 flex flex-col h-full justify-between">
                 <div className="space-y-8">
                   {/* Drawer Header */}
-                  <div className="flex justify-between items-center border-b border-zinc-150/40 dark:border-zinc-800/40 pb-4">
+                  <div className="flex justify-between items-center border-b border-zinc-100/40 dark:border-zinc-800/40 pb-4">
                     <div className="flex items-center gap-2 select-none">
                       {/* ASENTRA Vector Logo */}
                       <svg className="w-28 h-6" viewBox="0 0 250 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2387,7 +2387,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_COURSES', 'courses')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_COURSES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2398,7 +2398,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ROSTER', 'roster')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ROSTER' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2409,7 +2409,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2423,7 +2423,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2434,7 +2434,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2445,7 +2445,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BATCHES', 'batches')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BATCHES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2456,7 +2456,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('EXAMS', 'exams')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'EXAMS' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2467,7 +2467,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ANALYTICS' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2478,7 +2478,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2489,7 +2489,7 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
-                              ? 'bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-teal-200/40 dark:border-teal-500/20' 
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
                               : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
@@ -2502,9 +2502,9 @@ export default function DashboardClient({
                 </div>
 
                 {/* Drawer Profile Capsule */}
-                <div className="border-t border-zinc-150/40 dark:border-slate-800/50 pt-5 flex flex-col gap-3">
+                <div className="border-t border-zinc-100/40 dark:border-slate-800/50 pt-5 flex flex-col gap-3">
                   <div className="flex items-center gap-3.5 px-2">
-                    <div className="w-11 h-11 rounded-full bg-teal-600 flex items-center justify-center text-white font-extrabold shadow-sm shadow-teal-500/10 shrink-0 select-none">
+                    <div className="w-11 h-11 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center text-white font-extrabold shadow-sm shadow-teal-500/10 shrink-0 select-none">
                       {displayName.substring(0, 2).toUpperCase()}
                     </div>
                     <div className="overflow-hidden">
@@ -2542,7 +2542,7 @@ export default function DashboardClient({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-4">
                   <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                    <Plus className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                     <span>Publish New Course</span>
                   </h3>
                   <button 
@@ -2568,7 +2568,7 @@ export default function DashboardClient({
                       onChange={(e) => setCourseTitle(e.target.value)}
                       placeholder="e.g. Masterclass in Advanced Algorithms"
                       disabled={createLoading}
-                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 font-semibold text-sm text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner"
+                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-900/50 dark:focus:ring-white/50 focus:border-slate-900 dark:focus:border-white dark:focus:ring-slate-900/50 dark:focus:ring-white/50 dark:focus:border-slate-900 dark:focus:border-white font-semibold text-sm text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner"
                     />
                   </div>
 
@@ -2583,7 +2583,7 @@ export default function DashboardClient({
                       onChange={(e) => setCourseDesc(e.target.value)}
                       placeholder="Describe the learning objectives, pre-requisites, and outcomes of this course..."
                       disabled={createLoading}
-                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 dark:focus:ring-teal-500/50 dark:focus:border-teal-500 font-medium text-xs text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner resize-none"
+                      className="w-full px-4 py-3 bg-slate-50/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-900/50 dark:focus:ring-white/50 focus:border-slate-900 dark:focus:border-white dark:focus:ring-slate-900/50 dark:focus:ring-white/50 dark:focus:border-slate-900 dark:focus:border-white font-medium text-xs text-slate-900 dark:text-zinc-100 placeholder:text-zinc-400 transition-all shadow-inner resize-none"
                     />
                   </div>
 
@@ -2620,7 +2620,7 @@ export default function DashboardClient({
                   whileTap={{ scale: 0.99 }}
                   onClick={handleCreateCourse}
                   disabled={createLoading}
-                  className="w-full flex items-center justify-center py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-full shadow-md cursor-pointer disabled:opacity-50 transition-all text-xs tracking-wide select-none"
+                  className="w-full flex items-center justify-center py-3.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-extrabold rounded-full shadow-md cursor-pointer disabled:opacity-50 transition-all text-xs tracking-wide select-none"
                 >
                   {createLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -2656,7 +2656,7 @@ export default function DashboardClient({
                 <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/50 pb-4 shrink-0">
                   <div>
                     <h3 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-                      <GraduationCap className="w-5 h-5 text-teal-650 dark:text-teal-400" />
+                      <GraduationCap className="w-5 h-5 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300" />
                       <span>Cohort Console: {selectedCohortBatch.title}</span>
                     </h3>
                     <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">
@@ -2675,7 +2675,7 @@ export default function DashboardClient({
 
                 {loadingCohort ? (
                   <div className="flex-1 flex justify-center items-center py-20">
-                    <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-slate-900 dark:text-white animate-spin" />
                   </div>
                 ) : (
                   <div className="flex-1 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
@@ -2697,7 +2697,7 @@ export default function DashboardClient({
                               <div key={session.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-1.5">
-                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none">{session.title}</h5>
+                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-100 leading-none">{session.title}</h5>
                                     {isLive && (
                                       <span className="px-1.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-600 rounded text-[8px] font-black uppercase animate-pulse">
                                         LIVE
@@ -2728,7 +2728,7 @@ export default function DashboardClient({
                     {/* Scheduled Exams */}
                     <div className="space-y-3">
                       <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
-                        <Award className="w-4 h-4 text-teal-650" />
+                        <Award className="w-4 h-4 text-slate-900 dark:text-white" />
                         <span>Scheduled Cohort Assessments</span>
                       </h4>
                       {cohortExams.length === 0 ? (
@@ -2747,7 +2747,7 @@ export default function DashboardClient({
                               <div key={exam.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-1.5">
-                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none">{exam.title}</h5>
+                                    <h5 className="text-xs font-black text-slate-800 dark:text-zinc-100 leading-none">{exam.title}</h5>
                                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border ${
                                       isUpcoming
                                         ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-450 dark:border-amber-500/20'
@@ -2768,7 +2768,7 @@ export default function DashboardClient({
                                     router.push(`/learn/${exam.course_id || 'batch'}/exams/${exam.id}`)
                                   }}
                                   disabled={!isActive}
-                                  className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs shrink-0 cursor-pointer border border-teal-650"
+                                  className="px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs shrink-0 cursor-pointer border border-slate-900 dark:border-white"
                                 >
                                   {isUpcoming ? 'Upcoming' : isClosed ? 'Closed' : 'Enter Exam'}
                                 </button>
@@ -2792,7 +2792,7 @@ export default function DashboardClient({
                           {cohortFiles.map(file => (
                             <div key={file.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
                               <div className="min-w-0">
-                                <h5 className="text-xs font-black text-slate-800 dark:text-zinc-150 leading-none truncate max-w-[280px]">{file.file_name}</h5>
+                                <h5 className="text-xs font-black text-slate-800 dark:text-zinc-100 leading-none truncate max-w-[280px]">{file.file_name}</h5>
                                 <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {new Date(file.created_at).toLocaleDateString('en-US')}</p>
                               </div>
                               <a
