@@ -64,7 +64,7 @@ export default function InvoiceModal({ invoice, user, profile, onClose }) {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      pdf.save(Asentra_Invoice_INV-.pdf)
+      pdf.save(`Asentra_Invoice_INV-${invoice.id || '1001'}.pdf`)
     } catch (err) {
       console.error('Failed to generate PDF:', err)
       alert('Failed to generate PDF. Please try again.')
@@ -79,7 +79,7 @@ export default function InvoiceModal({ invoice, user, profile, onClose }) {
     if (!printContent) return
 
     const printWindow = window.open('', '_blank', 'width=850,height=950')
-    printWindow.document.write(
+    printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
@@ -107,13 +107,15 @@ export default function InvoiceModal({ invoice, user, profile, onClose }) {
           </style>
         </head>
         <body>
-          
+          <div class="invoice-box">
+            ${printContent.innerHTML}
+          </div>
           <script>
             window.onload = function() { window.print(); window.close(); }
           </script>
         </body>
       </html>
-    )
+    `)
     printWindow.document.close()
   }
 
