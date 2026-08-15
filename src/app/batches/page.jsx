@@ -6,7 +6,6 @@ import Script from 'next/script'
 import { createClient } from '@/utils/supabase/client'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { validateCoupon } from '@/utils/coupons'
 import { 
   Users, Sparkles, CheckCircle2, Clock, Calendar, 
   Package, Download, Award, ArrowRight, ShieldCheck, Loader2, CreditCard, Check, Tag,
@@ -17,12 +16,6 @@ export default function BatchesPage() {
   const [joinedBatchIds, setJoinedBatchIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
   const [expandedCurriculumBatchId, setExpandedCurriculumBatchId] = useState(null)
-
-  // Promo Code States
-  const [couponInputs, setCouponInputs] = useState({})
-  const [appliedCoupons, setAppliedCoupons] = useState({})
-  const [couponErrors, setCouponErrors] = useState({})
-
   const [batches, setBatches] = useState([])
   const [loadingBatches, setLoadingBatches] = useState(true)
   const supabase = createClient()
@@ -72,24 +65,11 @@ export default function BatchesPage() {
     } catch (e) {}
   }, [])
 
-  const handleApplyCoupon = (batchId, basePrice) => {
-    const code = couponInputs[batchId]
-    const result = validateCoupon(code, basePrice)
-    if (result.valid) {
-      setAppliedCoupons(prev => ({ ...prev, [batchId]: result }))
-      setCouponErrors(prev => ({ ...prev, [batchId]: null }))
-    } else {
-      setCouponErrors(prev => ({ ...prev, [batchId]: result.error }))
-      setAppliedCoupons(prev => ({ ...prev, [batchId]: null }))
-    }
-  }
-
   const handleJoinBatch = async (batch) => {
     if (joinedBatchIds.includes(batch.id)) return
     setProcessingId(batch.id)
 
-    const activeDiscount = appliedCoupons[batch.id]
-    const finalEnrollPrice = activeDiscount ? activeDiscount.finalPrice : batch.price
+    const finalEnrollPrice = batch.price
 
     try {
       const orderRes = await fetch('/api/razorpay/order', {
@@ -213,11 +193,10 @@ export default function BatchesPage() {
           {batches.map((batch) => {
             const isJoined = joinedBatchIds.includes(batch.id)
             const isProcessing = processingId === batch.id
-            const appliedCoupon = appliedCoupons[batch.id]
-            const couponError = couponErrors[batch.id]
 
-            const currentPrice = appliedCoupon ? appliedCoupon.finalPrice : batch.price
-            const discount = Math.round(((batch.originalPrice - currentPrice) / batch.originalPrice) * 100)
+            const currentPrice = batch.price
+            const originalPrice = batch.originalPrice || Math.round(batch.price * 2.5)
+            const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
 
             return (
               <div key={batch.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition">
@@ -269,41 +248,7 @@ export default function BatchesPage() {
                     </ul>
                   </div>
 
-                  {/* Promo Code Drawer */}
-                  {!isJoined && (
-                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-slate-700 flex items-center gap-1">
-                          <Tag className="w-3.5 h-3.5 text-teal-600" /> Have a Promo Code?
-                        </span>
-                        {appliedCoupon && (
-                          <span className="text-emerald-600 font-bold text-[10px]">
-                            {appliedCoupon.code} Applied (-₹{appliedCoupon.discountAmount})
-                          </span>
-                        )}
-                      </div>
 
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={couponInputs[batch.id] || ''}
-                          onChange={e => setCouponInputs({ ...couponInputs, [batch.id]: e.target.value })}
-                          placeholder="Enter Code (e.g. JEE2026)"
-                          className="flex-1 uppercase bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-teal-600 font-bold"
-                        />
-                        <button
-                          onClick={() => handleApplyCoupon(batch.id, batch.price)}
-                          className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                        >
-                          Apply
-                        </button>
-                      </div>
-
-                      {couponError && (
-                        <p className="text-rose-600 font-bold text-[10px]">{couponError}</p>
-                      )}
-                    </div>
-                  )}
 
                   {/* Included Book Box Banner */}
                   <div className="p-4 bg-teal-50 rounded-2xl border border-teal-200 text-xs space-y-1">
@@ -372,7 +317,7 @@ export default function BatchesPage() {
                       <span className="text-[10px] text-slate-400 font-bold block uppercase">Total Batch Fee (Book Box Included)</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-black text-slate-900">₹{currentPrice}</span>
-                        <span className="text-xs text-slate-400 line-through">₹{batch.originalPrice}</span>
+                        <span className="text-xs text-slate-400 line-through">₹{originalPrice}</span>
                         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded">Save {discount}%</span>
                       </div>
                     </div>

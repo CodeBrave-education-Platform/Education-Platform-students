@@ -6,7 +6,6 @@ import Script from 'next/script'
 import { createClient } from '@/utils/supabase/client'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { validateCoupon } from '@/utils/coupons'
 import { 
   GraduationCap, BookOpen, Sparkles, Star, CheckCircle2, 
   Package, Download, Truck, ArrowRight, ShieldCheck, Clock, Users, Loader2, CreditCard, Award, Check, Tag, Percent
@@ -17,12 +16,6 @@ export default function CoursesCatalogPage() {
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
   const [isMounted, setIsMounted] = useState(false)
-
-  // Promo Code States
-  const [couponInputs, setCouponInputs] = useState({})
-  const [appliedCoupons, setAppliedCoupons] = useState({})
-  const [couponErrors, setCouponErrors] = useState({})
-
   const [courses, setCourses] = useState([])
   const [loadingCourses, setLoadingCourses] = useState(true)
   const [userXp, setUserXp] = useState(0)
@@ -80,24 +73,11 @@ export default function CoursesCatalogPage() {
     } catch (e) {}
   }, [])
 
-  const handleApplyCoupon = (courseId, basePrice) => {
-    const code = couponInputs[courseId]
-    const result = validateCoupon(code, basePrice)
-    if (result.valid) {
-      setAppliedCoupons(prev => ({ ...prev, [courseId]: result }))
-      setCouponErrors(prev => ({ ...prev, [courseId]: null }))
-    } else {
-      setCouponErrors(prev => ({ ...prev, [courseId]: result.error }))
-      setAppliedCoupons(prev => ({ ...prev, [courseId]: null }))
-    }
-  }
-
   const handleEnrollCourse = async (course) => {
     if (enrolledCourseIds.includes(course.id)) return
     setProcessingId(course.id)
 
-    const activeDiscount = appliedCoupons[course.id]
-    const finalEnrollPrice = activeDiscount ? activeDiscount.finalPrice : course.price
+    const finalEnrollPrice = course.price
 
     try {
       const orderRes = await fetch('/api/razorpay/order', {
@@ -201,12 +181,7 @@ export default function CoursesCatalogPage() {
             Includes printed physical textbooks delivered free + instant downloadable eBook PDFs & auto-sync to My Learning!
           </p>
 
-          {/* Promo code tips banner */}
-          <div className="inline-flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-2xl border border-amber-200 text-amber-900 text-xs font-bold">
-            <Tag className="w-4 h-4 text-amber-600" />
-            <span>Use Coupon <strong>JEE2026</strong> for 25% OFF or <strong>EARLYBIRD</strong> for ₹500 OFF!</span>
           </div>
-        </div>
       </div>
 
       {/* Main Catalog Section */}
@@ -240,17 +215,15 @@ export default function CoursesCatalogPage() {
           {filteredCourses.map((course) => {
             const isEnrolled = enrolledCourseIds.includes(course.id)
             const isProcessing = processingId === course.id
-            const appliedCoupon = appliedCoupons[course.id]
-            const couponError = couponErrors[course.id]
 
-                        let basePrice = course.price
+            let currentPrice = course.price
             let xpDiscountApplied = false
             if (userXp > 1000) {
-              basePrice = Math.max(1, Math.floor(course.price * 0.9)) // 10% off for >1000 XP
+              currentPrice = Math.max(1, Math.floor(course.price * 0.9)) // 10% off for >1000 XP
               xpDiscountApplied = true
             }
-            const currentPrice = appliedCoupon ? appliedCoupon.finalPrice : basePrice
-            const discount = Math.round(((course.originalPrice - currentPrice) / course.originalPrice) * 100)
+            const originalPrice = course.originalPrice || Math.round(course.price * 2.5)
+            const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
 
             return (
               <div key={course.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition group">
@@ -302,41 +275,6 @@ export default function CoursesCatalogPage() {
                       </ul>
                     </div>
 
-                    {/* PW / Unacademy Style Discount Coupon Drawer */}
-                    {!isEnrolled && (
-                      <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="font-extrabold text-slate-700 flex items-center gap-1">
-                            <Tag className="w-3.5 h-3.5 text-teal-600" /> Have a Promo Code?
-                          </span>
-                          {appliedCoupon && (
-                            <span className="text-emerald-600 font-bold text-[10px]">
-                              {appliedCoupon.code} Applied (-₹{appliedCoupon.discountAmount})
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={couponInputs[course.id] || ''}
-                            onChange={e => setCouponInputs({ ...couponInputs, [course.id]: e.target.value })}
-                            placeholder="Enter Code (e.g. JEE2026)"
-                            className="flex-1 uppercase bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-teal-600 font-bold"
-                          />
-                          <button
-                            onClick={() => handleApplyCoupon(course.id, course.price)}
-                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                          >
-                            Apply
-                          </button>
-                        </div>
-
-                        {couponError && (
-                          <p className="text-rose-600 font-bold text-[10px]">{couponError}</p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -346,7 +284,7 @@ export default function CoursesCatalogPage() {
                       <span className="text-[10px] text-slate-400 font-bold block uppercase">Course Fee (Textbook Kit Included)</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-black text-slate-900">₹{currentPrice}</span>
-                        <span className="text-xs text-slate-400 line-through">₹{course.originalPrice}</span>
+                        <span className="text-xs text-slate-400 line-through">₹{originalPrice}</span>
                         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded">Save {discount}%</span>
                       </div>
                     </div>

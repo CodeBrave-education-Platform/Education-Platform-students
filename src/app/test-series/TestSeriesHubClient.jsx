@@ -282,12 +282,17 @@ export default function TestSeriesHubClient({
                             {pkg.campus_branch || 'Hyderabad Main'}
                           </span>
                         </div>
-                        <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border ${
+                        <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full border flex items-center gap-1.5 ${
                           isPremium 
                             ? 'bg-amber-50 text-amber-700 border-amber-200' 
                             : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}>
-                          {isPremium ? `₹${ledger.price || 499}` : 'FREE'}
+                          {isPremium ? (
+                            <>
+                              <span className="line-through opacity-50">₹{Math.round((ledger.price || 499) * 2.5)}</span>
+                              <span>₹{ledger.price || 499}</span>
+                            </>
+                          ) : 'FREE'}
                         </span>
                       </div>
                     </div>

@@ -233,7 +233,7 @@ export default function BookStorePage() {
               <div className="p-5 pt-0 space-y-3">
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-black text-slate-900">₹{book.price}</span>
-                  <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
+                  <span className="text-xs text-slate-400 line-through">₹{book.originalPrice || Math.round(book.price * 2.5)}</span>
                 </div>
 
                 <div className="flex gap-2">
