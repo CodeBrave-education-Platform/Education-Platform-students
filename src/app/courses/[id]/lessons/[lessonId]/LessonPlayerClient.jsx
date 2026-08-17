@@ -263,12 +263,14 @@ export default function LessonPlayerClient({
     setIsPostingDoubt(true)
 
     const supabase = createClient()
-    const mockProfile = {
-      full_name: user.user_metadata?.full_name || user.email.split('@')[0],
-      email: user.email
-    }
 
     try {
+      const { data: realProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
       const { data, error } = await supabase
         .from('lesson_doubts')
         .insert({
@@ -284,7 +286,7 @@ export default function LessonPlayerClient({
       // Append new doubt with joined profile locally
       const appendedDoubt = {
         ...data,
-        profiles: mockProfile
+        profiles: realProfile || { full_name: user.email?.split('@')[0], email: user.email }
       }
       setDoubts((prev) => [...prev, appendedDoubt])
       setNewDoubt('')

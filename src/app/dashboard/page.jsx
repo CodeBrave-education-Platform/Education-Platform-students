@@ -182,28 +182,7 @@ export default async function DashboardPage(props) {
     }
   }
 
-  const mockInvoices = [
-    {
-      id: 'inv-1001',
-      courseTitle: 'Foundations of Mathematics & Algebra',
-      razorpayId: 'pay_Nsh721Hhs812',
-      amount: 'Free',
-      currency: 'INR',
-      date: '2026-04-10',
-      status: 'Paid'
-    },
-    {
-      id: 'inv-1002',
-      courseTitle: 'IIT JEE Mains Mastery: Physics & Chemistry',
-      razorpayId: 'pay_Osk192Jks921',
-      amount: '₹4,999',
-      currency: 'INR',
-      date: '2026-05-15',
-      status: 'Paid'
-    }
-  ]
-
-  const finalInvoices = [...dbInvoices, ...mockInvoices]
+  const finalInvoices = dbInvoices
 
   return (
     <>

@@ -9,13 +9,15 @@ export default async function TestSeriesHubPage() {
   
   // Authenticate user session
   const { data: { user } } = await supabase.auth.getUser()
-  const authenticatedUser = user || { id: 'test-user-01', email: 'candidate@Asentra.edu.in' }
+  if (!user) {
+    redirect('/login')
+  }
 
   // Fetch student profile role
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', authenticatedUser.id)
+    .eq('id', user.id)
     .single()
 
   // Fetch test packages from database
@@ -44,7 +46,7 @@ export default async function TestSeriesHubPage() {
     const { data: invoices } = await supabase
       .from('invoices')
       .select('package_id')
-      .eq('profile_id', authenticatedUser.id)
+      .eq('user_id', user.id) // Corrected from profile_id and authenticatedUser
       .not('package_id', 'is', null)
       
     if (invoices) {
@@ -58,15 +60,15 @@ export default async function TestSeriesHubPage() {
     const { data: dbAttempts } = await supabase
       .from('test_attempts')
       .select('*, test_exams(title)')
-      .eq('user_id', authenticatedUser.id)
+      .eq('user_id', user.id)
       .order('completed_at', { ascending: false })
     if (dbAttempts) attempts = dbAttempts
   } catch (e) {}
 
   return (
     <TestSeriesHubClient
-      user={authenticatedUser}
-      profile={profile || { full_name: 'Test Candidate', role: 'student' }}
+      user={user}
+      profile={profile || { full_name: user.email?.split('@')[0] || 'Candidate', role: 'student' }}
       initialPackages={packages}
       initialExams={exams}
       initialAttempts={attempts}

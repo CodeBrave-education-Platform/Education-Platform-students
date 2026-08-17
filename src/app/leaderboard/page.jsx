@@ -24,18 +24,7 @@ export default async function LeaderboardPage() {
     }
   } catch (err) {}
 
-  // Pad with mock data if we have less than 50 real users for demo purposes
-  if (topUsers.length < 50) {
-    const mockUsers = Array.from({ length: 50 - topUsers.length }).map((_, i) => ({
-      id: `mock-${i}`,
-      full_name: i === 0 && topUsers.length === 0 ? 'Anjali Sharma' : i === 1 && topUsers.length === 0 ? 'Rahul Verma' : `Student ${topUsers.length + i + 1}`,
-      xp: 15000 - (i * 250) - Math.floor(Math.random() * 50),
-      streak: Math.floor(Math.random() * 30) + 1,
-      rank_badge: i === 0 ? 'Grandmaster' : i < 10 ? 'Master' : i < 25 ? 'Diamond' : 'Platinum'
-    }))
-    topUsers = [...topUsers, ...mockUsers]
-    topUsers.sort((a, b) => (b.xp || 0) - (a.xp || 0))
-  }
+
 
   const top3 = topUsers.slice(0, 3)
   const rest = topUsers.slice(3)

@@ -30,19 +30,15 @@ export default function CoursesCatalogPage() {
           const mappedData = data.map(c => ({
              ...c,
              instructor: c.instructor_name || 'Expert Faculty',
-             instructorRole: 'Senior Educator',
+             instructorRole: c.instructor_role || 'Senior Educator',
              cover: c.thumbnail_url || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
              badge: c.badge || '',
-             rating: 4.9,
+             rating: c.rating || 0,
              studentsCount: c.students_count ? `${c.students_count}+ Aspirants` : 'New Batch',
-             duration: 'Live & Recorded',
-             lessonsCount: 40,
-             checklist: [
-               'Comprehensive Video Lectures',
-               'Mock Exams & PYQs',
-               'Live Doubt Sessions'
-             ],
-             includedBookKit: c.book_kit || { title: 'Standard Digital Kit', booksCount: 0, value: 0 }
+             duration: c.duration || 'Flexible',
+             lessonsCount: c.lessons_count || 0,
+             checklist: c.checklist || [],
+             includedBookKit: c.book_kit || { title: 'Digital Kit', booksCount: 0, value: 0 }
           }))
           setCourses(mappedData)
         }
@@ -64,13 +60,14 @@ export default function CoursesCatalogPage() {
     fetchUserXp()
 
 
-    try {
-      const stored = localStorage.getItem('Asentra_enrolled_courses')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        setEnrolledCourseIds(parsed.map(c => c.id || c))
+    const fetchEnrollments = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase.from('enrollments').select('course_id').eq('user_id', user.id).eq('status', 'active')
+        if (data) setEnrolledCourseIds(data.map(e => e.course_id))
       }
-    } catch (e) {}
+    }
+    fetchEnrollments()
   }, [])
 
   const handleEnrollCourse = async (course) => {
@@ -91,40 +88,41 @@ export default function CoursesCatalogPage() {
 
       const orderData = await orderRes.json()
 
-      const saveSuccessfulEnrollment = () => {
-        try {
-          const existingCourses = JSON.parse(localStorage.getItem('Asentra_enrolled_courses') || '[]')
-          const updatedCourses = [course, ...existingCourses.filter(c => (c.id || c) !== course.id)]
-          localStorage.setItem('Asentra_enrolled_courses', JSON.stringify(updatedCourses))
-        } catch (e) {}
-
-        const trackingId = `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`
-        const newBookOrder = {
-          id: `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-          source: `Course: ${course.title}`,
-          date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
-          totalAmount: finalEnrollPrice,
-          status: 'Dispatched',
-          courier: 'Bluedart Express',
-          trackingNumber: trackingId,
-          trackingLink: `https://track.bluedart.com/${trackingId}`,
-          items: [
-            {
-              title: course.includedBookKit.title,
-              format: 'Physical Textbooks + Digital eBook PDF',
-              downloadUrl: '/downloads/physics-formulas.pdf'
-            }
-          ]
+      const saveSuccessfulEnrollment = async (response) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          alert('You must be logged in to enroll.')
+          setProcessingId(null)
+          return
         }
 
         try {
-          const existingOrders = JSON.parse(localStorage.getItem('Asentra_book_orders') || '[]')
-          localStorage.setItem('Asentra_book_orders', JSON.stringify([newBookOrder, ...existingOrders]))
-        } catch (e) {}
+          await supabase.from('enrollments').insert({
+            user_id: user.id,
+            course_id: course.id,
+            status: 'active'
+          })
 
-        setEnrolledCourseIds(prev => [...prev, course.id])
-        setProcessingId(null)
-        alert(`🎉 Payment Verified! You enrolled in "${course.title}". It is now active under "My Learning", and your bundled book kit has been dispatched with Tracking ID: ${trackingId}!`)
+          const trackingId = `TRK-BD-${Math.floor(100000000 + Math.random() * 900000000)}`
+          
+          await supabase.from('invoices').insert({
+            profile_id: user.id,
+            user_id: user.id,
+            course_id: course.id,
+            amount_paid: finalEnrollPrice,
+            currency: 'INR',
+            status: 'Paid',
+            invoice_date: new Date().toISOString().split('T')[0],
+            razorpay_payment_id: response?.razorpay_payment_id || trackingId
+          })
+
+          setEnrolledCourseIds(prev => [...prev, course.id])
+          setProcessingId(null)
+          alert(`🎉 Payment Verified! You enrolled in "${course.title}". It is now active under "My Learning", and your bundled book kit has been dispatched with Tracking ID: ${trackingId}!`)
+        } catch (err) {
+          console.error('Error saving enrollment:', err)
+          setProcessingId(null)
+        }
       }
 
       const options = {
@@ -135,7 +133,7 @@ export default function CoursesCatalogPage() {
         description: `${course.title} + Free Book Kit`,
         order_id: orderData.orderId,
         handler: function (response) {
-          saveSuccessfulEnrollment()
+          saveSuccessfulEnrollment(response)
         },
         prefill: {
           name: 'Student Candidate',
@@ -151,7 +149,7 @@ export default function CoursesCatalogPage() {
         const rzp = new window.Razorpay(options)
         rzp.open()
       } else {
-        saveSuccessfulEnrollment()
+        saveSuccessfulEnrollment(null)
       }
     } catch (err) {
       console.error('Payment error', err)

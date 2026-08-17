@@ -394,13 +394,14 @@ export default function CoursePlayerClient({
     setIsPostingDoubt(true)
 
     const supabase = createClient()
-    const mockProfile = {
-      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student',
-      email: user.email,
-      role: user.user_metadata?.role || 'student'
-    }
 
     try {
+      const { data: realProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
       const payload = {
         lesson_id: currentLesson.id,
         user_id: user.id,
@@ -421,7 +422,7 @@ export default function CoursePlayerClient({
 
       const appendedDoubt = {
         ...data,
-        profiles: mockProfile
+        profiles: realProfile || { full_name: user.email?.split('@')[0], role: 'student' }
       }
       setDoubts((prev) => [...prev, appendedDoubt])
       setNewDoubt('')
