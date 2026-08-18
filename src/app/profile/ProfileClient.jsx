@@ -234,13 +234,13 @@ export default function ProfileClient({ user, profile }) {
                 {(targetYear || academicBatch || preferredSubject) && (
                   <div className="flex flex-wrap gap-2 text-[9px] font-bold text-blue-600 dark:text-indigo-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-3 justify-center md:justify-start">
                     {targetYear && (
-                      <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
+                      <span className="bg-blue-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-blue-100/20">Target: IIT JEE {targetYear}</span>
                     )}
                     {academicBatch && (
-                      <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
+                      <span className="bg-blue-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-blue-100/20">Batch: {academicBatch}</span>
                     )}
                     {preferredSubject && (
-                      <span className="bg-blue-50 dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
+                      <span className="bg-blue-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg border border-blue-100/20">Focus: {preferredSubject}</span>
                     )}
                   </div>
                 )}
@@ -266,7 +266,7 @@ export default function ProfileClient({ user, profile }) {
                     <motion.div 
                       key={index}
                       whileHover={{ y: -2 }}
-                      className="p-5 rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-150/40 dark:border-zinc-800/20 flex flex-col justify-between min-h-[125px] transition-all"
+                      className="p-5 rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-200/40 dark:border-zinc-800/20 flex flex-col justify-between min-h-[125px] transition-all"
                     >
                       <div className="flex justify-between items-start">
                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{item.label}</span>
@@ -275,7 +275,7 @@ export default function ProfileClient({ user, profile }) {
                         </div>
                       </div>
                       <div className="mt-4">
-                        <p className="text-base font-black text-slate-800 dark:text-zinc-150 leading-snug line-clamp-1">{item.value}</p>
+                        <p className="text-base font-black text-slate-800 dark:text-zinc-100 leading-snug line-clamp-1">{item.value}</p>
                         <p className="text-[9px] font-semibold text-zinc-400 mt-1 leading-none">{item.desc}</p>
                       </div>
                     </motion.div>
@@ -288,7 +288,7 @@ export default function ProfileClient({ user, profile }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
               {/* Progress visualizer */}
-              <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-150/40 dark:border-zinc-800/20 space-y-6">
+              <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-200/40 dark:border-zinc-800/20 space-y-6">
                 <div>
                   <h4 className="text-sm font-black text-slate-800 dark:text-zinc-200">Syllabus Completion & Stats</h4>
                   <p className="text-[10px] text-zinc-400 mt-1">Real-time indicators updated from personal dashboard progress.</p>
@@ -344,7 +344,7 @@ export default function ProfileClient({ user, profile }) {
               </div>
 
               {/* Prep Roadmap Timeline */}
-              <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-150/40 dark:border-zinc-800/20 space-y-4">
+              <div className="p-6 rounded-[2rem] bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm border border-zinc-200/40 dark:border-zinc-800/20 space-y-4">
                 <div>
                   <h4 className="text-sm font-black text-slate-800 dark:text-zinc-200">Personalized IIT JEE Prep Journey</h4>
                   <p className="text-[10px] text-zinc-400 mt-1">Syllabus progression stages based on target stream goals.</p>
@@ -359,7 +359,7 @@ export default function ProfileClient({ user, profile }) {
                     <div key={idx} className="relative space-y-1">
                       <span className={`absolute -left-[22px] top-1 w-3 h-3 rounded-full border-2 ${stage.color}`} />
                       <div className="flex justify-between items-center">
-                        <h5 className="text-xs font-bold text-slate-850 dark:text-zinc-200">{stage.title}</h5>
+                        <h5 className="text-xs font-bold text-slate-800 dark:text-zinc-200">{stage.title}</h5>
                         <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
                           stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
                         }`}>{stage.status}</span>
@@ -375,8 +375,8 @@ export default function ProfileClient({ user, profile }) {
             {/* Profile Updating Form Card */}
             <div className="bg-white/60 backdrop-blur-xl shadow-sm dark:bg-zinc-900/60 rounded-[2rem] p-8 space-y-6 transition-all duration-300">
               <div>
-                <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-250">Update Academic Profile Details</h4>
-                <p className="text-[11px] text-slate-400 dark:text-zinc-450 mt-1 font-semibold leading-relaxed">
+                <h4 className="text-sm font-black uppercase tracking-wider text-slate-800 dark:text-zinc-300">Update Academic Profile Details</h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1 font-semibold leading-relaxed">
                   Modify your display name, stream focus, and contact details. Updated parameters will synchronize seamlessly across your profile cards and metrics in real-time.
                 </p>
               </div>
@@ -388,24 +388,24 @@ export default function ProfileClient({ user, profile }) {
                   <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Personal Identity</h5>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Full Name</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Full Name</label>
                       <input 
                         type="text"
                         value={profileName}
                         onChange={(e) => setProfileName(e.target.value)}
                         placeholder="Your full name"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Indian Phone Number</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Indian Phone Number</label>
                       <input 
                         type="text"
                         value={profilePhone}
                         onChange={(e) => setProfilePhone(e.target.value)}
                         placeholder="Enter 10 digit number"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
                   </div>
@@ -416,22 +416,22 @@ export default function ProfileClient({ user, profile }) {
                   <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Stream / Focus Details</h5>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Target JEE Year</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Target JEE Year</label>
                       <input 
                         type="text"
                         value={targetYear}
                         onChange={(e) => setTargetYear(e.target.value)}
                         placeholder="e.g. 2027"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Prep Batch / Stream</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Prep Batch / Stream</label>
                       <select 
                         value={academicBatch}
                         onChange={(e) => setAcademicBatch(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       >
                         <option value="">Select Stream</option>
                         <option value="11th Standard Foundation">11th Standard Foundation</option>
@@ -442,11 +442,11 @@ export default function ProfileClient({ user, profile }) {
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Preferred Subject Focus</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Preferred Subject Focus</label>
                       <select 
                         value={preferredSubject}
                         onChange={(e) => setPreferredSubject(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-500 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       >
                         <option value="">Select Subject</option>
                         <option value="Mathematics">Mathematics</option>
@@ -463,46 +463,46 @@ export default function ProfileClient({ user, profile }) {
                   <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Performance Indicators</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Daily Study hours</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Daily Study hours</label>
                       <input 
                         type="text"
                         value={dailyStudyHours}
                         onChange={(e) => setDailyStudyHours(e.target.value)}
                         placeholder="e.g. 8 Hours"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Syllabus Progress %</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Syllabus Progress %</label>
                       <input 
                         type="text"
                         value={syllabusProgress}
                         onChange={(e) => setSyllabusProgress(e.target.value)}
                         placeholder="e.g. 45%"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Test score average %</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Test score average %</label>
                       <input 
                         type="text"
                         value={testAverage}
                         onChange={(e) => setTestAverage(e.target.value)}
                         placeholder="e.g. 82%"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Academic Strength</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Academic Strength</label>
                       <input 
                         type="text"
                         value={academicStrengths}
                         onChange={(e) => setAcademicStrengths(e.target.value)}
                         placeholder="e.g. Kinematics"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
                   </div>
@@ -513,46 +513,46 @@ export default function ProfileClient({ user, profile }) {
                   <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-indigo-400 ml-1">Advanced Profile Parameters</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Weekly Practice Tests</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Weekly Practice Tests</label>
                       <input 
                         type="text"
                         value={weeklyTestsAttempted}
                         onChange={(e) => setWeeklyTestsAttempted(e.target.value)}
                         placeholder="e.g. 3 tests/week"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Target College / Stream</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Target College / Stream</label>
                       <input 
                         type="text"
                         value={dreamCollege}
                         onChange={(e) => setDreamCollege(e.target.value)}
                         placeholder="e.g. IIT Bombay, CS"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Hours Slept / Wellness</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Hours Slept / Wellness</label>
                       <input 
                         type="text"
                         value={studyHoursSlept}
                         onChange={(e) => setStudyHoursSlept(e.target.value)}
                         placeholder="e.g. 7 Hours"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-450 dark:text-zinc-400 mb-1 ml-2">Assigned Study Mentor</label>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1 ml-2">Assigned Study Mentor</label>
                       <input 
                         type="text"
                         value={studyMentor}
                         onChange={(e) => setStudyMentor(e.target.value)}
                         placeholder="e.g. Dr. R. V. Sharma"
-                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800 rounded-xl text-xs font-semibold text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all shadow-inner"
                       />
                     </div>
                   </div>
@@ -566,7 +566,7 @@ export default function ProfileClient({ user, profile }) {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
-                          className="text-xs font-bold text-emerald-600 dark:text-emerald-450"
+                          className="text-xs font-bold text-emerald-600 dark:text-emerald-400"
                         >
                           {profileSuccess}
                         </motion.span>
@@ -576,7 +576,7 @@ export default function ProfileClient({ user, profile }) {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
-                          className="text-xs font-bold text-rose-600 dark:text-rose-455"
+                          className="text-xs font-bold text-rose-600 dark:text-rose-400"
                         >
                           {profileError}
                         </motion.span>
@@ -623,7 +623,7 @@ export default function ProfileClient({ user, profile }) {
               <div className="space-y-8 flex flex-col h-full justify-between">
                 <div className="space-y-8">
                   {/* Drawer Header */}
-                  <div className="flex justify-between items-center border-b border-zinc-150/40 dark:border-zinc-800/40 pb-4">
+                  <div className="flex justify-between items-center border-b border-zinc-200/40 dark:border-zinc-800/40 pb-4">
                     <div className="flex items-center gap-2 select-none">
                       <span className="text-lg font-black tracking-widest text-slate-900 dark:text-zinc-100">ASENTRA</span>
                     </div>
@@ -643,20 +643,20 @@ export default function ProfileClient({ user, profile }) {
                       <>
                         <button 
                           onClick={() => { router.push('/dashboard?tab=courses'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
                         >
                           <LayoutDashboard className="w-5 h-5 shrink-0" />
                           <span>My Courses</span>
                         </button>
                         <button 
                           onClick={() => { router.push('/dashboard?tab=roster'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
                         >
                           <Users className="w-5 h-5 shrink-0" />
                           <span>Students Roster</span>
                         </button>
                         <button 
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold shadow-sm"
                         >
                           <User className="w-5 h-5 shrink-0" />
                           <span>My Profile</span>
@@ -666,27 +666,27 @@ export default function ProfileClient({ user, profile }) {
                       <>
                         <button 
                           onClick={() => { router.push('/dashboard?tab=learning'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
                         >
                           <BookOpenCheck className="w-5 h-5 shrink-0" />
                           <span>My Learning</span>
                         </button>
                         <button 
                           onClick={() => { router.push('/dashboard?tab=browse'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
                         >
                           <Search className="w-5 h-5 shrink-0" />
                           <span>Browse Directory</span>
                         </button>
                         <button 
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-450 font-bold shadow-sm"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 bg-[#EAF2FF] text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold shadow-sm"
                         >
                           <User className="w-5 h-5 shrink-0" />
                           <span>My Profile</span>
                         </button>
                         <button 
                           onClick={() => { router.push('/dashboard?tab=invoices'); setIsMobileMenuOpen(false); }}
-                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
+                          className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent"
                         >
                           <FileText className="w-5 h-5 shrink-0" />
                           <span>Invoices Ledger</span>
@@ -697,7 +697,7 @@ export default function ProfileClient({ user, profile }) {
                 </div>
 
                 {/* Drawer Profile Capsule */}
-                <div className="border-t border-zinc-150/40 dark:border-zinc-800/50 pt-5 flex flex-col gap-3">
+                <div className="border-t border-zinc-200/40 dark:border-zinc-800/50 pt-5 flex flex-col gap-3">
                   <div className="flex items-center gap-3.5 px-2">
                     <div className="w-11 h-11 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-extrabold shadow-sm shadow-blue-500/10 shrink-0 select-none">
                       {displayInitials}

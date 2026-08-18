@@ -163,21 +163,25 @@ export default async function DashboardPage(props) {
 
   let dbInvoices = []
   if (role !== 'teacher') {
-    const { data: invoicesData } = await supabase
+    const { data: invoicesData, error: invoicesError } = await supabase
       .from('invoices')
-      .select('*, courses(title), batches(title)')
+      .select('*, courses(title), batches(title), test_packages(title)')
       .eq('user_id', user.id)
       .order('invoice_date', { ascending: false })
 
+    if (invoicesError) {
+      console.error('[DASHBOARD INVOICES ERROR]:', invoicesError)
+    }
+
     if (invoicesData) {
       dbInvoices = invoicesData.map(inv => ({
-        id: inv.id.slice(0, 8).toUpperCase(),
-        courseTitle: inv.courses?.title || inv.batches?.title || 'Hybrid Cohort Batch Access',
-        razorpayId: inv.razorpay_payment_id,
-        amount: inv.amount_paid === 0 ? 'Free' : `₹${inv.amount_paid.toLocaleString('en-IN')}`,
+        id: inv.id ? inv.id.slice(0, 8).toUpperCase() : 'INV-REC',
+        courseTitle: inv.courses?.title || inv.batches?.title || inv.test_packages?.title || 'Academic Program Access',
+        razorpayId: inv.razorpay_payment_id || 'N/A',
+        amount: Number(inv.amount_paid) === 0 ? 'Free' : `₹${Number(inv.amount_paid).toLocaleString('en-IN')}`,
         currency: inv.currency || 'INR',
-        date: inv.invoice_date,
-        status: inv.status === 'captured' ? 'Paid' : (inv.status || 'Paid')
+        date: inv.invoice_date || new Date().toISOString().split('T')[0],
+        status: inv.status === 'captured' || inv.status === 'success' ? 'Paid' : (inv.status || 'Paid')
       }))
     }
   }

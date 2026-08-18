@@ -559,7 +559,7 @@ export default function CourseraShowcase() {
                         className={`flex-1 py-1.5 px-3 rounded text-[11px] font-bold border transition-all cursor-pointer ${
                           isLoading
                             ? 'bg-amber-600/30 text-amber-300 border-amber-500'
-                            : 'bg-[#1E293B] text-slate-350 border-slate-700 hover:bg-[#334155]'
+                            : 'bg-[#1E293B] text-slate-400 border-slate-700 hover:bg-[#334155]'
                         }`}
                       >
                         Force Skeleton
@@ -569,7 +569,7 @@ export default function CourseraShowcase() {
                         className={`flex-1 py-1.5 px-3 rounded text-[11px] font-bold border transition-all cursor-pointer ${
                           !isLoading
                             ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500'
-                            : 'bg-[#1E293B] text-slate-350 border-slate-700 hover:bg-[#334155]'
+                            : 'bg-[#1E293B] text-slate-400 border-slate-700 hover:bg-[#334155]'
                         }`}
                       >
                         Force Hydrated

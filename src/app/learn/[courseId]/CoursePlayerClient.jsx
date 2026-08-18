@@ -180,7 +180,7 @@ export default function CoursePlayerClient({
     const roleLower = role.toLowerCase()
     if (['admin', 'teacher', 'instructor'].includes(roleLower)) {
       return (
-        <span className="ml-2 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-650 text-[9px] font-black uppercase tracking-wider border border-indigo-100 select-none">
+        <span className="ml-2 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-wider border border-indigo-100 select-none">
           Instructor
         </span>
       )
@@ -473,10 +473,10 @@ export default function CoursePlayerClient({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 text-xs font-bold text-teal-600 uppercase tracking-wider">
                 <span>Focus Mode Player</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-350 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span className="text-slate-500 truncate">{course.title}</span>
               </div>
-              <h1 className="text-base md:text-lg font-black text-slate-850 mt-0.5 truncate">
+              <h1 className="text-base md:text-lg font-black text-slate-800 mt-0.5 truncate">
                 {currentLesson.title}
               </h1>
             </div>
@@ -499,7 +499,7 @@ export default function CoursePlayerClient({
                   style={{ width: `${percentComplete}%` }}
                 />
               </div>
-              <span className="text-xs font-black text-teal-650 sm:hidden">
+              <span className="text-xs font-black text-teal-600 sm:hidden">
                 {percentComplete}%
               </span>
             </div>
@@ -513,7 +513,7 @@ export default function CoursePlayerClient({
         {/* Left Side: Widescreen Video Player & Dynamic Tabs switcher */}
         <section className="lg:col-span-2 space-y-6">
           
-          <div className="relative w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-250/20">
+          <div className="relative w-full bg-black aspect-video rounded-none md:rounded-3xl overflow-hidden shadow-md border-b md:border border-slate-200/20">
             {/* Dynamic Floating Watermark Overlay */}
             {user?.email && (
               <div 
@@ -566,7 +566,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('NOTES')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'NOTES'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -578,7 +578,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('READING')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'READING'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -590,7 +590,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('ASSIGNMENT')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'ASSIGNMENT'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -602,7 +602,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('DOUBTS')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'DOUBTS'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -615,7 +615,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('LIVE')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'LIVE'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -628,7 +628,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('EXAMS')}
                 className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'EXAMS'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -640,7 +640,7 @@ export default function CoursePlayerClient({
                 onClick={() => handleTabChange('SYLLABUS')}
                 className={`lg:hidden px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'SYLLABUS'
-                    ? 'bg-teal-50 text-teal-650 font-black font-extrabold'
+                    ? 'bg-teal-50 text-teal-600 font-black font-extrabold'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                 }`}
               >
@@ -657,7 +657,7 @@ export default function CoursePlayerClient({
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="space-y-1.5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-teal-55 bg-teal-50 text-teal-700 border border-teal-100">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-teal-50 text-teal-700 border border-teal-100">
                         <Video className="w-3.5 h-3.5" />
                         Lecture {currentLessonIndex + 1} of {lessons.length}
                       </span>
@@ -666,12 +666,12 @@ export default function CoursePlayerClient({
                       </h2>
                       <div className="flex items-center gap-4 text-xs font-bold text-slate-400 pt-1">
                         <span className="flex items-center gap-1.5">
-                          <Clock className="w-4 h-4 text-slate-350" />
+                          <Clock className="w-4 h-4 text-slate-400" />
                           {currentLesson.duration_minutes || 0} Minutes
                         </span>
-                        <span className="w-1.5 h-1.5 bg-slate-350 rounded-full" />
+                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
                         <span className="flex items-center gap-1.5">
-                          <BookOpen className="w-4 h-4 text-slate-350" />
+                          <BookOpen className="w-4 h-4 text-slate-400" />
                           Focus Lecture
                         </span>
                       </div>
@@ -681,7 +681,7 @@ export default function CoursePlayerClient({
                       onClick={() => handleToggleProgress(currentLesson.id)}
                       className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition duration-200 select-none cursor-pointer flex items-center justify-center gap-2 border shadow-sm ${
                         completedSet.has(currentLesson.id)
-                          ? 'bg-teal-50 border-teal-200 text-teal-650 hover:bg-teal-100/50'
+                          ? 'bg-teal-50 border-teal-200 text-teal-600 hover:bg-teal-100/50'
                           : 'bg-teal-600 border-teal-600 text-white hover:bg-teal-700 active:bg-teal-800'
                       }`}
                     >
@@ -693,7 +693,7 @@ export default function CoursePlayerClient({
                   </div>
 
                   {linkedAssessment && (
-                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-250/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
+                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-200/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-amber-500 text-white rounded-xl border border-amber-600 shadow-sm shrink-0">
                           <Award className="w-5 h-5" />
@@ -724,13 +724,13 @@ export default function CoursePlayerClient({
                         <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">
                           Overview & Key Takeaways
                         </h4>
-                        <p className="text-slate-655 text-sm leading-relaxed whitespace-pre-line font-medium">
+                        <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line font-medium">
                           {currentLesson.description}
                         </p>
                       </div>
                     </>
                   ) : (
-                    <div className="text-slate-400 text-sm italic py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-150">
+                    <div className="text-slate-400 text-sm italic py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                       No summary overview provided for this lecture notes page.
                     </div>
                   )}
@@ -745,7 +745,7 @@ export default function CoursePlayerClient({
                       <FileText className="w-4 h-4" />
                       Assigned Reading Material
                     </h3>
-                    <p className="text-[11px] font-bold text-teal-650 mt-1">
+                    <p className="text-[11px] font-bold text-teal-600 mt-1">
                       Read through the study materials prepared by the course instructor to supplement the video lecture.
                     </p>
                   </div>
@@ -754,7 +754,7 @@ export default function CoursePlayerClient({
                     <article className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed space-y-4 pt-2">
                       <div 
                         dangerouslySetInnerHTML={{ __html: currentLesson.reading_material }}
-                        className="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden break-words text-slate-655 space-y-3 md:p-6"
+                        className="p-5 bg-slate-50 rounded-2xl border border-slate-200/50 overflow-hidden break-words text-slate-600 space-y-3 md:p-6"
                       />
                     </article>
                   ) : (
@@ -769,7 +769,7 @@ export default function CoursePlayerClient({
               {activeTab === 'ASSIGNMENT' && (
                 <div className="space-y-6">
                   {linkedAssessment && (
-                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-250/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
+                    <div className="p-5 bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-200/50 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm select-none">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-amber-500 text-white rounded-xl border border-amber-600 shadow-sm shrink-0">
                           <Award className="w-5 h-5" />
@@ -808,7 +808,7 @@ export default function CoursePlayerClient({
                           {currentLesson.assignment_url && (
                             <a
                               href={getSecureDownloadUrl(currentLesson.assignment_url)}
-                              className="p-2.5 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-650 hover:text-slate-800 transition shadow-sm shrink-0 flex items-center justify-center cursor-pointer"
+                              className="p-2.5 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-slate-800 transition shadow-sm shrink-0 flex items-center justify-center cursor-pointer"
                               title="Download Homework Worksheet"
                             >
                               <Download className="w-4 h-4" />
@@ -830,7 +830,7 @@ export default function CoursePlayerClient({
                           <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wider">
                             Secure Resource Vault
                           </h4>
-                          <p className="text-[11px] font-bold text-emerald-650 mt-1">
+                          <p className="text-[11px] font-bold text-emerald-600 mt-1">
                             Attachments are dynamically signed for 60 seconds to safeguard proprietary academy resources.
                           </p>
                         </div>
@@ -886,13 +886,13 @@ export default function CoursePlayerClient({
                                 isOwnDoubt
                                   ? 'bg-teal-50/30 border-teal-100 text-slate-700'
                                   : isDoubtInstructor
-                                    ? 'bg-indigo-50/30 border-indigo-150 text-slate-700'
+                                    ? 'bg-indigo-50/30 border-indigo-200 text-slate-700'
                                     : 'bg-slate-50/60 border-slate-200/50 text-slate-700'
                               }`}
                             >
-                              <div className="flex items-center justify-between gap-3 font-extrabold text-[11px] text-slate-450 mb-1.5 uppercase tracking-wider">
+                              <div className="flex items-center justify-between gap-3 font-extrabold text-[11px] text-slate-500 mb-1.5 uppercase tracking-wider">
                                 <span className="flex items-center">
-                                  <span className={isOwnDoubt ? 'text-teal-700 font-black' : isDoubtInstructor ? 'text-indigo-655 font-black' : 'text-slate-600'}>
+                                  <span className={isOwnDoubt ? 'text-teal-700 font-black' : isDoubtInstructor ? 'text-indigo-600 font-black' : 'text-slate-600'}>
                                     {authorName} {isOwnDoubt && '(You)'}
                                   </span>
                                   {renderRoleBadge(doubt.profiles?.role)}
@@ -908,7 +908,7 @@ export default function CoursePlayerClient({
                               <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
                                 <button
                                   onClick={() => setReplyingToDoubt(doubt)}
-                                  className="px-2 py-1 bg-white border border-slate-200 hover:border-slate-350 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-800 cursor-pointer transition shadow-xs"
+                                  className="px-2 py-1 bg-white border border-slate-200 hover:border-slate-300 text-[10px] font-bold rounded-lg text-slate-500 hover:text-slate-800 cursor-pointer transition shadow-xs"
                                   title="Reply to question"
                                 >
                                   Reply
@@ -916,7 +916,7 @@ export default function CoursePlayerClient({
                                 {isOwnDoubt && (
                                   <button
                                     onClick={() => handleDeleteDoubt(doubt.id)}
-                                    className="p-1 text-slate-350 hover:text-red-500 hover:bg-red-50 rounded-lg cursor-pointer transition border border-transparent hover:border-red-200"
+                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg cursor-pointer transition border border-transparent hover:border-red-200"
                                     title="Delete question"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -927,7 +927,7 @@ export default function CoursePlayerClient({
 
                             {/* Nested Replies */}
                             {replies.length > 0 && (
-                              <div className="pl-6 ml-4 border-l-2 border-slate-150 space-y-3">
+                              <div className="pl-6 ml-4 border-l-2 border-slate-200 space-y-3">
                                 {replies.map((reply) => {
                                   const isOwnReply = reply.user_id === user.id
                                   const replyAuthorName = reply.profiles?.full_name || reply.profiles?.email?.split('@')[0] || 'Student'
@@ -941,13 +941,13 @@ export default function CoursePlayerClient({
                                         isOwnReply
                                           ? 'bg-teal-50/20 border-teal-100/60 text-slate-700'
                                           : isReplyInstructor
-                                            ? 'bg-indigo-50/30 border-indigo-150/60 text-slate-700'
+                                            ? 'bg-indigo-50/30 border-indigo-200/60 text-slate-700'
                                             : 'bg-white border-slate-200/50 text-slate-700'
                                       }`}
                                     >
                                       <div className="flex items-center justify-between gap-3 font-extrabold text-[10px] text-slate-400 mb-1 uppercase tracking-wider">
                                         <span className="flex items-center">
-                                          <span className={isOwnReply ? 'text-teal-700 font-black' : isReplyInstructor ? 'text-indigo-655 font-black' : 'text-slate-500'}>
+                                          <span className={isOwnReply ? 'text-teal-700 font-black' : isReplyInstructor ? 'text-indigo-600 font-black' : 'text-slate-500'}>
                                             {replyAuthorName} {isOwnReply && '(You)'}
                                           </span>
                                           {renderRoleBadge(reply.profiles?.role)}
@@ -956,7 +956,7 @@ export default function CoursePlayerClient({
                                           {replyPostedAt}
                                         </span>
                                       </div>
-                                      <p className="text-slate-655 font-semibold select-text">
+                                      <p className="text-slate-600 font-semibold select-text">
                                         {reply.content}
                                       </p>
 
@@ -978,7 +978,7 @@ export default function CoursePlayerClient({
                         )
                       })
                     ) : (
-                      <div className="text-slate-400 text-sm italic py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-150">
+                      <div className="text-slate-400 text-sm italic py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                         Ask a question to start the community doubt solver thread.
                       </div>
                     )}
@@ -987,7 +987,7 @@ export default function CoursePlayerClient({
 
                   {/* Reply Indicator */}
                   {replyingToDoubt && (
-                    <div className="flex items-center justify-between bg-indigo-50 border border-indigo-150 px-4 py-2 rounded-xl text-xs font-bold text-indigo-750 shrink-0">
+                    <div className="flex items-center justify-between bg-indigo-50 border border-indigo-200 px-4 py-2 rounded-xl text-xs font-bold text-indigo-700 shrink-0">
                       <span>Replying to {replyingToDoubt.profiles?.full_name || 'Student'}'s question</span>
                       <button
                         type="button"
@@ -1012,7 +1012,7 @@ export default function CoursePlayerClient({
                     <button
                       type="submit"
                       disabled={!newDoubt.trim() || isPostingDoubt}
-                      className="p-3.5 bg-teal-650 hover:bg-teal-750 text-white rounded-2xl transition disabled:bg-slate-100 disabled:text-slate-350 disabled:border-slate-100 cursor-pointer shadow-sm shrink-0"
+                      className="p-3.5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl transition disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-100 cursor-pointer shadow-sm shrink-0"
                     >
                       <Send className="w-4 h-4" />
                     </button>
@@ -1054,7 +1054,7 @@ export default function CoursePlayerClient({
                       </div>
 
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs font-extrabold text-slate-300 shadow-inner">
-                        <Activity className="w-3.5 h-3.5 text-emerald-450 animate-pulse shrink-0" />
+                        <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
                         <span>{classroomState?.activeUsersCount || 142} Students Online</span>
                       </div>
                     </div>
@@ -1133,7 +1133,7 @@ export default function CoursePlayerClient({
                                 key={idx}
                                 onClick={() => handleVotePoll(classroomState.livePoll.id, idx)}
                                 disabled={isVoting}
-                                className="w-full text-left p-3.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-305 hover:text-white rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
+                                className="w-full text-left p-3.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
                               >
                                 <span className="w-5 h-5 rounded-full border border-slate-700 bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-black">
                                   {['A', 'B', 'C', 'D'][idx]}
@@ -1156,7 +1156,7 @@ export default function CoursePlayerClient({
                       <Tv className="w-4 h-4" />
                       Live Lecture Schedule
                     </h3>
-                    <p className="text-[11px] font-bold text-emerald-650 mt-1">
+                    <p className="text-[11px] font-bold text-emerald-600 mt-1">
                       Join active live lectures directly via our encrypted Google Meet/Zoom portals. Review scheduled classes below.
                     </p>
                   </div>
@@ -1205,7 +1205,7 @@ export default function CoursePlayerClient({
                               </h4>
                               <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400">
                                 <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-slate-350" />
+                                  <Clock className="w-3 h-3 text-slate-400" />
                                   {session.duration_minutes} Minutes
                                 </span>
                                 <span>•</span>
@@ -1243,7 +1243,7 @@ export default function CoursePlayerClient({
                       <Award className="w-4 h-4" />
                       JEE Assessment Test Center
                     </h3>
-                    <p className="text-[11px] font-bold text-teal-650 mt-1">
+                    <p className="text-[11px] font-bold text-teal-600 mt-1">
                       Simulate high-fidelity JEE Main mock exams and dynamic chapter quizzes. Grading is strictly zero-trust and timed authoritatively on the server.
                     </p>
                   </div>
@@ -1271,7 +1271,7 @@ export default function CoursePlayerClient({
                               </h4>
                               <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 pt-0.5">
                                 <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-slate-350" />
+                                  <Clock className="w-3 h-3 text-slate-400" />
                                   {exam.duration_minutes}m Duration
                                 </span>
                               </div>
@@ -1350,7 +1350,7 @@ export default function CoursePlayerClient({
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-slate-350" />
+                                <Clock className="w-3 h-3 text-slate-400" />
                                 {lesson.duration_minutes || 0}m
                               </span>
                               {isActive && (
@@ -1383,7 +1383,7 @@ export default function CoursePlayerClient({
                     router.push(`?lesson=${prevLesson.id}`, { scroll: false })
                     handleTabChange('NOTES')
                   }}
-                  className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-slate-650 flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-slate-600 flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Previous</span>
@@ -1398,7 +1398,7 @@ export default function CoursePlayerClient({
                     router.push(`?lesson=${nextLesson.id}`, { scroll: false })
                     handleTabChange('NOTES')
                   }}
-                  className="px-4 py-2.5 bg-teal-650 border border-teal-605 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="px-4 py-2.5 bg-teal-600 border border-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <span>Next Lesson</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1475,7 +1475,7 @@ export default function CoursePlayerClient({
                       </h4>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-350" />
+                          <Clock className="w-3 h-3 text-slate-400" />
                           {lesson.duration_minutes || 0}m
                         </span>
                         {isActive && (

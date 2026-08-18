@@ -120,11 +120,11 @@ export default function Navbar({ user, profile }) {
               {/* Col 3: Assessments */}
               <div>
                 <h4 className="text-xs font-black text-slate-800 dark:text-zinc-200 uppercase tracking-wider mb-3 flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5 text-blue-650" />
+                  <Award className="w-3.5 h-3.5 text-blue-600" />
                   <span>Test Center</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white font-bold text-slate-900 dark:text-white dark:text-slate-800 dark:text-slate-200 transition-colors block">🚀 CBT Test Series Hub</Link></li>
+                  <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white font-bold text-slate-900 dark:text-white transition-colors block">🚀 CBT Test Series Hub</Link></li>
                   <li><Link href="/dashboard?tab=exams" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Scheduled Mock Exams</Link></li>
                   <li><Link href="/dashboard?tab=analytics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Performance Analytics</Link></li>
                 </ul>
@@ -156,7 +156,7 @@ export default function Navbar({ user, profile }) {
           href="/test-series"
           className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/80 rounded-lg text-xs font-bold text-slate-700 dark:text-zinc-300 transition shadow-2xs select-none"
         >
-          <Award className="w-4 h-4 text-slate-900 dark:text-white dark:text-blue-450" />
+          <Award className="w-4 h-4 text-slate-900 dark:text-white dark:text-blue-400" />
           <span>Test Series Hub</span>
         </Link>
 
@@ -201,7 +201,7 @@ export default function Navbar({ user, profile }) {
               <p className="text-xs font-bold text-slate-800 dark:text-zinc-200 leading-tight truncate max-w-[120px]">
                 {displayName}
               </p>
-              <p className="text-[9px] font-bold text-slate-900 dark:text-white dark:text-slate-800 dark:text-slate-200 uppercase tracking-widest mt-0.5 leading-none">
+              <p className="text-[9px] font-bold text-slate-900 dark:text-white uppercase tracking-widest mt-0.5 leading-none">
                 {displayRole}
               </p>
             </div>
@@ -210,9 +210,9 @@ export default function Navbar({ user, profile }) {
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-950 rounded-2xl shadow-xl py-2 z-50 border border-zinc-100 dark:border-zinc-800/80 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-850">
+              <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account</p>
-                <p className="text-xs font-semibold text-slate-800 dark:text-zinc-250 truncate mt-0.5">{user.email}</p>
+                <p className="text-xs font-semibold text-slate-800 dark:text-zinc-300 truncate mt-0.5">{user.email}</p>
               </div>
               <Link
                 href="/dashboard?tab=profile"
@@ -224,7 +224,7 @@ export default function Navbar({ user, profile }) {
               </Link>
 
               {/* Theme togglers inline */}
-              <div className="flex items-center justify-between px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 border-t border-zinc-100 dark:border-zinc-850 mt-1.5 pt-2">
+              <div className="flex items-center justify-between px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 border-t border-zinc-100 dark:border-zinc-800 mt-1.5 pt-2">
                 <span>Theme Mode</span>
                 <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg">
                   <button 
@@ -242,7 +242,7 @@ export default function Navbar({ user, profile }) {
                 </div>
               </div>
 
-              <div className="border-t border-zinc-100 dark:border-zinc-850 my-1" />
+              <div className="border-t border-zinc-100 dark:border-zinc-800 my-1" />
 
               <button
                 type="button"

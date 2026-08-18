@@ -271,7 +271,7 @@ async function basePOST(request) {
       if (error) {
         console.error('Supabase doubt insertion error in classroom sync:', error)
         return NextResponse.json(
-          { error: 'Database write failed' },
+          { error: 'Database write failed: ' + error.message },
           { status: 500 }
         )
       }

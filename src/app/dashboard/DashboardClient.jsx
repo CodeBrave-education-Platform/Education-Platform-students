@@ -20,6 +20,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadialBarChart, RadialBar
 } from 'recharts'
+import { formatDateSafe, formatDateTimeSafe } from '@/utils/dateFormat'
 
 const getDefaultThumbnail = (level) => {
   const defaultThumbs = {
@@ -138,6 +139,11 @@ export default function DashboardClient({
   const [localTab, setLocalTab] = useState(null)
 
   const tabParam = searchParams ? searchParams.get('tab') : null
+  const [mounted, setMounted] = useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Sync localTab back to null when route transition resolves
   React.useEffect(() => {
@@ -402,31 +408,32 @@ export default function DashboardClient({
     setEnrollError('')
 
     try {
-      const { data: newEnroll, error } = await supabase
-        .from('enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: courseId
+      const paymentId = `free_enroll_${Date.now()}`
+      const verifyRes = await fetch('/api/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_payment_id: paymentId,
+          razorpay_order_id: `order_${paymentId}`,
+          razorpay_signature: 'free_tier_bypass',
+          courseId: courseId,
+          amount: 0
         })
-        .select('*, courses(*)')
-        .single()
+      })
 
-      if (error) throw error
-
-      // Insert free invoice for courses
-      await supabase
-        .from('invoices')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          amount_paid: 0,
-          currency: 'INR',
-          status: 'captured',
-          razorpay_payment_id: `free_enroll_${Date.now()}`
-        }).select().maybeSingle()
+      const verifyData = await verifyRes.json()
+      if (!verifyRes.ok || verifyData.error) {
+        throw new Error(verifyData.error || 'Failed to enroll in course via transaction.')
+      }
 
       // Update local enrollments list instantly
-      setEnrollments(prev => [newEnroll, ...prev])
+      setEnrollments(prev => [{
+        id: paymentId,
+        user_id: user.id,
+        course_id: courseId,
+        status: 'active',
+        enrolled_at: new Date().toISOString()
+      }, ...prev])
 
       // Trigger a server-side route refresh to sync layout state
       startTransition(() => {
@@ -556,16 +563,22 @@ export default function DashboardClient({
     setCheckoutLoadingId(batch.id)
     try {
       const paymentId = `free_enroll_${Date.now()}`
-      const { data, error } = await supabase
-        .rpc('execute_atomic_batch_onboarding', {
-          _user_id: user.id,
-          _batch_id: batch.id,
-          _payment_id: paymentId,
-          _amount: 0
+      const verifyRes = await fetch('/api/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_payment_id: paymentId,
+          razorpay_order_id: `order_${paymentId}`,
+          razorpay_signature: 'free_tier_bypass',
+          batchId: batch.id,
+          amount: 0
         })
+      })
 
-      if (error) throw error
-      if (!data) throw new Error('Failed to enroll in cohort batch via transaction.')
+      const verifyData = await verifyRes.json()
+      if (!verifyRes.ok || verifyData.error) {
+        throw new Error(verifyData.error || 'Failed to enroll in cohort batch via transaction.')
+      }
 
       // Upsert enrollment in local state instantly for 0ms reactive UI update
       const newBatchEnroll = {
@@ -1084,32 +1097,71 @@ export default function DashboardClient({
                         </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
                         {courses.map((course, idx) => {
-                          // Find enrollment count
+                          const isHero = idx === 0
                           const studentCount = enrollments.filter(e => e.course_id === course.id).length
+                          const createdDate = formatDateSafe(course.created_at, 'short')
+
+                          if (isHero) {
+                            return (
+                              <motion.div
+                                key={course.id || `course_${idx}`}
+                                whileHover={{ y: -4 }}
+                                className="col-span-1 md:col-span-2 lg:col-span-2 p-6 md:p-8 rounded-[2.5rem] border-2 border-slate-200/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[220px] transition-all"
+                              >
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-400 border border-teal-200 dark:border-teal-900/40 rounded-full shadow-xs">
+                                      Flagship Curriculum
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                      Created {createdDate}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-lg md:text-xl font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-snug">{course.title}</h4>
+                                  <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
+                                    {course.description || 'Comprehensive syllabus designed for high-ranking aspirants.'}
+                                  </p>
+                                </div>
+                                <div className="border-t border-slate-100 dark:border-zinc-800 pt-4 mt-4 flex justify-between items-center">
+                                  <span className="text-xs font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wide flex items-center gap-1.5">
+                                    <Users className="w-4 h-4" />
+                                    <span>{studentCount} Active Aspirants Enrolled</span>
+                                  </span>
+                                  <button
+                                    onClick={() => router.push(`/courses/${course.id}`)}
+                                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-900 dark:text-zinc-100 text-xs font-bold rounded-xl transition"
+                                  >
+                                    Preview Course &rarr;
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )
+                          }
+
                           return (
                             <motion.div
                               key={course.id || `course_${idx}`}
                               whileHover={{ y: -4 }}
-                              className="p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
+                              className="col-span-1 p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px] transition-all"
                             >
                               <div className="space-y-2">
-                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-zinc-8000/10 dark:bg-slate-100 dark:bg-zinc-8000/20 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 rounded-full">
-                                  Course
+                                <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-zinc-300 rounded-full">
+                                  Modular Course
                                 </span>
-                                <h4 className="text-base font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1">{course.title}</h4>
-                                <p className="text-xs text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                <h4 className="text-base font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-2">{course.title}</h4>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                                   {course.description || 'No description provided.'}
                                 </p>
                               </div>
                               <div className="border-t border-zinc-100/40 dark:border-zinc-800/40 pt-4 mt-4 flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
                                   <Users className="w-3.5 h-3.5" />
                                   <span>{studentCount} Students</span>
                                 </span>
-                                <span className="text-[10px] font-bold text-zinc-400">
-                                  {new Date(course.created_at).toLocaleDateString('en-US')}
+                                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                  {createdDate}
                                 </span>
                               </div>
                             </motion.div>
@@ -1180,7 +1232,7 @@ export default function DashboardClient({
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-right text-[10px] text-zinc-400 tracking-wide">
-                                  {new Date(enroll.enrolled_at).toLocaleDateString('en-US')}
+                                  {formatDateSafe(enroll.enrolled_at, 'short')}
                                 </td>
                               </tr>
                             ))}
@@ -1259,98 +1311,165 @@ export default function DashboardClient({
                         </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
                         {enrollments.filter(e => e.courses).map((enroll, idx) => {
+                          const isHero = idx === 0
                           const course = enroll.courses
                           const thumbUrl = getThumbnailUrl(course)
                           const aspirantInfo = course.aspirant_info || (course.level === 'advanced' ? 'For JEE Advanced Aspirants' : 'For IIT-JEE Aspirants')
                           const batchInfo = course.batch_info || 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
+                          const enrolledDate = formatDateSafe(enroll.enrolled_at, 'short') || 'Active Access'
 
-                          return (
-                            <motion.div 
-                              key={enroll.id || `enroll_div_${idx}`}
-                              whileHover={{ y: -8, scale: 1.01 }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-800/30 shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[500px]"
-                            >
-                              {/* Premium Widescreen Banner Image Header */}
-                              <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
-                                <img 
-                                  src={thumbUrl} 
-                                  alt={course.title}
-                                  loading="lazy"
-                                  onError={(e) => handleImageError(e, course.level)}
-                                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
-                                  Enrolled
-                                </span>
-                              </div>
-
-                              {/* Card Content Section */}
-                              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                                <div className="space-y-3">
-                                  {/* Title Row */}
-                                  <div className="flex items-start justify-between gap-2.5">
-                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-100 leading-snug line-clamp-2">
-                                      {course.title}
-                                    </h4>
+                          if (isHero) {
+                            return (
+                              <motion.div 
+                                key={enroll.id || `enroll_hero_${idx}`}
+                                whileHover={{ y: -6 }}
+                                transition={{ duration: 0.3, ease: 'easeOut' }}
+                                className="col-span-1 md:col-span-2 lg:col-span-2 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border-2 border-teal-500/30 hover:border-teal-500/60 shadow-md rounded-[2.5rem] p-6 md:p-8 flex flex-col justify-between transition-all duration-300 relative group min-h-[460px]"
+                              >
+                                <div>
+                                  {/* Top Header & Status */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40 rounded-full shadow-xs">
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                      <span>Enrolled & Active Program</span>
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                      Enrolled: {enrolledDate}
+                                    </span>
                                   </div>
 
-                                  {/* Description line */}
-                                  <p className="text-[11px] text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                                    {course.description || 'No description provided.'}
-                                  </p>
-
-                                  {/* Detail metadata list */}
-                                  <div className="space-y-1.5 pt-2 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-                                    <div className="flex items-center gap-2">
-                                      <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
-                                      <span>{aspirantInfo}</span>
+                                  {/* Split Hero: Uncropped Media + Course Info */}
+                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+                                    <div className="lg:col-span-6 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                      <img 
+                                        src={thumbUrl} 
+                                        alt="" 
+                                        aria-hidden="true" 
+                                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                      />
+                                      <img 
+                                        src={thumbUrl} 
+                                        alt={course.title}
+                                        onError={(e) => handleImageError(e, course.level)}
+                                        className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
+                                      />
+                                      <span className="absolute top-3 left-3 z-20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/90 text-white rounded-lg shadow-sm">
+                                        Active Syllabus
+                                      </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                      </svg>
-                                      <span>{batchInfo}</span>
+
+                                    <div className="lg:col-span-6 flex flex-col justify-between space-y-3">
+                                      <div>
+                                        <h4 className="text-lg md:text-xl font-black text-slate-900 dark:text-zinc-100 leading-snug tracking-tight">
+                                          {course.title}
+                                        </h4>
+                                        <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed mt-2">
+                                          {course.description || 'Access your interactive video modules, digital worksheets, CBT test roster, and study notes.'}
+                                        </p>
+                                      </div>
+
+                                      <div className="space-y-1.5 pt-2 text-xs font-bold text-slate-600 dark:text-zinc-300 bg-slate-50 dark:bg-zinc-900 p-3 rounded-2xl border border-slate-100 dark:border-zinc-800">
+                                        <div className="flex items-center gap-2">
+                                          <GraduationCap className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                                          <span className="truncate">{aspirantInfo}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                                          <span className="truncate">{batchInfo}</span>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
 
-                                {/* Access Granted Row & Action Buttons */}
-                                <div className="space-y-4 pt-1">
-                                  <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-3 select-none">
-                                    <div className="flex items-center gap-1.5">
-                                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                                      <span className="text-xs font-black text-emerald-650 dark:text-emerald-455">
-                                        Access Granted
-                                      </span>
-                                    </div>
-                                    <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">
-                                      {enroll.enrolled_at && !isNaN(new Date(enroll.enrolled_at).getTime())
-                                        ? new Date(enroll.enrolled_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                                        : 'Active Access'}
-                                    </span>
-                                  </div>
+                                {/* Dual Actions */}
+                                <div className="grid grid-cols-2 gap-3 border-t border-slate-100 dark:border-zinc-800/80 pt-4 mt-2">
+                                  <button
+                                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                                    className="border border-slate-300 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 text-center py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center"
+                                  >
+                                    My Profile
+                                  </button>
+                                  
+                                  <button
+                                    onClick={() => router.push(`/learn/${course.id || 'c1'}`)}
+                                    className="bg-teal-600 hover:bg-teal-700 text-white text-center py-3 rounded-xl text-xs font-black uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                                  >
+                                    <span>Resume Syllabi</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )
+                          }
 
-                                  {/* Dual CTAs Grid */}
-                                  <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
-                                    <button
-                                      onClick={() => handleTabChange('PROFILE', 'profile')}
-                                      className="border border-slate-900 dark:border-white hover:bg-slate-100 dark:bg-zinc-800/50 dark:border-slate-400 dark:border-zinc-500 dark:hover:dark:bg-zinc-800 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-400 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
-                                    >
-                                      MY PROFILE
-                                    </button>
-                                    
-                                    <button
-                                      onClick={() => router.push(`/learn/${course.id || 'c1'}`)}
-                                      className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                                    >
-                                      <span>RESUME SYLLABI</span>
-                                      <ArrowRight className="w-3.5 h-3.5" />
-                                    </button>
+                          return (
+                            <motion.div 
+                              key={enroll.id || `enroll_mod_${idx}`}
+                              whileHover={{ y: -6 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              className="col-span-1 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/50 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 relative group shadow-sm hover:shadow-lg min-h-[440px]"
+                            >
+                              <div className="space-y-4">
+                                {/* Uncropped 16:9 Container with Ambient Blur */}
+                                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                  <img 
+                                    src={thumbUrl} 
+                                    alt="" 
+                                    aria-hidden="true" 
+                                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                  />
+                                  <img 
+                                    src={thumbUrl} 
+                                    alt={course.title}
+                                    onError={(e) => handleImageError(e, course.level)}
+                                    className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
+                                  />
+                                  <span className="absolute top-2.5 left-2.5 z-20 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-lg shadow-sm">
+                                    Enrolled
+                                  </span>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <h4 className="text-sm font-black tracking-tight text-slate-900 dark:text-zinc-100 leading-snug line-clamp-2">
+                                    {course.title}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                    {course.description || 'Comprehensive curriculum modules & assessments.'}
+                                  </p>
+                                  <div className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 pt-1">
+                                    <span className="truncate block">{aspirantInfo}</span>
                                   </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-zinc-800/80 mt-4">
+                                <div className="flex items-center justify-between text-[10px] font-bold">
+                                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Access Active
+                                  </span>
+                                  <span className="text-slate-400 dark:text-zinc-500">
+                                    {enrolledDate}
+                                  </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                  <button
+                                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                                    className="border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-center py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition select-none cursor-pointer"
+                                  >
+                                    Profile
+                                  </button>
+                                  <button
+                                    onClick={() => router.push(`/learn/${course.id || 'c1'}`)}
+                                    className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                                  >
+                                    <span>Resume</span>
+                                    <ArrowRight className="w-3 h-3" />
+                                  </button>
                                 </div>
                               </div>
                             </motion.div>
@@ -1386,67 +1505,174 @@ export default function DashboardClient({
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
                         {initialBatches.map((batch, idx) => {
-                          const isEnrolled = batchEnrollments.some(e => e.batch_id === batch.id && e.status === 'active') || true
-                          const formattedDate = (batch.start_date && !isNaN(new Date(batch.start_date).getTime()))
-                            ? new Date(batch.start_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })
-                            : '2026 Target Cohort'
-                          const isCheckoutLoading = checkoutLoadingId === batch.id
+                          const isHero = idx === 0
+                          const isEnrolled = batchEnrollments.some(e => (e.batch_id === batch.id || e.id === batch.id) && (e.status === 'active' || e.status === 'enrolled')) || (typeof window !== 'undefined' && JSON.parse(localStorage.getItem('Asentra_joined_batches') || '[]').some(b => (b.id || b) === batch.id))
+                          const formattedDate = formatDateSafe(batch.start_date, 'short') || '2026 Target Cohort'
+                          const batchCover = batch.thumbnail_url || batch.cover || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80'
+
+                          if (isHero) {
+                            return (
+                              <div 
+                                key={batch.id || `batch_hero_${idx}`} 
+                                className="col-span-1 md:col-span-2 lg:col-span-2 bg-white/70 dark:bg-zinc-900/80 border-2 border-teal-500/30 hover:border-teal-500/60 rounded-[2.5rem] p-6 md:p-8 flex flex-col justify-between transition-all duration-300 relative group shadow-md min-h-[460px]"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase border tracking-wider select-none shadow-xs ${
+                                        isEnrolled
+                                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40'
+                                          : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40'
+                                      }`}>
+                                        <span className="w-2 h-2 rounded-full bg-current animate-ping" />
+                                        {isEnrolled ? 'Enrolled in Live Cohort' : 'Open Cohort Enrollment'}
+                                      </span>
+                                      <span className="px-3 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[10px] font-black uppercase rounded-full">
+                                        {batch.target_year || batch.level || '2026'}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                      Starts: {formattedDate}
+                                    </span>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+                                    <div className="lg:col-span-6 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                      <img 
+                                        src={batchCover} 
+                                        alt="" 
+                                        aria-hidden="true" 
+                                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                      />
+                                      <img 
+                                        src={batchCover} 
+                                        alt={batch.title} 
+                                        className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out" 
+                                      />
+                                      <span className="absolute top-3 left-3 z-20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/90 text-white rounded-lg shadow-sm">
+                                        Live Classroom
+                                      </span>
+                                    </div>
+
+                                    <div className="lg:col-span-6 flex flex-col justify-between space-y-3">
+                                      <div>
+                                        <h4 className="text-lg md:text-xl font-black text-slate-900 dark:text-zinc-100 leading-snug tracking-tight">
+                                          {batch.title}
+                                        </h4>
+                                        <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed mt-2">
+                                          {batch.description || 'Comprehensive Live Preparation Batch Cohort with Daily Classes, Doubts, Practice DPPs & Physical Textbook Box Set.'}
+                                        </p>
+                                      </div>
+
+                                      <div className="space-y-1.5 pt-2 text-xs font-bold text-slate-600 dark:text-zinc-300 bg-slate-50 dark:bg-zinc-900 p-3 rounded-2xl border border-slate-100 dark:border-zinc-800">
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-slate-500 dark:text-zinc-400">Faculty Lead:</span>
+                                          <span className="text-slate-900 dark:text-zinc-100 font-extrabold">{batch.faculty || 'Top Academic Mentors'}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-slate-500 dark:text-zinc-400">Tuition Fee:</span>
+                                          <span className="text-sm font-black text-slate-900 dark:text-zinc-100">
+                                            {Number(batch.price) === 0 ? 'Free' : `₹${Number(batch.price).toLocaleString('en-IN')}`}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 border-t border-slate-100 dark:border-zinc-800/80 pt-4 mt-2">
+                                  <button
+                                    onClick={() => handleTabChange('PROFILE', 'profile')}
+                                    className="border border-slate-300 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 text-center py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center"
+                                  >
+                                    My Profile
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (isEnrolled) {
+                                        setSelectedCohortBatch(batch)
+                                      } else {
+                                        router.push('/batches')
+                                      }
+                                    }}
+                                    className="bg-teal-600 hover:bg-teal-700 text-white text-center py-3 rounded-xl text-xs font-black uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                                  >
+                                    <span>{isEnrolled ? 'Open Cohort Vault' : 'View Batch Catalog'}</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          }
 
                           return (
                             <div 
-                              key={batch.id || `batch_${idx}`} 
-                              className="bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/85 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between p-6 min-h-[300px]"
+                              key={batch.id || `batch_mod_${idx}`} 
+                              className="col-span-1 bg-white/70 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-lg min-h-[440px]"
                             >
                               <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border tracking-wider select-none ${
+                                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                  <img 
+                                    src={batchCover} 
+                                    alt="" 
+                                    aria-hidden="true" 
+                                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                  />
+                                  <img 
+                                    src={batchCover} 
+                                    alt={batch.title} 
+                                    className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out" 
+                                  />
+                                  <span className={`absolute top-2.5 left-2.5 z-20 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-sm ${
                                     isEnrolled
-                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
-                                      : 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white border-slate-200 dark:border-zinc-700 dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-400 dark:border-slate-300 dark:border-zinc-700'
+                                      ? 'bg-emerald-500 text-white'
+                                      : 'bg-rose-500 text-white'
                                   }`}>
-                                    {isEnrolled ? 'Enrolled (Live)' : 'Open Enrollment'}
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-455 uppercase tracking-widest">
-                                    {formattedDate}
+                                    {isEnrolled ? 'Enrolled' : 'Live Batch'}
                                   </span>
                                 </div>
+
                                 <div className="space-y-1.5">
-                                  <h4 className="text-sm font-black text-slate-800 dark:text-zinc-100 leading-snug line-clamp-2">
+                                  <h4 className="text-sm font-black text-slate-900 dark:text-zinc-100 leading-snug line-clamp-2">
                                     {batch.title}
                                   </h4>
-                                  <p className="text-slate-505 dark:text-zinc-400 text-[11px] font-medium leading-relaxed line-clamp-3">
-                                    {batch.description || 'Comprehensive Live Preparation Batch Cohort with Daily Classes, Doubts, Practice DPPs & Physical Textbook Box Set.'}
+                                  <p className="text-slate-500 dark:text-zinc-400 text-[11px] font-medium leading-relaxed line-clamp-2">
+                                    {batch.description || 'Comprehensive Live Preparation Batch Cohort.'}
                                   </p>
                                 </div>
                               </div>
 
-                              <div className="pt-6 border-t border-slate-100/80 dark:border-zinc-800/80 space-y-4">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
-                                    Batch Tuition
+                              <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 space-y-3 mt-4">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">
+                                    Tuition
                                   </span>
-                                  <span className="text-sm font-extrabold text-slate-700 dark:text-zinc-305">
-                                    {Number(batch.price) === 0 ? 'Free' : `₹${Number(batch.price).toLocaleString()}`}
+                                  <span className="font-extrabold text-slate-900 dark:text-zinc-100">
+                                    {Number(batch.price) === 0 ? 'Free' : `₹${Number(batch.price).toLocaleString('en-IN')}`}
                                   </span>
                                 </div>
 
-                                {/* Dual CTAs for Live Batch */}
-                                <div className="grid grid-cols-2 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-3">
+                                <div className="grid grid-cols-2 gap-2">
                                   <button
                                     onClick={() => handleTabChange('PROFILE', 'profile')}
-                                    className="border border-slate-900 dark:border-white hover:bg-slate-100 dark:bg-zinc-800/50 dark:border-slate-400 dark:border-zinc-500 text-slate-900 dark:text-white dark:text-slate-500 dark:text-zinc-300 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center"
+                                    className="border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-center py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition select-none cursor-pointer"
                                   >
-                                    MY PROFILE
+                                    Profile
                                   </button>
-
                                   <button
-                                    onClick={() => router.push('/learn/c1')}
-                                    className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all select-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                    onClick={() => {
+                                      if (isEnrolled) {
+                                        setSelectedCohortBatch(batch)
+                                      } else {
+                                        router.push('/batches')
+                                      }
+                                    }}
+                                    className="bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition select-none cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                                   >
-                                    <span>RESUME SYLLABI</span>
-                                    <ArrowRight className="w-3.5 h-3.5" />
+                                    <span>{isEnrolled ? 'Open Vault' : 'View'}</span>
+                                    <ArrowRight className="w-3 h-3" />
                                   </button>
                                 </div>
                               </div>
@@ -1481,12 +1707,13 @@ export default function DashboardClient({
                         <Loader2 className="w-8 h-8 text-slate-900 dark:text-white animate-spin" />
                       </div>
                     ) : myExams.length === 0 ? (
-                      <div className="text-center text-zinc-455 text-xs py-16 bg-white/40 dark:bg-zinc-900/40 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl">
+                      <div className="text-center text-zinc-400 dark:text-zinc-500 text-xs py-16 bg-white/40 dark:bg-zinc-900/40 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl">
                         No scheduled exams or mock tests are active for your profile at this time.
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {myExams.map(exam => {
+                        {myExams.map((exam, idx) => {
+                          const isHero = idx === 0
                           const now = Date.now()
                           const start = exam.start_window ? new Date(exam.start_window).getTime() : null
                           const end = exam.end_window ? new Date(exam.end_window).getTime() : null
@@ -1494,41 +1721,47 @@ export default function DashboardClient({
                           const isClosed = end && now > end
                           const isActive = !isUpcoming && !isClosed
 
+                          const startText = exam.start_window ? formatDateTimeSafe(exam.start_window) : 'Open Access'
+                          const endText = exam.end_window ? formatDateTimeSafe(exam.end_window) : 'No Expiry'
+
                           return (
-                            <div key={exam.id} className="bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800/80 p-5 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition">
-                              <div className="space-y-2">
+                            <div 
+                              key={exam.id} 
+                              className={`${isHero ? 'col-span-1 md:col-span-2 bg-white dark:bg-zinc-900 border-2 border-teal-500/30 hover:border-teal-500/60' : 'col-span-1 bg-white/90 dark:bg-zinc-900/80 border border-slate-200/60 dark:border-zinc-800'} p-6 rounded-[2.5rem] flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition`}
+                            >
+                              <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider select-none border ${
+                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider select-none border shadow-xs ${
                                     isUpcoming
-                                      ? 'bg-amber-50 text-amber-700 border-amber-250 dark:bg-amber-950/20 dark:text-amber-450 dark:border-amber-500/20'
+                                      ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-500/20'
                                       : isClosed
-                                      ? 'bg-rose-50 text-rose-700 border-rose-250 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-500/20'
-                                      : 'bg-emerald-50 text-emerald-700 border-emerald-250 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
+                                      ? 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-500/20'
+                                      : 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-500/20'
                                   }`}>
-                                    {isUpcoming ? 'Locked (Upcoming)' : isClosed ? 'Closed' : 'Active Test'}
+                                    {isUpcoming ? 'Locked (Upcoming)' : isClosed ? 'Closed' : 'Active CBT Simulation'}
                                   </span>
-                                  <span className="text-[10px] font-bold text-slate-450 dark:text-zinc-500">
-                                    Duration: {exam.duration_minutes} Mins
+                                  <span className="text-xs font-black text-slate-600 dark:text-zinc-400">
+                                    {exam.duration_minutes} Mins &bull; {exam.total_questions || 75} Questions
                                   </span>
                                 </div>
                                 
-                                <h4 className="text-sm font-extrabold text-slate-800 dark:text-zinc-100 leading-snug line-clamp-2">
+                                <h4 className={`${isHero ? 'text-lg md:text-xl' : 'text-base'} font-black text-slate-900 dark:text-zinc-100 leading-snug`}>
                                   {exam.title}
                                 </h4>
 
-                                <div className="text-[10px] text-slate-450 dark:text-zinc-500 space-y-0.5 font-bold">
-                                  {exam.courses?.title && <div>Course: {exam.courses.title}</div>}
-                                  {exam.start_window && <div>Opens: {new Date(exam.start_window).toLocaleString()}</div>}
-                                  {exam.end_window && <div>Closes: {new Date(exam.end_window).toLocaleString()}</div>}
+                                <div className="text-xs text-slate-500 dark:text-zinc-400 space-y-1 font-semibold bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-slate-100 dark:border-zinc-800/80">
+                                  {exam.courses?.title && <div className="text-teal-700 dark:text-teal-400 font-bold truncate">Course: {exam.courses.title}</div>}
+                                  <div>Opens: {startText}</div>
+                                  <div>Closes: {endText}</div>
                                 </div>
                               </div>
 
                               <button
                                 onClick={() => router.push(`/learn/${exam.course_id || 'batch'}/exams/${exam.id}`)}
                                 disabled={!isActive}
-                                className="w-full py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 disabled:bg-slate-100 disabled:text-slate-355 disabled:border-slate-100 dark:disabled:bg-zinc-800 dark:disabled:border-zinc-800 dark:disabled:text-zinc-650 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition cursor-pointer text-center border border-slate-900 dark:border-white"
+                                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 dark:disabled:bg-zinc-800 dark:disabled:border-zinc-800 dark:disabled:text-zinc-500 rounded-2xl text-xs font-black uppercase tracking-wider transition cursor-pointer text-center shadow-xs"
                               >
-                                {isUpcoming ? 'Test Locked' : isClosed ? 'Test Closed' : 'Enter Test Center'}
+                                {isUpcoming ? 'Test Locked' : isClosed ? 'Test Closed' : 'Enter CBT Test Center'}
                               </button>
                             </div>
                           )
@@ -1584,7 +1817,7 @@ export default function DashboardClient({
                               <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest block">
                                 Exams Taken
                               </span>
-                              <span className="text-xl font-black text-slate-850 dark:text-zinc-100">
+                              <span className="text-xl font-black text-slate-800 dark:text-zinc-100">
                                 {studentAnalytics.total_exams}
                               </span>
                             </div>
@@ -1724,7 +1957,7 @@ export default function DashboardClient({
                               </ResponsiveContainer>
                             </div>
 
-                            <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-450 uppercase tracking-widest pt-2">
+                            <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-500 uppercase tracking-widest pt-2">
                               <span>Trend Tracker: Oldest</span>
                               <ArrowRight className="w-3.5 h-3.5" />
                               <span>Newest Attempts</span>
@@ -1779,142 +2012,240 @@ export default function DashboardClient({
                         <p className="text-xs text-zinc-400 dark:text-zinc-400 font-semibold">No courses matched your query. Try searching for other key phrases!</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
                         {filteredDirectory.map((course, idx) => {
+                          const isHero = idx === 0
                           const enrolled = checkIsEnrolled(course.id)
                           const loading = enrollLoadingId === course.id || checkoutLoadingId === course.id
                           const isFree = Number(course.price) === 0
                           const thumbUrl = getThumbnailUrl(course)
                           
-                          // Custom mapped details for high-fidelity visual matching with Image 2
                           const language = course.language || 'Hinglish'
                           const aspirantInfo = course.aspirant_info || (course.level === 'advanced' ? 'For JEE Advanced Aspirants' : 'For IIT-JEE Aspirants')
                           const batchInfo = course.batch_info || 'Starts on 1 Jun, 2026 Ends on 28 Jun, 2028'
                           const originalPrice = course.original_price || (course.price > 0 ? course.price * 1.25 : 0)
+                          const discountPercent = originalPrice > course.price ? Math.round(((originalPrice - course.price) / originalPrice) * 100) : 0
 
-                          return (
-                            <motion.div 
-                              key={course.id || `course_dir_${idx}`}
-                              whileHover={{ y: -8, scale: 1.01 }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                              className="bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/30 dark:border-zinc-800/30 shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 rounded-[2.5rem] overflow-hidden flex flex-col justify-between transition-all duration-300 relative group min-h-[540px]"
-                            >
-                              {/* Premium Widescreen Banner Image Header */}
-                              <div className="relative w-full aspect-video bg-slate-100 overflow-hidden rounded-t-2xl shrink-0">
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 transition-opacity duration-300 group-hover:opacity-70" />
-                                <img 
-                                  src={thumbUrl} 
-                                  alt={course.title}
-                                  loading="lazy"
-                                  onError={(e) => handleImageError(e, course.level)}
-                                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                                />
-                                {enrolled && (
-                                  <span className="absolute top-4 left-4 z-20 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
-                                    Enrolled
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Card Content Section */}
-                              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                                <div className="space-y-3">
-                                  {/* Title Row */}
-                                  <div className="flex items-start justify-between gap-2.5">
-                                    <h4 className="text-sm font-black tracking-tight text-slate-905 dark:text-zinc-100 leading-snug line-clamp-2">
-                                      {course.title}
-                                    </h4>
+                          if (isHero) {
+                            return (
+                              <motion.div 
+                                key={course.id || `course_dir_hero_${idx}`}
+                                whileHover={{ y: -6 }}
+                                transition={{ duration: 0.3, ease: 'easeOut' }}
+                                className="col-span-1 md:col-span-2 lg:col-span-2 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border-2 border-teal-500/30 hover:border-teal-500/60 shadow-md rounded-[2.5rem] p-6 md:p-8 flex flex-col justify-between transition-all duration-300 relative group min-h-[480px]"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className="px-3 py-1 bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40 text-teal-800 dark:text-teal-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-xs">
+                                        Flagship Master Course
+                                      </span>
+                                      <span className="px-3 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[10px] font-black uppercase rounded-full">
+                                        {language}
+                                      </span>
+                                    </div>
+                                    {enrolled && (
+                                      <span className="px-3 py-1 text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-full shadow-sm">
+                                        Enrolled
+                                      </span>
+                                    )}
                                   </div>
 
-                                  {/* Description line */}
-                                  <p className="text-[11px] text-zinc-400 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                                    {course.description || 'No description provided.'}
-                                  </p>
-
-                                  {/* Detail metadata list */}
-                                  <div className="space-y-1.5 pt-2 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-                                    <div className="flex items-center gap-2">
-                                      <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
-                                      <span>{aspirantInfo}</span>
+                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+                                    <div className="lg:col-span-6 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                      <img 
+                                        src={thumbUrl} 
+                                        alt="" 
+                                        aria-hidden="true" 
+                                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                      />
+                                      <img 
+                                        src={thumbUrl} 
+                                        alt={course.title}
+                                        onError={(e) => handleImageError(e, course.level)}
+                                        className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
+                                      />
+                                      <span className="absolute top-3 left-3 z-20 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/90 text-white rounded-lg shadow-sm">
+                                        All-India Access
+                                      </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                      </svg>
-                                      <span>{batchInfo}</span>
+
+                                    <div className="lg:col-span-6 flex flex-col justify-between space-y-3">
+                                      <div>
+                                        <h4 className="text-lg md:text-xl font-black text-slate-900 dark:text-zinc-100 leading-snug tracking-tight">
+                                          {course.title}
+                                        </h4>
+                                        <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed mt-2">
+                                          {course.description || 'Complete syllabus coverage with printed physical book kit, video modules, and NTA CBT test series.'}
+                                        </p>
+                                      </div>
+
+                                      <div className="space-y-1.5 pt-2 text-xs font-bold text-slate-600 dark:text-zinc-300 bg-slate-50 dark:bg-zinc-900 p-3 rounded-2xl border border-slate-100 dark:border-zinc-800">
+                                        <div className="flex items-center gap-2">
+                                          <GraduationCap className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                                          <span className="truncate">{aspirantInfo}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                                          <span className="truncate">{batchInfo}</span>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
 
-                                {/* Cost Row & Action Buttons */}
-                                <div className="space-y-4 pt-1">
-                                  <div className="border-t border-zinc-100 dark:border-zinc-800/60 pt-3">
-                                    <div className="flex flex-wrap items-baseline gap-3 mt-4 mb-2 select-none">
-                                      <span className="text-2xl font-bold text-slate-900 dark:text-zinc-100">
+                                <div className="border-t border-slate-100 dark:border-zinc-800/80 pt-4 mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                                  <div>
+                                    <div className="flex items-baseline gap-2.5">
+                                      <span className="text-2xl font-black text-slate-900 dark:text-zinc-100">
                                         {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
                                       </span>
                                       {!isFree && originalPrice > course.price && (
                                         <>
-                                          <span className="text-sm font-medium text-slate-400 line-through">
+                                          <span className="text-xs text-slate-400 line-through font-bold">
                                             ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
                                           </span>
-                                          <span className="text-xs font-bold text-emerald-700 bg-emerald-100/50 px-2 py-1 rounded-md tracking-wide">
-                                            {Math.round(((originalPrice - course.price) / originalPrice) * 100)}% OFF
+                                          <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                            {discountPercent}% OFF
                                           </span>
                                         </>
                                       )}
                                     </div>
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                                      (FOR FULL BATCH)
-                                    </p>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">
+                                      Complete Program Fee
+                                    </span>
                                   </div>
 
-                                   {/* Refactored High-Conversion Button Hierarchy */}
-                                   <div className="flex flex-col mt-5 gap-3 border-t border-slate-100/80 dark:border-zinc-800/80 pt-4">
-                                     {enrolled ? (
-                                       <button
-                                         onClick={() => handleTabChange('MY_LEARNING', 'learning')}
-                                         className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition-colors select-none cursor-pointer flex items-center justify-center"
-                                       >
-                                         Go to Dashboard
-                                       </button>
-                                     ) : (
-                                       <>
-                                         {isFree ? (
-                                           <button
-                                             onClick={() => handleEnroll(course.id)}
-                                             disabled={loading}
-                                             className="w-full bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
-                                           >
-                                             {loading ? (
-                                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                             ) : (
-                                               <span>Enroll Free</span>
-                                             )}
-                                           </button>
-                                         ) : (
-                                           <button
-                                             onClick={() => handleRazorpayCheckout(course)}
-                                             disabled={loading}
-                                             className="w-full bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:bg-zinc-200 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm shadow-teal-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 select-none cursor-pointer"
-                                           >
-                                             {loading ? (
-                                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                             ) : (
-                                               <span>Buy Now</span>
-                                             )}
-                                           </button>
-                                         )}
-                                         
-                                         <button
-                                            onClick={() => router.push(`/courses/${course.id}`)}
-                                            className="w-full text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 py-2 transition-colors select-none cursor-pointer"
-                                          >
-                                            View Course Details &rarr;
-                                          </button>
-                                       </>
-                                     )}
-                                   </div>
+                                  <div className="flex items-center gap-3">
+                                    <button
+                                      onClick={() => router.push(`/courses/${course.id}`)}
+                                      className="px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-bold rounded-xl transition"
+                                    >
+                                      Syllabus
+                                    </button>
+
+                                    {enrolled ? (
+                                      <button
+                                        onClick={() => handleTabChange('MY_LEARNING', 'learning')}
+                                        className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition shadow-sm cursor-pointer"
+                                      >
+                                        Go to Learning
+                                      </button>
+                                    ) : isFree ? (
+                                      <button
+                                        onClick={() => handleEnroll(course.id)}
+                                        disabled={loading}
+                                        className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                                      >
+                                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Enroll Free</span>}
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleRazorpayCheckout(course)}
+                                        disabled={loading}
+                                        className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                                      >
+                                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Enroll & Pay (₹{course.price})</span>}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )
+                          }
+
+                          return (
+                            <motion.div 
+                              key={course.id || `course_dir_mod_${idx}`}
+                              whileHover={{ y: -6 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                              className="col-span-1 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl border border-slate-200/50 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 relative group shadow-sm hover:shadow-lg min-h-[460px]"
+                            >
+                              <div className="space-y-4">
+                                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-900/5 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 shadow-inner group">
+                                  <img 
+                                    src={thumbUrl} 
+                                    alt="" 
+                                    aria-hidden="true" 
+                                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35" 
+                                  />
+                                  <img 
+                                    src={thumbUrl} 
+                                    alt={course.title}
+                                    onError={(e) => handleImageError(e, course.level)}
+                                    className="relative z-10 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
+                                  />
+                                  {enrolled && (
+                                    <span className="absolute top-2.5 left-2.5 z-20 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white rounded-lg shadow-sm">
+                                      Enrolled
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="space-y-2">
+                                  <h4 className="text-sm font-black tracking-tight text-slate-900 dark:text-zinc-100 leading-snug line-clamp-2">
+                                    {course.title}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                    {course.description || 'Structured academic learning program.'}
+                                  </p>
+                                  <div className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 pt-1">
+                                    <span className="truncate block">{aspirantInfo}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-zinc-800/80 mt-4">
+                                <div className="flex items-baseline justify-between">
+                                  <div className="flex items-baseline gap-2">
+                                    <span className="text-xl font-black text-slate-900 dark:text-zinc-100">
+                                      {isFree ? 'Free' : `₹${Number(course.price).toLocaleString('en-IN')}`}
+                                    </span>
+                                    {!isFree && originalPrice > course.price && (
+                                      <span className="text-xs text-slate-400 line-through font-bold">
+                                        ₹{Number(Math.round(originalPrice)).toLocaleString('en-IN')}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {!isFree && discountPercent > 0 && (
+                                    <span className="text-[9px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                                      {discountPercent}% OFF
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                  <button
+                                    onClick={() => router.push(`/courses/${course.id}`)}
+                                    className="border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-center py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition select-none cursor-pointer"
+                                  >
+                                    Details
+                                  </button>
+
+                                  {enrolled ? (
+                                    <button
+                                      onClick={() => handleTabChange('MY_LEARNING', 'learning')}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition select-none cursor-pointer shadow-xs"
+                                    >
+                                      Enrolled
+                                    </button>
+                                  ) : isFree ? (
+                                    <button
+                                      onClick={() => handleEnroll(course.id)}
+                                      disabled={loading}
+                                      className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition select-none cursor-pointer shadow-xs disabled:opacity-50"
+                                    >
+                                      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : <span>Free</span>}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleRazorpayCheckout(course)}
+                                      disabled={loading}
+                                      className="bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition select-none cursor-pointer shadow-xs disabled:opacity-50"
+                                    >
+                                      {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : <span>Buy</span>}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </motion.div>
@@ -2055,7 +2386,7 @@ export default function DashboardClient({
                             <span>Algebra & Limits (Done)</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-slate-100 dark:bg-zinc-8000 rounded-full animate-pulse" />
+                            <span className="w-1.5 h-1.5 bg-slate-400 dark:bg-zinc-600 rounded-full animate-pulse" />
                             <span>Calculus & Derivatives (Active)</span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -2075,13 +2406,13 @@ export default function DashboardClient({
                         <div className="space-y-3.5 relative pl-4 border-l border-zinc-200 dark:border-zinc-800 mt-2">
                           {[
                             { title: 'Stage 1: Foundation Phase', desc: 'Core formulas, equations, and basic vectors.', status: 'COMPLETED', color: 'bg-emerald-500 text-emerald-100 border-emerald-500' },
-                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-slate-900 dark:bg-white text-white dark:text-black text-white dark:text-black border-slate-900 dark:border-white animate-pulse' },
+                            { title: 'Stage 2: Mains Preparation', desc: 'Mock tests, test ledgers, and exercises.', status: 'ACTIVE PREP', color: 'bg-slate-900 dark:bg-white text-white dark:text-black border-slate-900 dark:border-white animate-pulse' },
                             { title: 'Stage 3: Advanced Curriculums', desc: 'Multi-concept modules and IIT PYQs.', status: 'LOCKED', color: 'bg-slate-200 dark:bg-zinc-800 text-zinc-400 border-transparent' }
                           ].map((stage, idx) => (
                             <div key={idx} className="relative space-y-1">
                               <span className={`absolute -left-[22px] top-1 w-3 h-3 rounded-full border-2 ${stage.color}`} />
                               <div className="flex justify-between items-center">
-                                <h5 className="text-xs font-bold text-slate-850 dark:text-zinc-200">{stage.title}</h5>
+                                <h5 className="text-xs font-bold text-slate-800 dark:text-zinc-200">{stage.title}</h5>
                                 <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
                                   stage.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : stage.status === 'ACTIVE PREP' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white' : 'bg-slate-50 text-slate-400'
                                 }`}>{stage.status}</span>
@@ -2175,7 +2506,7 @@ export default function DashboardClient({
 
                         {/* NEW: Extended Profile Parameters Section */}
                         <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4">
-                          <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-350">Academic Profile Indicators</h5>
+                          <h5 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-zinc-300">Academic Profile Indicators</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                               <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1 ml-2">Daily Study hours</label>
@@ -2231,7 +2562,7 @@ export default function DashboardClient({
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
-                                  className="text-xs font-bold text-emerald-600 dark:text-emerald-450"
+                                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400"
                                 >
                                   {profileSuccess}
                                 </motion.span>
@@ -2241,7 +2572,7 @@ export default function DashboardClient({
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   exit={{ opacity: 0, x: -10 }}
-                                  className="text-xs font-bold text-rose-600 dark:text-rose-455"
+                                  className="text-xs font-bold text-rose-600 dark:text-rose-400"
                                 >
                                   {profileError}
                                 </motion.span>
@@ -2281,7 +2612,7 @@ export default function DashboardClient({
                     <div className="overflow-x-auto rounded-[2rem] border border-slate-200/30 dark:border-zinc-800/30 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl shadow-sm">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-zinc-100/55 dark:border-zinc-805/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-450 dark:text-zinc-455 select-none">
+                          <tr className="border-b border-zinc-100/55 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-950/50 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-zinc-400 select-none">
                             <th className="px-6 py-4">Invoice ID</th>
                             <th className="px-6 py-4">Course</th>
                             <th className="px-6 py-4">Razorpay Payment ID</th>
@@ -2294,11 +2625,11 @@ export default function DashboardClient({
                         <tbody className="divide-y divide-slate-100/60 dark:divide-zinc-800/80 text-xs font-semibold text-slate-800 dark:text-zinc-200">
                           {mockInvoices?.map((invoice, idx) => (
                             <tr key={invoice.id || invoice.razorpayId || `inv_${idx}`} className="hover:bg-slate-50/60 dark:hover:bg-zinc-950/20 transition-all duration-200">
-                              <td className="px-6 py-4 font-mono font-bold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.id}</td>
+                              <td className="px-6 py-4 font-mono font-bold text-xs tracking-tight text-slate-900 dark:text-zinc-100">{invoice.id}</td>
                               <td className="px-6 py-4 font-medium text-slate-800 dark:text-zinc-300">{invoice.courseTitle}</td>
                               <td className="px-6 py-4 font-mono text-[10px] text-slate-500 dark:text-zinc-500 tracking-wider">{invoice.razorpayId}</td>
-                              <td className="px-6 py-4 font-mono font-extrabold text-xs tracking-tight text-slate-909 dark:text-zinc-100">{invoice.amount}</td>
-                              <td className="px-6 py-4 font-mono text-[11px] text-slate-550 dark:text-zinc-400">{new Date(invoice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                              <td className="px-6 py-4 font-mono font-extrabold text-xs tracking-tight text-slate-900 dark:text-zinc-100">{invoice.amount}</td>
+                              <td className="px-6 py-4 font-mono text-[11px] text-slate-500 dark:text-zinc-400">{formatDateSafe(invoice.date, 'short')}</td>
                               <td className="px-6 py-4 text-right">
                                 <span className="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.1)] text-[9px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
                                   {invoice.status}
@@ -2425,8 +2756,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('MY_LEARNING', 'learning')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'MY_LEARNING' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <BookOpenCheck className="w-5 h-5 shrink-0" />
@@ -2436,8 +2767,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BROWSE', 'browse')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BROWSE' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <Search className="w-5 h-5 shrink-0" />
@@ -2447,8 +2778,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('BATCHES', 'batches')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'BATCHES' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <Users className="w-5 h-5 shrink-0" />
@@ -2458,8 +2789,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('EXAMS', 'exams')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'EXAMS' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <Award className="w-5 h-5 shrink-0" />
@@ -2469,8 +2800,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('ANALYTICS', 'analytics')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'ANALYTICS' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <TrendingUp className="w-5 h-5 shrink-0" />
@@ -2480,8 +2811,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('PROFILE', 'profile')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'PROFILE' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <User className="w-5 h-5 shrink-0" />
@@ -2491,8 +2822,8 @@ export default function DashboardClient({
                           onClick={() => handleTabChange('INVOICES', 'invoices')}
                           className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
                             activeTab === 'INVOICES' 
-                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white dark:dark:bg-zinc-800 dark:text-slate-500 dark:text-zinc-300 font-extrabold shadow-[0_0_12px_rgba(13,148,136,0.1)] dark:shadow-[0_0_15px_rgba(13,148,136,0.2)] border border-slate-300 dark:border-zinc-700 dark:border-slate-300 dark:border-zinc-700' 
-                              : 'text-slate-655 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
+                              ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-extrabold shadow-sm border border-slate-300 dark:border-zinc-700' 
+                              : 'text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/40 font-semibold border-transparent'
                           }`}
                         >
                           <FileText className="w-5 h-5 shrink-0" />
@@ -2606,7 +2937,7 @@ export default function DashboardClient({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="flex gap-2 items-start p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-450 text-xs font-semibold"
+                        className="flex gap-2 items-start p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold"
                       >
                         <Loader2 className="w-4 h-4 shrink-0 animate-spin mt-0.5" />
                         <span>{createSuccess}</span>
@@ -2685,7 +3016,7 @@ export default function DashboardClient({
                     {/* Live Coordination Room */}
                     <div className="space-y-3">
                       <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
-                        <Calendar className="w-4 h-4 text-indigo-650" />
+                        <Calendar className="w-4 h-4 text-indigo-600" />
                         <span>Live Coordinator Room</span>
                       </h4>
                       {cohortLiveSessions.length === 0 ? (
@@ -2706,8 +3037,8 @@ export default function DashboardClient({
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-[9px] text-slate-455 mt-1 font-bold">
-                                    Start: {new Date(session.scheduled_start).toLocaleString()} &bull; Duration: {session.duration_minutes}m
+                                  <p className="text-[9px] text-slate-500 mt-1 font-bold">
+                                    Start: {formatDateTimeSafe(session.scheduled_start)} &bull; Duration: {session.duration_minutes}m
                                   </p>
                                 </div>
                                 {!isEnded && (
@@ -2752,16 +3083,16 @@ export default function DashboardClient({
                                     <h5 className="text-xs font-black text-slate-800 dark:text-zinc-100 leading-none">{exam.title}</h5>
                                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase border ${
                                       isUpcoming
-                                        ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-450 dark:border-amber-500/20'
+                                        ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-500/20'
                                         : isClosed
-                                        ? 'bg-rose-50 text-rose-700 border-rose-250 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-500/20'
-                                        : 'bg-emerald-50 text-emerald-700 border-emerald-250 dark:bg-emerald-950/20 dark:text-emerald-450 dark:border-emerald-500/20'
+                                        ? 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-500/20'
+                                        : 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-500/20'
                                     }`}>
                                       {isUpcoming ? 'Locked' : isClosed ? 'Closed' : 'Active'}
                                     </span>
                                   </div>
-                                  <p className="text-[9px] text-slate-455 dark:text-zinc-500 mt-1 font-bold">
-                                    Opens: {exam.start_window ? new Date(exam.start_window).toLocaleString() : 'Anytime'} &bull; Closes: {exam.end_window ? new Date(exam.end_window).toLocaleString() : 'Anytime'}
+                                  <p className="text-[9px] text-slate-500 dark:text-zinc-400 mt-1 font-bold">
+                                    Opens: {exam.start_window ? formatDateTimeSafe(exam.start_window) : 'Anytime'} &bull; Closes: {exam.end_window ? formatDateTimeSafe(exam.end_window) : 'Anytime'}
                                   </p>
                                 </div>
                                 <button
@@ -2784,7 +3115,7 @@ export default function DashboardClient({
                     {/* Materials Vault */}
                     <div className="space-y-3">
                       <h4 className="font-extrabold text-xs uppercase text-slate-800 dark:text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-slate-100 dark:border-zinc-900 pb-1.5">
-                        <FileText className="w-4 h-4 text-emerald-650" />
+                        <FileText className="w-4 h-4 text-emerald-600" />
                         <span>Materials Vault</span>
                       </h4>
                       {cohortFiles.length === 0 ? (
@@ -2795,11 +3126,11 @@ export default function DashboardClient({
                             <div key={file.id} className="bg-slate-50 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 p-3.5 rounded-2xl flex items-center justify-between gap-4">
                               <div className="min-w-0">
                                 <h5 className="text-xs font-black text-slate-800 dark:text-zinc-100 leading-none truncate max-w-[280px]">{file.file_name}</h5>
-                                <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {new Date(file.created_at).toLocaleDateString('en-US')}</p>
+                                <p className="text-[9px] text-slate-400 mt-1 font-bold">Uploaded: {formatDateSafe(file.created_at, 'short')}</p>
                               </div>
                               <a
                                 href={`/api/downloads?file=${encodeURIComponent(file.file_path)}&batchId=${encodeURIComponent(selectedCohortBatch.id)}`}
-                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 shrink-0 border border-emerald-650"
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 shrink-0 border border-emerald-600"
                               >
                                 Download
                               </a>

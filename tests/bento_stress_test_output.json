@@ -1,0 +1,630 @@
+{
+  "dateTests": {
+    "passed": 12,
+    "failed": 1,
+    "details": [
+      {
+        "input": null,
+        "format": "short",
+        "expected": "",
+        "actual": "",
+        "pass": true
+      },
+      {
+        "format": "short",
+        "expected": "",
+        "actual": "",
+        "pass": true
+      },
+      {
+        "input": "",
+        "format": "short",
+        "expected": "",
+        "actual": "",
+        "pass": true
+      },
+      {
+        "input": "invalid-date-string",
+        "format": "short",
+        "expected": "invalid-date-string",
+        "actual": "invalid-date-string",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01",
+        "format": "short",
+        "expected": "1 Jun, 2026",
+        "actual": "1 Jun, 2026",
+        "pass": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.000Z",
+        "format": "short",
+        "expected": "31 Dec, 2026",
+        "actual": "31 Dec, 2026",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01T12:00:00.000Z",
+        "format": "long",
+        "expected": "1 Jun, 2026 12:00 UTC",
+        "actual": "1 Jun, 2026 12:00 UTC",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01T12:00:00.000Z",
+        "format": "iso-date",
+        "expected": "2026-06-01",
+        "actual": "2026-06-01",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01T12:00:00.000Z",
+        "format": "year-only",
+        "expected": "2026",
+        "actual": "2026",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01T12:00:00.000Z",
+        "format": "month-year",
+        "expected": "Jun 2026",
+        "actual": "Jun 2026",
+        "pass": true
+      },
+      {
+        "input": "2026-06-01T12:00:00.000Z",
+        "format": "full",
+        "expected": "June 1, 2026",
+        "actual": "June 1, 2026",
+        "pass": true
+      },
+      {
+        "input": 0,
+        "format": "short",
+        "expected": "1 Jan, 1970",
+        "actual": "",
+        "pass": false
+      },
+      {
+        "input": 1772496000000,
+        "format": "short",
+        "expected": "3 Mar, 2026",
+        "actual": "3 Mar, 2026",
+        "pass": true
+      }
+    ]
+  },
+  "gridGeometry": {
+    "passed": 36,
+    "failed": 0,
+    "details": [
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 0,
+        "totalRows": 0,
+        "lastRowOccupancy": "0/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 1,
+        "totalRows": 1,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 2,
+        "totalRows": 2,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 3,
+        "totalRows": 3,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 4,
+        "totalRows": 4,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 5,
+        "totalRows": 5,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 8,
+        "totalRows": 8,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 10,
+        "totalRows": 10,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Mobile (375px)",
+        "itemCount": 20,
+        "totalRows": 20,
+        "lastRowOccupancy": "1/1",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 0,
+        "totalRows": 0,
+        "lastRowOccupancy": "0/2",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 1,
+        "totalRows": 1,
+        "lastRowOccupancy": "2/2",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 2,
+        "totalRows": 2,
+        "lastRowOccupancy": "1/2",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 3,
+        "totalRows": 2,
+        "lastRowOccupancy": "2/2",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 4,
+        "totalRows": 3,
+        "lastRowOccupancy": "1/2",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 5,
+        "totalRows": 3,
+        "lastRowOccupancy": "2/2",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 8,
+        "totalRows": 5,
+        "lastRowOccupancy": "1/2",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 10,
+        "totalRows": 6,
+        "lastRowOccupancy": "1/2",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Tablet (768px)",
+        "itemCount": 20,
+        "totalRows": 11,
+        "lastRowOccupancy": "1/2",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 0,
+        "totalRows": 0,
+        "lastRowOccupancy": "0/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 1,
+        "totalRows": 1,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 2,
+        "totalRows": 1,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 3,
+        "totalRows": 2,
+        "lastRowOccupancy": "1/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 4,
+        "totalRows": 2,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 5,
+        "totalRows": 2,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 8,
+        "totalRows": 3,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 10,
+        "totalRows": 4,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Desktop (1280px)",
+        "itemCount": 20,
+        "totalRows": 7,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 0,
+        "totalRows": 0,
+        "lastRowOccupancy": "0/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 1,
+        "totalRows": 1,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 2,
+        "totalRows": 1,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 3,
+        "totalRows": 2,
+        "lastRowOccupancy": "1/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 4,
+        "totalRows": 2,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 5,
+        "totalRows": 2,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 8,
+        "totalRows": 3,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 10,
+        "totalRows": 4,
+        "lastRowOccupancy": "2/3",
+        "hasIncompleteRow": true,
+        "rowOverflown": false
+      },
+      {
+        "breakpoint": "Wide (1920px)",
+        "itemCount": 20,
+        "totalRows": 7,
+        "lastRowOccupancy": "3/3",
+        "hasIncompleteRow": false,
+        "rowOverflown": false
+      }
+    ]
+  },
+  "dataResilience": {
+    "passed": 7,
+    "failed": 0,
+    "details": [
+      {
+        "testCase": "Empty Object",
+        "courseResult": {
+          "success": true,
+          "title": "Untitled Course",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "Untitled Batch",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "Untitled Test Series",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "All Nulls",
+        "courseResult": {
+          "success": true,
+          "title": "Untitled Course",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "Untitled Batch",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "Untitled Test Series",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "All Undefined",
+        "courseResult": {
+          "success": true,
+          "title": "Untitled Course",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "Untitled Batch",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "Untitled Test Series",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "Empty Arrays and Strings",
+        "courseResult": {
+          "success": true,
+          "title": "Untitled Course",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "Untitled Batch",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "Untitled Test Series",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "Broken Nested Structures",
+        "courseResult": {
+          "success": true,
+          "title": "Untitled Course",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "Untitled Batch",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "Untitled Test Series",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "Ultra-Long Strings (1000+ chars)",
+        "courseResult": {
+          "success": true,
+          "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      },
+      {
+        "testCase": "Special Chars and HTML/XSS Payloads",
+        "courseResult": {
+          "success": true,
+          "title": "<script>alert(\"XSS\")</script>&amp;\"'<>",
+          "isHero": false,
+          "checklistCount": 2,
+          "discount": 90
+        },
+        "batchResult": {
+          "success": true,
+          "title": "<script>alert(\"XSS\")</script>&amp;\"'<>",
+          "isHero": false,
+          "totalLessons": 1
+        },
+        "testSeriesResult": {
+          "success": true,
+          "title": "<script>alert(\"XSS\")</script>&amp;\"'<>",
+          "isHero": false,
+          "drills": 0,
+          "mocks": 0,
+          "live": 0,
+          "price": 499
+        },
+        "pass": true
+      }
+    ]
+  },
+  "cssLayoutAudit": {
+    "passed": 3,
+    "failed": 1,
+    "details": [
+      {
+        "file": "src/app/courses/page.jsx",
+        "hasEmptyState": false,
+        "hasUncroppedMedia": true,
+        "hasTruncateOrClamp": true,
+        "hasResponsiveGrid": true,
+        "hasHeroColSpan": true,
+        "hasUnsafeDateMethod": false,
+        "pass": true
+      },
+      {
+        "file": "src/app/batches/page.jsx",
+        "hasEmptyState": false,
+        "hasUncroppedMedia": true,
+        "hasTruncateOrClamp": true,
+        "hasResponsiveGrid": true,
+        "hasHeroColSpan": true,
+        "hasUnsafeDateMethod": false,
+        "pass": true
+      },
+      {
+        "file": "src/app/test-series/TestSeriesHubClient.jsx",
+        "hasEmptyState": true,
+        "hasUncroppedMedia": true,
+        "hasTruncateOrClamp": true,
+        "hasResponsiveGrid": true,
+        "hasHeroColSpan": true,
+        "hasUnsafeDateMethod": false,
+        "pass": true
+      },
+      {
+        "file": "src/app/dashboard/DashboardClient.jsx",
+        "hasEmptyState": true,
+        "hasUncroppedMedia": true,
+        "hasTruncateOrClamp": true,
+        "hasResponsiveGrid": true,
+        "hasHeroColSpan": true,
+        "hasUnsafeDateMethod": true,
+        "pass": false
+      }
+    ]
+  },
+  "findings": [
+    "[DateFormat Error] input=0, format=short, expected=\"1 Jan, 1970\", got=\"\"",
+    "[Hydration Warning] src/app/dashboard/DashboardClient.jsx contains direct toLocaleDateString/toLocaleString call"
+  ]
+}

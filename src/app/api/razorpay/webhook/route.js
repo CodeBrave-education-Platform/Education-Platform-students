@@ -8,7 +8,6 @@ export async function POST(request) {
 
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'rzp_secret_production_key';
 
-    // Verify HMAC SHA256 signature if secret is provided in production
     if (signature && process.env.RAZORPAY_WEBHOOK_SECRET) {
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
@@ -33,25 +32,49 @@ export async function POST(request) {
       const notes = paymentEntity.notes || {};
       const userId = notes.userId;
       const courseId = notes.courseId;
+      const batchId = notes.batchId;
+      const packageId = notes.packageId;
 
-      if (userId && courseId) {
-        // Create an admin client bypassing RLS to insert webhook data securely
+      if (userId) {
         const { createClient } = require('@supabase/supabase-js');
         const supabaseAdmin = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
-          process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY // fallback for dev
+          process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
         );
 
-        const { error: enrollError } = await supabaseAdmin
-          .from('enrollments')
-          .insert([{
-            user_id: userId,
-            course_id: courseId,
-            status: 'ACTIVE'
-          }]);
+        if (courseId) {
+          await supabaseAdmin
+            .from('enrollments')
+            .upsert([{
+              user_id: userId,
+              course_id: courseId,
+              status: 'active'
+            }], { onConflict: 'user_id,course_id' });
+        }
 
-        if (enrollError) {
-          console.error("Webhook enrollment error:", enrollError);
+        if (batchId) {
+          await supabaseAdmin
+            .from('batch_enrollments')
+            .upsert([{
+              user_id: userId,
+              batch_id: batchId,
+              status: 'active'
+            }], { onConflict: 'user_id,batch_id' });
+        }
+
+        if (packageId) {
+          await supabaseAdmin
+            .from('invoices')
+            .insert([{
+              user_id: userId,
+              profile_id: userId,
+              package_id: packageId,
+              razorpay_payment_id: paymentEntity.id || `webhook_${Date.now()}`,
+              razorpay_order_id: orderId,
+              amount_paid: amount,
+              currency: 'INR',
+              status: 'success'
+            }]);
         }
       }
 

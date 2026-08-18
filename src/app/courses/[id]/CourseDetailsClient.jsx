@@ -239,7 +239,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
           </button>
           
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-teal-50 dark:bg-teal-950/30 text-teal-650 dark:text-teal-400 px-3 py-1 rounded-full border border-teal-100/30">
+            <span className="text-[10px] font-black uppercase tracking-widest bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 px-3 py-1 rounded-full border border-teal-100/30">
               JEE Training
             </span>
           </div>
@@ -258,7 +258,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
               <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border select-none ${
                 course.level === 'advanced' 
                   ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/20 dark:border-rose-900/40 dark:text-rose-400' 
-                  : 'bg-teal-50 border-teal-200 text-teal-650 dark:bg-teal-950/20 dark:border-teal-900/40 dark:text-teal-400'
+                  : 'bg-teal-50 border-teal-200 text-teal-600 dark:bg-teal-950/20 dark:border-teal-900/40 dark:text-teal-400'
               }`}>
                 JEE {course.level || 'Foundation'}
               </span>
@@ -267,7 +267,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
               </span>
             </div>
             
-            <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-zinc-150 tracking-tight leading-tight">
+            <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight">
               {course.title}
             </h1>
             
@@ -277,9 +277,9 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
           </div>
 
           {/* Academic Highlight Matrix */}
-          <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-sm border border-slate-200/50 dark:border-zinc-850/50 rounded-3xl p-6 lg:p-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-sm border border-slate-200/50 dark:border-zinc-800/50 rounded-3xl p-6 lg:p-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-teal-650 dark:text-teal-400">
+              <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
                 <GraduationCap className="w-5 h-5 shrink-0" />
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Audience</h4>
               </div>
@@ -310,8 +310,8 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
           {/* Dynamic Syllabus Timelines */}
           <div className="space-y-6">
             <div className="flex items-center gap-2.5">
-              <BookOpen className="w-5 h-5 text-teal-650 dark:text-teal-400" />
-              <h2 className="text-lg font-black text-slate-900 dark:text-zinc-150 tracking-tight">
+              <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              <h2 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight">
                 Curriculum syllabus chapters
               </h2>
             </div>
@@ -333,7 +333,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
                 >
                   
                   {/* Glowing vertical point marker */}
-                  <span className={`absolute top-5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-350 dark:border-zinc-700 ring-4 ring-[#F8FAFC] dark:ring-zinc-950 transition-colors group-hover:border-teal-500 ${
+                  <span className={`absolute top-5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-700 ring-4 ring-[#F8FAFC] dark:ring-zinc-950 transition-colors group-hover:border-teal-500 ${
                     enrolled ? '-left-[15px]' : '-left-[31px]'
                   }`}>
                     <span className="h-1.5 w-1.5 rounded-full bg-slate-400 group-hover:bg-teal-500 transition-colors" />
@@ -347,14 +347,14 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
                       {enrolled && (
                         <>
                           <span>•</span>
-                          <span className="text-teal-650 dark:text-teal-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <span className="text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider flex items-center gap-1">
                             <Play className="w-2.5 h-2.5 inline" /> Play Lesson
                           </span>
                         </>
                       )}
                     </div>
                     
-                    <h3 className="text-sm font-black text-slate-850 dark:text-zinc-200 leading-snug group-hover:text-teal-650 dark:group-hover:text-teal-400 transition-colors">
+                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 leading-snug group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                       {lesson.title}
                     </h3>
                     
@@ -378,10 +378,10 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
           <div className="sticky top-28 space-y-6">
             
             {/* Visual Action Panel */}
-            <div className="bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-850 shadow-md rounded-[2.5rem] overflow-hidden flex flex-col relative">
+            <div className="bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-md rounded-[2.5rem] overflow-hidden flex flex-col relative">
               
               {/* Aspect-Video strict widescreen image */}
-              <div className="relative w-full aspect-video bg-slate-150 overflow-hidden shrink-0">
+              <div className="relative w-full aspect-video bg-slate-100 overflow-hidden shrink-0">
                 <img 
                   src={thumbUrl} 
                   alt={course.title}
@@ -489,8 +489,8 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
             </div>
 
             {/* Zero-Trust Security disclaimer notice */}
-            <div className="flex items-start gap-2.5 p-4 bg-slate-100/50 dark:bg-zinc-900/30 rounded-2xl border border-slate-200/50 dark:border-zinc-800/40 text-[10px] text-slate-450 dark:text-zinc-500 select-none">
-              <svg className="w-4.5 h-4.5 text-slate-405 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-start gap-2.5 p-4 bg-slate-100/50 dark:bg-zinc-900/30 rounded-2xl border border-slate-200/50 dark:border-zinc-800/40 text-[10px] text-slate-500 dark:text-zinc-500 select-none">
+              <svg className="w-4.5 h-4.5 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <span>Transactions are secured with zero-trust validation keys to prevent active session hijackings.</span>

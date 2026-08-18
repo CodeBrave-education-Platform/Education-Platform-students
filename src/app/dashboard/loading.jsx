@@ -26,10 +26,10 @@ export default function Loading() {
         {/* Mock Header */}
         <header className="p-6 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/20 dark:bg-zinc-900/20 rounded-[2rem] flex justify-between items-center shadow-sm">
           <div className="space-y-2">
-            <div className="h-6 w-48 bg-slate-250 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-6 w-48 bg-slate-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
             <div className="h-3.5 w-64 bg-slate-200 dark:bg-zinc-800/70 rounded-md animate-pulse" />
           </div>
-          <div className="h-10 w-28 bg-slate-250 dark:bg-zinc-800 rounded-full animate-pulse hidden sm:block" />
+          <div className="h-10 w-28 bg-slate-200 dark:bg-zinc-800 rounded-full animate-pulse hidden sm:block" />
         </header>
 
         <div className="p-6 md:p-8 space-y-8 flex-1">
@@ -37,10 +37,10 @@ export default function Loading() {
           <div className="p-6 rounded-2xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/10 dark:border-zinc-800/10 shadow-sm animate-pulse space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-teal-500 rounded-full" />
-              <div className="h-3 w-20 bg-slate-250 dark:bg-zinc-850 rounded" />
+              <div className="h-3 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
             </div>
-            <div className="h-5 w-40 bg-slate-250 dark:bg-zinc-850 rounded-lg" />
-            <div className="h-3.5 w-5/6 bg-slate-200 dark:bg-zinc-850/80 rounded" />
+            <div className="h-5 w-40 bg-slate-200 dark:bg-zinc-800 rounded-lg" />
+            <div className="h-3.5 w-5/6 bg-slate-200 dark:bg-zinc-800/80 rounded" />
           </div>
 
           {/* Stats Cards Grid Skeleton */}
@@ -48,12 +48,12 @@ export default function Loading() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-850/30 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl shadow-sm flex items-center gap-5 animate-pulse"
+                className="p-6 rounded-[2rem] border border-slate-200/30 dark:border-zinc-800/30 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl shadow-sm flex items-center gap-5 animate-pulse"
               >
-                <div className="p-3.5 rounded-2xl bg-slate-250 dark:bg-zinc-800 w-12 h-12 shrink-0" />
+                <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-zinc-800 w-12 h-12 shrink-0" />
                 <div className="space-y-2 flex-1">
                   <div className="h-3 w-16 bg-slate-200 dark:bg-zinc-800 rounded" />
-                  <div className="h-6 w-10 bg-slate-250 dark:bg-zinc-850 rounded-lg" />
+                  <div className="h-6 w-10 bg-slate-200 dark:bg-zinc-800 rounded-lg" />
                 </div>
               </div>
             ))}
@@ -61,7 +61,7 @@ export default function Loading() {
 
           {/* Item/Courses Grid Skeleton */}
           <div className="space-y-4">
-            <div className="h-5 w-44 bg-slate-250 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <div className="h-5 w-44 bg-slate-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((idx) => (
                 <div
@@ -69,14 +69,14 @@ export default function Loading() {
                   className="p-6 rounded-[2rem] border border-slate-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-zinc-900/40 shadow-sm flex flex-col justify-between min-h-[220px] animate-pulse space-y-4"
                 >
                   <div className="space-y-3">
-                    <div className="h-4.5 w-20 bg-slate-250 dark:bg-zinc-800 rounded-full" />
-                    <div className="h-5 bg-slate-250 dark:bg-zinc-800 rounded-full w-5/6" />
-                    <div className="h-3.5 bg-slate-200 dark:bg-zinc-850 rounded-full w-full" />
-                    <div className="h-3.5 bg-slate-200 dark:bg-zinc-850 rounded-full w-4/5" />
+                    <div className="h-4.5 w-20 bg-slate-200 dark:bg-zinc-800 rounded-full" />
+                    <div className="h-5 bg-slate-200 dark:bg-zinc-800 rounded-full w-5/6" />
+                    <div className="h-3.5 bg-slate-200 dark:bg-zinc-800 rounded-full w-full" />
+                    <div className="h-3.5 bg-slate-200 dark:bg-zinc-800 rounded-full w-4/5" />
                   </div>
                   <div className="flex justify-between items-center pt-2">
-                    <div className="h-3 w-16 bg-slate-200 dark:bg-zinc-850 rounded" />
-                    <div className="h-8 w-24 bg-slate-250 dark:bg-zinc-800 rounded-xl" />
+                    <div className="h-3 w-16 bg-slate-200 dark:bg-zinc-800 rounded" />
+                    <div className="h-8 w-24 bg-slate-200 dark:bg-zinc-800 rounded-xl" />
                   </div>
                 </div>
               ))}

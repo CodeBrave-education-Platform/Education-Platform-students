@@ -35,8 +35,19 @@ export default async function AnalyticsTerminalPage({ params }) {
   }
 
   const exam = attempt.test_exams
-  const questions = exam.questions || []
-  const answersPayload = attempt.answers_payload || {}
+  let questions = []
+  if (typeof exam?.questions === 'string') {
+    try { questions = JSON.parse(exam.questions) } catch (e) { questions = [] }
+  } else if (Array.isArray(exam?.questions)) {
+    questions = exam.questions
+  }
+
+  let answersPayload = {}
+  if (typeof attempt.answers_payload === 'string') {
+    try { answersPayload = JSON.parse(attempt.answers_payload) } catch (e) { answersPayload = {} }
+  } else if (attempt.answers_payload && typeof attempt.answers_payload === 'object') {
+    answersPayload = attempt.answers_payload
+  }
 
   // Calculate subject-wise accuracy and seconds spent
   const subjectsData = {}

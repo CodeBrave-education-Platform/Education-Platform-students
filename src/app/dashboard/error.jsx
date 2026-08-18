@@ -31,8 +31,8 @@ export default function Error({ error, reset }) {
             An unexpected error occurred while loading this section of the portal. Our transaction and database states remain perfectly secure.
           </p>
           {error?.message && (
-            <div className="mt-3 p-3 bg-slate-100/55 dark:bg-zinc-950/50 rounded-xl text-left border border-slate-200/30 dark:border-zinc-850 w-full">
-              <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-450 break-all leading-normal">
+            <div className="mt-3 p-3 bg-slate-100/55 dark:bg-zinc-950/50 rounded-xl text-left border border-slate-200/30 dark:border-zinc-800 w-full">
+              <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 break-all leading-normal">
                 {error.message}
               </p>
             </div>

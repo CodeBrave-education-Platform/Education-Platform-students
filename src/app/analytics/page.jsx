@@ -44,8 +44,19 @@ export default function AnalyticsDashboard() {
         const recentScores = [];
 
         attempts.forEach(attempt => {
-          const questions = attempt.test_exams?.questions || [];
-          const answers = attempt.answers_payload || {};
+          let questions = [];
+          if (typeof attempt.test_exams?.questions === 'string') {
+            try { questions = JSON.parse(attempt.test_exams.questions); } catch (e) { questions = []; }
+          } else if (Array.isArray(attempt.test_exams?.questions)) {
+            questions = attempt.test_exams.questions;
+          }
+
+          let answers = {};
+          if (typeof attempt.answers_payload === 'string') {
+            try { answers = JSON.parse(attempt.answers_payload); } catch (e) { answers = {}; }
+          } else if (attempt.answers_payload && typeof attempt.answers_payload === 'object') {
+            answers = attempt.answers_payload;
+          }
           let attemptScore = 0;
           let maxPossible = 0;
 

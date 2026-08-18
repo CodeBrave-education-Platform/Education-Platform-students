@@ -102,7 +102,7 @@ export default function Footer() {
       </div>
 
       {/* Copyright bottom band */}
-      <div className="max-w-7xl mx-auto border-t border-slate-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-semibold text-slate-550">
+      <div className="max-w-7xl mx-auto border-t border-slate-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-semibold text-slate-500">
         <div>
           © {new Date().getFullYear()} ASENTRA Technologies. All rights reserved.
         </div>

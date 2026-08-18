@@ -55,20 +55,22 @@ export default async function CbtEnginePage({ params }) {
       const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
 
       if (isPremium) {
-        // Verify invoice
+        // Verify invoice with correct user_id column
         const { data: invoice } = await supabase
           .from('invoices')
           .select('id')
-          .eq('profile_id', authenticatedUser.id)
+          .eq('user_id', authenticatedUser.id)
           .eq('package_id', exam.package_id)
-          .single()
+          .maybeSingle()
 
         if (!invoice) {
           isAuthorized = false
         }
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Error fetching exam details:', e)
+  }
 
   if (!isAuthorized) {
     redirect('/test-series')

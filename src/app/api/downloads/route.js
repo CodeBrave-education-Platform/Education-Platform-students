@@ -4,25 +4,25 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { getSafeRedirectUrl } from '@/utils/security'
 
-// Initialize Upstash Redis client securely for rate limiting
-let redis;
-let ratelimit;
+let redis
+let ratelimit
 
 try {
-  redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-  })
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
 
-  // Allow 5 download requests per 60 seconds per authenticated student
-  ratelimit = new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '60 s'),
-    analytics: true,
-    prefix: '@upstash/ratelimit',
-  })
+    ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, '60 s'),
+      analytics: true,
+      prefix: '@upstash/ratelimit',
+    })
+  }
 } catch (e) {
-  console.warn('Redis rate-limiter initialization failed:', e.message)
+  console.warn('Redis rate-limiter initialization skipped:', e.message)
 }
 
 export async function GET(request) {
@@ -41,7 +41,7 @@ export async function GET(request) {
 
     const supabase = await createClient()
 
-    // 1. Zero-Trust Cryptographic User Verification via getUser()
+    // 1. Authenticate user session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
@@ -50,70 +50,76 @@ export async function GET(request) {
       )
     }
 
-    // 2. Strict Rate Limiting via Upstash Redis sliding window (with graceful degradation)
+    // 2. Sliding window rate limit check
     if (ratelimit) {
       try {
         const { success } = await ratelimit.limit(user.id)
         if (!success) {
           return NextResponse.json(
-            { error: 'Rate limit exceeded. Max 5 downloads per minute allowed.' },
+            { error: 'Rate limit exceeded. Max 10 downloads per minute allowed.' },
             { status: 429 }
           )
         }
       } catch (err) {
-        console.warn('[RATE LIMIT ERROR] Upstash Redis is unreachable. Bypassing rate limit check.', err.message)
+        console.warn('[RATE LIMIT NOTICE] Upstash Redis bypass:', err.message)
       }
     }
 
-    // 3. Authorization Check
-    if (lessonId) {
-      // Fetch course_id matching the lessonId
-      const { data: lesson, error: lessonError } = await supabase
-        .from('lessons')
-        .select('course_id')
-        .eq('id', lessonId)
-        .maybeSingle()
+    // 3. User Role Check for Staff Bypass
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle()
 
-      if (lessonError || !lesson) {
-        return NextResponse.json(
-          { error: 'Lesson not found' },
-          { status: 404 }
-        )
-      }
+    const isStaff = profile?.role === 'admin' || profile?.role === 'teacher' || profile?.role === 'instructor'
 
-      // High-Performance authorization check via active enrollments
-      const { data: enrollment, error: enrollError } = await supabase
-        .from('enrollments')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('course_id', lesson.course_id)
-        .eq('status', 'active')
-        .maybeSingle()
+    // 4. Authorization Check for Students
+    if (!isStaff) {
+      if (lessonId) {
+        const { data: lesson, error: lessonError } = await supabase
+          .from('lessons')
+          .select('course_id')
+          .eq('id', lessonId)
+          .maybeSingle()
 
-      if (enrollError || !enrollment) {
-        return NextResponse.json(
-          { error: 'Forbidden: Active enrollment required' },
-          { status: 403 }
-        )
-      }
-    } else if (batchId) {
-      // High-Performance authorization check via active batch enrollments
-      const { data: enrollment, error: enrollError } = await supabase
-        .from('batch_enrollments')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('batch_id', batchId)
-        .maybeSingle()
+        if (lessonError || !lesson) {
+          return NextResponse.json({ error: 'Lesson not found' }, { status: 404 })
+        }
 
-      if (enrollError || !enrollment) {
-        return NextResponse.json(
-          { error: 'Forbidden: Active batch enrollment required' },
-          { status: 403 }
-        )
+        const { data: enrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('course_id', lesson.course_id)
+          .in('status', ['active', 'ACTIVE'])
+          .maybeSingle()
+
+        if (!enrollment) {
+          return NextResponse.json(
+            { error: 'Forbidden: Active enrollment required' },
+            { status: 403 }
+          )
+        }
+      } else if (batchId) {
+        const { data: enrollment } = await supabase
+          .from('batch_enrollments')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('batch_id', batchId)
+          .in('status', ['active', 'ACTIVE'])
+          .maybeSingle()
+
+        if (!enrollment) {
+          return NextResponse.json(
+            { error: 'Forbidden: Active batch enrollment required' },
+            { status: 403 }
+          )
+        }
       }
     }
 
-    // Extract relative storage path if a full URL was supplied
+    // 5. Resolve storage path
     let filePath = file
     if (file.startsWith('http')) {
       try {
@@ -125,19 +131,17 @@ export async function GET(request) {
           filePath = parsedUrl.pathname.split('/').pop()
         }
       } catch (err) {
-        console.error('Failed to parse URL, using raw path:', err)
+        console.error('Path parsing notice:', err)
       }
     }
 
-    // 4. Create signed URL for secure download (expires in 60s)
+    // 6. Generate signed URL (expires in 60s)
     const { data, error: signedUrlError } = await supabase
       .storage
       .from('secure-assets')
       .createSignedUrl(filePath, 60)
 
     if (signedUrlError || !data?.signedUrl) {
-      // Fallback: If signed asset generation fails or bucket not fully set up,
-      // redirect securely to the original workspace link to ensure resilience
       if (file.startsWith('http')) {
         const safeUrl = getSafeRedirectUrl(file, '/dashboard')
         const isSupabaseUrl = file.includes('.supabase.co')
@@ -147,22 +151,17 @@ export async function GET(request) {
             { status: 403 }
           )
         }
-        return NextResponse.redirect(file)
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to generate secure download link' },
-          { status: 500 }
-        )
+        return NextResponse.redirect(new URL(file, request.url))
       }
+      return NextResponse.json(
+        { error: 'Failed to generate secure download link' },
+        { status: 500 }
+      )
     }
 
-    // 5. Redirect user to the temporary signed download URL
-    return NextResponse.redirect(data.signedUrl)
+    return NextResponse.redirect(new URL(data.signedUrl, request.url))
   } catch (err) {
-    console.error('Secure download gateway critical crash:', err)
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
+    console.error('Download route exception:', err)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

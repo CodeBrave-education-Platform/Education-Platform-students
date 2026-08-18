@@ -32,7 +32,7 @@ export default function FeatureScroll() {
           <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
             Rigorous Training Systems for JEE Candidates
           </h2>
-          <div className="h-1.5 w-16 bg-teal-650 mx-auto rounded-full" />
+          <div className="h-1.5 w-16 bg-teal-600 mx-auto rounded-full" />
           <p className="text-slate-500 text-sm font-semibold tracking-wide">
             Zero-friction interfaces. Server-validated telemetry. High-accuracy mock engines.
           </p>
@@ -174,13 +174,13 @@ export default function FeatureScroll() {
               {/* Miniature UI Exam Mockup */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2.5 mt-2">
                 {/* Title */}
-                <div className="flex justify-between items-center bg-white border border-slate-150 rounded-lg px-2.5 py-1.5 shadow-sm text-[9px] font-bold">
+                <div className="flex justify-between items-center bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm text-[9px] font-bold">
                   <span className="text-slate-800">JEE MOCK TEST-04</span>
                   <span className="font-mono text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">01:58 LEFT</span>
                 </div>
 
                 {/* Q Panel */}
-                <div className="bg-white border border-slate-150 rounded-lg p-2.5 shadow-sm space-y-2">
+                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-sm space-y-2">
                   <p className="text-[9.5px] text-slate-800 font-bold leading-normal">
                     Q4. Restore force F = -kx. If amplitude is doubled, which parameter is unchanged?
                   </p>
@@ -211,15 +211,15 @@ export default function FeatureScroll() {
                 </div>
 
                 {/* Visual guidelines to fill the vertical gap and enrich the mock representation */}
-                <div className="bg-white border border-slate-150 rounded-lg p-2.5 shadow-sm text-[8.5px] text-slate-500 font-semibold space-y-1">
+                <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-sm text-[8.5px] text-slate-500 font-semibold space-y-1">
                   <div className="font-bold text-slate-700 uppercase tracking-widest text-[8px] border-b border-slate-100 pb-0.5 flex items-center justify-between">
                     <span>Testing Protocol</span>
-                    <span className="text-teal-650 animate-pulse flex items-center gap-1 font-extrabold">
+                    <span className="text-teal-600 animate-pulse flex items-center gap-1 font-extrabold">
                       <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
                       Protocol Active
                     </span>
                   </div>
-                  <p className="leading-snug">1. Responses are auto-saved on clicking <span className="font-bold text-teal-650">Save & Next</span>.</p>
+                  <p className="leading-snug">1. Responses are auto-saved on clicking <span className="font-bold text-teal-600">Save & Next</span>.</p>
                   <p className="leading-snug">2. Server-side validations verify timestamps securely.</p>
                 </div>
 
@@ -260,7 +260,7 @@ export default function FeatureScroll() {
               <button className="bg-slate-100 border border-slate-200 px-2 py-1.5 rounded hover:bg-slate-200 text-slate-700 cursor-pointer tactile-press flex-1 text-center">
                 Clear
               </button>
-              <button className="bg-emerald-600 border border-emerald-700 text-white px-2.5 py-1.5 rounded shadow-sm hover:bg-emerald-750 cursor-pointer tactile-press flex-2 text-center">
+              <button className="bg-emerald-600 border border-emerald-700 text-white px-2.5 py-1.5 rounded shadow-sm hover:bg-emerald-700 cursor-pointer tactile-press flex-2 text-center">
                 Save & Next
               </button>
             </div>
@@ -273,7 +273,7 @@ export default function FeatureScroll() {
           >
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-teal-650" />
+                <BarChart3 className="w-4 h-4 text-teal-600" />
                 <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Database Telemetry</span>
               </div>
               
@@ -332,7 +332,7 @@ export default function FeatureScroll() {
               </div>
 
               {/* Chat Simulation */}
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-150 space-y-1.5 max-h-[80px] overflow-hidden text-[9px] font-medium text-slate-600 leading-tight">
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5 max-h-[80px] overflow-hidden text-[9px] font-medium text-slate-600 leading-tight">
                 <div>
                   <span className="font-bold text-teal-600">Rahul S.</span> Is torque expression zero under net frame shift?
                 </div>
