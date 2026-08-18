@@ -62,15 +62,8 @@ export async function POST(request) {
 
     const durationSeconds = ((durationMinutes || 180) * 60) - (secondsRemaining || 0)
 
-    // Create admin client to bypass RLS for attempts and ensure profile exists
-    const { createClient: createAdminClient } = require('@supabase/supabase-js')
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
-
     // Ensure profile exists to prevent Foreign Key constraint violations
-    const { error: profileError } = await adminSupabase.from('profiles').upsert({ 
+    const { error: profileError } = await supabase.from('profiles').upsert({ 
       id: user.id, 
       email: user.email || '',
       full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student'
@@ -78,8 +71,8 @@ export async function POST(request) {
 
     if (profileError) console.warn('[GRADE API] Profile upsert warning:', profileError.message)
 
-    // Insert attempt securely using admin client
-    const { data: attempt, error: insertError } = await adminSupabase
+    // Insert attempt securely
+    const { data: attempt, error: insertError } = await supabase
       .from('test_attempts')
       .insert([{
         user_id: user.id,
@@ -108,7 +101,7 @@ export async function POST(request) {
 
       if (earnedXp > 0) {
         // Fetch current stats
-        const { data: profile } = await adminSupabase.from('profiles').select('xp, streak').eq('id', user.id).single()
+        const { data: profile } = await supabase.from('profiles').select('xp, streak').eq('id', user.id).single()
         
         const newXp = (profile?.xp || 0) + earnedXp
         const newStreak = (profile?.streak || 0) + 1 // Simply incrementing streak for demo purposes
@@ -119,7 +112,7 @@ export async function POST(request) {
         if (newXp > 5000) badge = 'Gold'
         if (newXp > 10000) badge = 'Platinum'
         
-        await adminSupabase.from('profiles').update({
+        await supabase.from('profiles').update({
           xp: newXp,
           streak: newStreak,
           rank_badge: badge,
