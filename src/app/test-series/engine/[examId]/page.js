@@ -32,7 +32,26 @@ export default async function CbtEnginePage({ params }) {
       .single()
       
     if (exam) {
-      examData = exam
+      // SECURITY PATCH: Strip correct answers and explanations before sending to client
+      let sanitizedQuestions = []
+      if (typeof exam.questions === 'string') {
+        try { sanitizedQuestions = JSON.parse(exam.questions) } catch (e) { sanitizedQuestions = [] }
+      } else if (Array.isArray(exam.questions)) {
+        sanitizedQuestions = exam.questions
+      }
+
+      examData = {
+        ...exam,
+        questions: sanitizedQuestions.map(q => {
+          const safeQ = { ...q }
+          delete safeQ.correct_option_index
+          delete safeQ.correctAnswer
+          delete safeQ.solution_explanation
+          delete safeQ.explanation
+          return safeQ
+        })
+      }
+
       const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
 
       if (isPremium) {
