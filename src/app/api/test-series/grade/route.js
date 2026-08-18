@@ -81,7 +81,7 @@ export async function POST(request) {
 
     if (insertError) {
       console.error('Failed to insert test attempt:', insertError)
-      return NextResponse.json({ error: 'Failed to record test attempt. Please contact support.' }, { status: 500 })
+      return NextResponse.json({ error: `Database rejection: ${insertError.message} / Code: ${insertError.code}` }, { status: 500 })
     }
 
     // --- GAMIFICATION ENGINE: Calculate and Award XP ---
