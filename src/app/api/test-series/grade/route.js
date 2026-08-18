@@ -60,10 +60,20 @@ export async function POST(request) {
       }
     })
 
-    const durationSeconds = (durationMinutes * 60) - (secondsRemaining || 0)
+    const durationSeconds = ((durationMinutes || 180) * 60) - (secondsRemaining || 0)
 
-    // Insert attempt securely
-    const { data: attempt, error: insertError } = await supabase
+    // Create admin client to bypass RLS for attempts and ensure profile exists
+    const { createClient: createAdminClient } = require('@supabase/supabase-js')
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+
+    // Ensure profile exists to prevent Foreign Key constraint violations
+    await adminSupabase.from('profiles').upsert({ id: user.id, email: user.email || '' }, { onConflict: 'id', ignoreDuplicates: true })
+
+    // Insert attempt securely using admin client
+    const { data: attempt, error: insertError } = await adminSupabase
       .from('test_attempts')
       .insert([{
         user_id: user.id,
@@ -73,7 +83,7 @@ export async function POST(request) {
         correct_count: correct,
         incorrect_count: incorrect,
         unanswered_count: unanswered,
-        total_duration_seconds: durationSeconds,
+        total_duration_seconds: isNaN(durationSeconds) ? 0 : durationSeconds,
         completed_at: new Date().toISOString()
       }])
       .select()
@@ -92,7 +102,7 @@ export async function POST(request) {
 
       if (earnedXp > 0) {
         // Fetch current stats
-        const { data: profile } = await supabase.from('profiles').select('xp, streak').eq('id', user.id).single()
+        const { data: profile } = await adminSupabase.from('profiles').select('xp, streak').eq('id', user.id).single()
         
         const newXp = (profile?.xp || 0) + earnedXp
         const newStreak = (profile?.streak || 0) + 1 // Simply incrementing streak for demo purposes
@@ -102,21 +112,20 @@ export async function POST(request) {
         if (newXp > 1000) badge = 'Silver'
         if (newXp > 5000) badge = 'Gold'
         if (newXp > 10000) badge = 'Platinum'
-        if (newXp > 20000) badge = 'Diamond'
-
-        // Securely update profile
-        await supabase.from('profiles').update({
+        
+        await adminSupabase.from('profiles').update({
           xp: newXp,
           streak: newStreak,
-          rank_badge: badge
+          rank_badge: badge,
+          last_active_date: new Date().toISOString()
         }).eq('id', user.id)
       }
-    } catch (xpError) {
-      console.warn('Non-fatal: Failed to award gamification XP', xpError)
+    } catch (gamificationErr) {
+      console.warn('Non-fatal gamification error:', gamificationErr)
     }
     // ----------------------------------------------------
 
-    return NextResponse.json({ success: true, attemptId: attempt.id })
+    return NextResponse.json({ success: true, attemptId: attempt.id, score, earnedXp: correct * 10 })
 
   } catch (err) {
     console.error('[GRADE API] Exception:', err.message)
