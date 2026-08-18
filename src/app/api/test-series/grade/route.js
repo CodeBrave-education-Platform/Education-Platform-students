@@ -70,7 +70,13 @@ export async function POST(request) {
     )
 
     // Ensure profile exists to prevent Foreign Key constraint violations
-    await adminSupabase.from('profiles').upsert({ id: user.id, email: user.email || '' }, { onConflict: 'id', ignoreDuplicates: true })
+    const { error: profileError } = await adminSupabase.from('profiles').upsert({ 
+      id: user.id, 
+      email: user.email || '',
+      full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Student'
+    }, { onConflict: 'id', ignoreDuplicates: true })
+
+    if (profileError) console.warn('[GRADE API] Profile upsert warning:', profileError.message)
 
     // Insert attempt securely using admin client
     const { data: attempt, error: insertError } = await adminSupabase
