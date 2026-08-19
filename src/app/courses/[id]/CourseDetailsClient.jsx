@@ -224,7 +224,7 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#F8FAFC] dark:bg-zinc-950 font-sans text-slate-800 dark:text-zinc-200">
+    <div className="min-h-[100dvh] bg-[#F8FAFC] dark:bg-zinc-950 font-sans text-slate-800 dark:text-zinc-200 pb-20 md:pb-0">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       {/* Premium Glassmorphic Top Navbar */}

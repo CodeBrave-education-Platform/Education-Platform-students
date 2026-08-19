@@ -107,7 +107,7 @@ export default function ProfileClient({ user, profile }) {
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-blue-500/5 dark:bg-indigo-950/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-indigo-500/5 dark:bg-zinc-950/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 flex min-h-[100dvh] pt-0 pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
+      <div className="relative z-10 flex min-h-[100dvh] pt-0 pb-20 md:pb-12 gap-6 w-full max-w-none px-0 pr-4 md:pr-6">
         
         {/* Sidebar Nav (Unified Shell UI) */}
         <aside className="w-24 bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-900/60 hidden md:flex flex-col gap-6 justify-between py-6 px-2 shrink-0 h-[calc(100dvh-62px)] sticky top-[62px] z-40">

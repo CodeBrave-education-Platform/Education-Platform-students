@@ -103,7 +103,7 @@ export default function BookCheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none pb-20 md:pb-0">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
 

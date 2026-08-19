@@ -177,7 +177,7 @@ export default function TestSeriesHubClient({
   }, [attempts])
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between select-none font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between select-none font-sans overflow-x-hidden pb-20 md:pb-0">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       
       {/* Light Theme Navbar */}

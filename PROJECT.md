@@ -1,69 +1,96 @@
-# Project: Education Platform UI Bento Grid Redesign & Database QA Audit
+# Project: Global Question Bank Architecture & Cross-Portal Mobile Overhaul
 
 ## Architecture
-- **Framework**: Next.js 16 (React 19, App Router) with Tailwind CSS
-- **Database & Auth**: Supabase PostgreSQL with PostgREST, `@supabase/ssr`, RLS policies, RPC stored procedures
-- **Integrations**: Razorpay payment gateway (Server-authoritative HMAC verification), Redis/Upstash session tracking
+- **Frameworks**:
+  - Student Portal: Next.js 16 (React 19, App Router) with Tailwind CSS (`D:\education portal`)
+  - Admin Dashboard: Next.js 15/16 (React 19, App Router) with Tailwind CSS (`D:\admin dashboard`)
+- **Database & Auth**: Supabase PostgreSQL with PostgREST, `@supabase/ssr`, RLS policies, PostgreSQL triggers, JSON sync backward compatibility
 - **Testing**: Playwright test runner (`@playwright/test`)
+- **Key Modules**:
+  - Central Question Bank (`public.question_bank`)
+  - Junction Tables (`public.exam_questions`, `public.assessment_questions`)
+  - Student CBT Exam Taking Engine (`src/app/test-series/engine/[examId]`)
+  - Admin Question Bank & Test Series Studio (`src/app/admin/questions`, `src/components/test-series/tabs/ExamCompilerTab.jsx`)
+  - Responsive Cross-Portal Navigation & Grids (`Navbar.jsx`, `MobileBottomNav.jsx`, `AdminLayoutShell.jsx`, Admin data tables)
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Bento Grid Courses Catalog | Modern asymmetrical card-based grid with uncropped 16:9/4:3 thumbnails, hover lift, subject filters, clean typography | M1 | Survey UI |
-| 2 | Bento Grid Test Packages Hub | Asymmetrical Bento cards for CBT test series with drill/mock stats, prominent artwork without dark obscuring gradients, expandable exam rosters | M1 | Survey UI |
-| 3 | Bento Grid Live Batches Catalog | High-impact cards with batch thumbnails, live badge, seat progress bar, schedule chips, syllabus accordion | M1 | Survey UI |
-| 4 | Dashboard Bento & Hydration Fixes | Modern Bento cards in Student/Teacher Dashboard tabs, removal of `|| true` fake enrollment, SSR hydration date fixes | M1 | Survey UI |
-| 5 | Tailwind Token Normalization | Fix all invalid Tailwind color tokens (`text-slate-905`, `bg-indigo-650`, `text-emerald-650`, etc.) across all components | M1 | Survey UI |
-| 6 | Database Schema Integrity Migration | Create SQL migration fixing FK relations (`courses.instructor_id` -> `profiles`, `invoices.batch_id` -> `batches`), missing columns (`profiles.xp/streak/rank_badge`, `assessments.batch_id/windows`), and `course_files` table | M2 | Survey DB |
-| 7 | Next.js API Routes QA Fixes | Align columns (`user_id`/`profile_id`), fix status casing ('ACTIVE' vs 'active'), server-authoritative grading, secure payment onboarding | M2 | Survey DB |
-| 8 | Missing RLS Policies & Security | Ensure strict RLS policies on `invoices`, `test_attempts`, `enrollments`, `courses`, `course_files` with service-role webhook bypass | M2 | Survey DB |
-| 9 | Simulated Test Submission Verification | Validate `/api/test-series/grade` and Server Action blind grading without FK constraint violations or 500 errors | M3 | Survey QA |
-| 10 | Course & Batch Enrollment Verification | Validate `/api/razorpay/verify` and database insertion with invoice creation and profile access | M3 | Survey QA |
-| 11 | Bento UI Responsiveness & Hydration E2E | Playwright E2E verification of Bento Grid layout, uncropped thumbnails, viewport breakpoints, and clean console | M3 | Survey QA |
-| 12 | Comprehensive QA Bug Summary Documentation | Publish complete Markdown summary `DATABASE_QA_AND_UI_AUDIT_REPORT.md` documenting all audited components, root causes, SQL migrations, and verified fixes | M4 | ORIGINAL_REQUEST §5 |
+| 1 | Centralized Question Bank Schema | `public.question_bank` table with content, options, correct answers, explanation, subject, tags, difficulty, format, latex/images | M1 | Survey DB |
+| 2 | Relational Junction Tables | `public.exam_questions` and `public.assessment_questions` with marks, negative marks, sort order, and section tagging | M1 | Survey DB |
+| 3 | Zero-Data-Loss Data Migration | Extract existing questions from `test_exams.questions` and `test_questions` into `question_bank` preserving all original UUIDs for 66 student attempts | M1 | Survey DB |
+| 4 | Live Propagation Sync Trigger | PostgreSQL trigger `sync_test_exams_questions_from_bank()` ensuring changes in `question_bank` propagate live to all linked exams & maintain JSON backward compatibility | M1 | Survey DB |
+| 5 | Admin Question Bank Studio | CRUD, filtering by subject/tag/difficulty, LaTeX live preview, and search interface in Admin Dashboard (`/admin/questions`) | M2 | Survey Admin |
+| 6 | Admin Exam Compiler Junction Integration | Select, assemble, and order questions from `question_bank` into test packages via `exam_questions` junction table (`/admin/test-series`) | M2 | Survey Admin |
+| 7 | Admin Data Grids Mobile Degradation | Responsive card layouts for wide tabular data grids (`StudentRelationshipClient`, `InvoiceAuditClient`, `OrderFulfillmentClient`) on mobile screens | M2 | Survey Admin |
+| 8 | Admin Mobile Navigation Fixes | Auto-closing mobile sidebar drawer on navigation clicks and responsive toolbar layout in `AdminLayoutShell.jsx` | M2 | Survey Admin |
+| 9 | Mobile Bottom Sheet Question Palette | Swipeable, filterable Framer Motion bottom sheet for question jumping on mobile viewports (<1024px) replacing rigid 320px desktop sidebar | M3 | Survey CBT |
+| 10 | Ergonomic Option Selection & Multi-Format | Option cards with letter badges (A/B/C/D), tactile active press states, single MCQ, MSQ multi-select, and numerical on-screen keypads | M3 | Survey CBT |
+| 11 | Sticky Header & Persistent Timer | 56px sticky top header with compact timer, question status badge, and dropdown menu for tools (calculator, scratchpad, clear) | M3 | Survey CBT |
+| 12 | Responsive KaTeX & Image Scaling | Formula containment (`max-w-full overflow-x-auto`) and image scaling to guarantee zero illegal horizontal page scrolling | M3 | Survey CBT |
+| 13 | Touch-Enabled HTML5 Scratchpad & Calculator | Canvas supporting touch events (`onTouchStart`, `onTouchMove`, `onTouchEnd`) with high-DPI scaling, and responsive calculator modal | M3 | Survey CBT |
+| 14 | Overlay Suppression & Offline Persistence | Hide `MobileBottomNav` and `AIAssistant` on `/test-series/engine/` routes; debounced IndexedDB persistence for offline/reload survival | M3 | Survey CBT |
+| 15 | Student Portal Top Navbar Reliability | Gracefully handle missing `user` prop in `Navbar.jsx` so top navigation renders on `/batches`, `/courses`, `/books`, `/policies` | M4 | Survey Admin |
+| 16 | Bottom Navigation Spacing Pass | Add `pb-20 md:pb-0` bottom padding across Student Portal pages to prevent content occlusion under `MobileBottomNav` | M4 | Survey Admin |
+| 17 | Next.js SSR Hydration Remediation | Guard `localStorage`, `window.navigator`, and localized date formatting against SSR/client mismatches | M4 | Survey Admin |
+| 18 | Multi-Viewport E2E Testing & Forensic Audit | Playwright E2E verification across mobile viewports (320px–768px), Question Bank junction updates, build verification, and forensic audit | M5 | Survey QA |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Bento Grid UI Redesign | Courses, Test Packages, Batches, Dashboard Bento layout, thumbnail uncropping, Tailwind tokens & hydration fixes | none | DONE |
-| M2 | Database Schema & API QA Fixes | SQL migration (14_schema_integrity_and_qa_patch.sql), API route column alignments, RLS policies, query bug fixes | none | DONE |
-| M3 | Database Health & E2E Testing Suite | Playwright E2E suites for Bento UI, Test Submissions, Course Enrollments, and database connection health | M1, M2 | DONE |
-| M4 | Comprehensive QA Audit Documentation | Full documentation of bugs found, root causes, migrations, code fixes, and empirical test outcomes | M3 | DONE |
+| M1 | Database Question Bank & Zero-Loss Migration | SQL migration (`15_question_bank_and_junction_tables.sql`), tables (`question_bank`, `exam_questions`, `assessment_questions`), data extraction of all existing questions with UUID preservation, sync trigger | none | IN_PROGRESS |
+| M2 | Admin Dashboard Question Bank & Mobile Grids | Question Bank Studio (`/admin/questions`), Exam Compiler junction linking (`/admin/test-series`), mobile card degradation for student/invoice/order tables, mobile sidebar auto-close | M1 | PLANNED |
+| M3 | Student Portal CBT Exam Engine Mobile Overhaul | Mobile bottom sheet question palette, ergonomic option cards with A/B/C/D badges, sticky timer header, touch scratchpad, responsive KaTeX formulas, overlay suppression, IndexedDB auto-save | M1 | PLANNED |
+| M4 | Cross-Portal Navigation Polish & Hydration Fixes | `Navbar.jsx` fallback for missing user prop, `pb-20` bottom padding on student pages, SSR hydration mismatch fixes | M2, M3 | PLANNED |
+| M5 | E2E Testing, Build Verification & Forensic Audit | Playwright E2E test suite (mobile viewports, Question Bank junction updates, navbar rendering), dual Next.js build verification, forensic audit | M1, M2, M3, M4 | PLANNED |
 
 ## Interface Contracts
-### `courses` Table ↔ `profiles` Table
-- `courses.instructor_id` UUID REFERENCES `public.profiles(id)` ON DELETE SET NULL
-- `courses.status` VARCHAR(20) DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived'))
-- `courses.badge` VARCHAR(50)
-- `courses.thumbnail_url` TEXT
+### `public.question_bank`
+- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- `subject` VARCHAR(50) NOT NULL
+- `tags` TEXT[] DEFAULT '{}'
+- `difficulty` VARCHAR(20) DEFAULT 'medium' CHECK (difficulty IN ('easy', 'medium', 'hard'))
+- `type` VARCHAR(20) DEFAULT 'mcq' CHECK (type IN ('mcq', 'multi_mcq', 'numerical', 'matrix_match'))
+- `content` TEXT NOT NULL
+- `diagram_url` TEXT
+- `options` JSONB NOT NULL DEFAULT '[]'::jsonb
+- `correct_answer` TEXT NOT NULL
+- `explanation` TEXT
+- `created_at` TIMESTAMPTZ DEFAULT now()
+- `updated_at` TIMESTAMPTZ DEFAULT now()
 
-### `invoices` Table ↔ `batches` & `test_packages`
-- `invoices.user_id` UUID REFERENCES `public.profiles(id)` ON DELETE CASCADE
-- `invoices.course_id` UUID REFERENCES `public.courses(id)` ON DELETE SET NULL
-- `invoices.batch_id` UUID REFERENCES `public.batches(id)` ON DELETE SET NULL
-- `invoices.package_id` UUID REFERENCES `public.test_packages(id)` ON DELETE SET NULL
-- `invoices.razorpay_order_id` TEXT
-- `invoices.razorpay_payment_id` TEXT NOT NULL
-- `invoices.amount_paid` NUMERIC(10,2) NOT NULL
-- `invoices.currency` VARCHAR(10) DEFAULT 'INR'
-- `invoices.status` VARCHAR(20) DEFAULT 'success' CHECK (status IN ('success', 'pending', 'failed', 'refunded'))
+### `public.exam_questions` (Junction Table)
+- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- `exam_id` UUID NOT NULL REFERENCES public.test_exams(id) ON DELETE CASCADE
+- `question_id` UUID NOT NULL REFERENCES public.question_bank(id) ON DELETE CASCADE
+- `order_index` INTEGER NOT NULL DEFAULT 1
+- `section` VARCHAR(50) DEFAULT 'General'
+- `marks_positive` NUMERIC(4,2) DEFAULT 4.00
+- `marks_negative` NUMERIC(4,2) DEFAULT 1.00
+- UNIQUE(exam_id, question_id)
 
-### CBT Exam Grading API Contract (`POST /api/test-series/grade`)
-- Request Body: `{ examId: string, answers: Record<string, any>, secondsRemaining: number, durationMinutes: number }`
-- Output: `{ success: true, score: number, totalMarks: number, percentage: number, correctCount: number, incorrectCount: number, unattemptedCount: number, accuracy: number, attemptId: string, newStreak: number, newXp: number, rankBadge: string }`
-
-### Payment Verification API Contract (`POST /api/razorpay/verify`)
-- Request Body: `{ razorpay_order_id: string, razorpay_payment_id: string, razorpay_signature: string, item_type: 'course'|'batch'|'package'|'book', item_id: string, amount: number, book_id?: string }`
-- Output: `{ success: true, message: string, invoice_id: string, item_type: string, item_id: string }`
+### `public.assessment_questions` (Junction Table)
+- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- `assessment_id` UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE
+- `question_id` UUID NOT NULL REFERENCES public.question_bank(id) ON DELETE CASCADE
+- `order_index` INTEGER NOT NULL DEFAULT 1
+- `marks_positive` NUMERIC(4,2) DEFAULT 1.00
+- `marks_negative` NUMERIC(4,2) DEFAULT 0.00
+- UNIQUE(assessment_id, question_id)
 
 ## Code Layout
-- `src/app/courses/page.jsx`: Course catalog page with Bento Grid
-- `src/app/test-series/TestSeriesHubClient.jsx`: Test series hub with Bento Grid
-- `src/app/batches/page.jsx`: Cohort batches catalog with Bento Grid
-- `src/app/dashboard/DashboardClient.jsx`: Student & Instructor dashboard with Bento Grids & hydration safety
-- `src/app/api/test-series/grade/route.js`: Server-authoritative CBT grading
-- `src/app/api/razorpay/verify/route.js`: Server-authoritative payment verification & onboarding
-- `src/app/api/razorpay/order/route.js`: Razorpay order generation
-- `supabase/migrations/14_schema_integrity_and_qa_patch.sql`: Schema integrity, FKs, gamification columns, and RLS policies
-- `tests/bento-ui.spec.js`: Playwright E2E suite for Bento UI layouts and responsiveness
-- `tests/database-health.spec.js`: Playwright E2E suite for Database health, test grading, and enrollments
+- `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql`: Central Question Bank & junction SQL migration
+- `D:\admin dashboard\src\app\admin\questions\QuestionBankClient.jsx`: Question Bank CRUD Studio
+- `D:\admin dashboard\src\components\test-series\tabs\ExamCompilerTab.jsx`: Exam Compiler with junction linking
+- `D:\admin dashboard\src\app\admin\students\StudentRelationshipClient.jsx`: Responsive student management with mobile card view
+- `D:\admin dashboard\src\app\admin\invoices\InvoiceAuditClient.jsx`: Responsive invoice audit table with mobile card view
+- `D:\admin dashboard\src\app\admin\books\orders\OrderFulfillmentClient.jsx`: Responsive order fulfillment table with mobile card view
+- `D:\admin dashboard\src\components\AdminLayoutShell.jsx`: Responsive admin sidebar with auto-close on mobile
+- `D:\education portal\src\app\test-series\engine\[examId]\CbtEngineClient.jsx`: Redesigned mobile CBT Exam taking engine
+- `D:\education portal\src\components\navigation\MobileBottomNav.jsx`: Mobile bottom nav with route exclusion on CBT engine
+- `D:\education portal\src\components\AIAssistant.jsx`: AI Assistant widget with route exclusion on CBT engine
+- `D:\education portal\src\components\KatexRenderer.jsx`: Responsive KaTeX formula wrapper
+- `D:\education portal\src\components\Navbar.jsx`: Top navigation with fallback for unauthenticated/prop-less pages
+- `D:\education portal\src\app\api\test-series\grade\route.js`: Server-authoritative grading with relational junction support
+- `D:\education portal\tests\mobile-cbt-and-qb.spec.js`: Playwright E2E test suite for mobile CBT & Question Bank
+

@@ -1,18 +1,40 @@
-# Original User Request
+﻿# Original User Request
 
-## Initial Request — 2026-08-18T14:14:17Z
+## 2026-08-19T18:28:14Z
 
-You are the Project Orchestrator for this workspace.
+Architect a global, independent Question Bank system that integrates seamlessly into Test Packages via robust SQL migrations (ensuring zero data loss of existing questions). Furthermore, perform a massive mobile UI/UX optimization pass across both the Admin and Student portals, completely redesigning the CBT Exam Engine's mobile experience. Resolve any systemic flaws discovered during this architectural shift.
 
-Your working directory is: d:\education portal\.agents\orchestrator_1\
-The original user request is located at: d:\education portal\.agents\ORIGINAL_REQUEST.md
-The project root workspace is: d:\education portal
+Working directories:
+- D:\education portal (Student Portal)
+- D:\admin dashboard (Admin Dashboard)
 
-Mission:
-1. Redesign the display grids for "Test Packages" and "Courses" across the platform using a modern Bento Grid UI layout (asymmetrical, card-based UI with hover states, clean typography, fully responsive on mobile and desktop). Ensure thumbnails are prominently and clearly visible without awkward cropping. Ensure no React hydration errors or mapping key warnings.
-2. Perform a comprehensive system-wide QA audit of all database connections (Next.js API routes and Supabase client calls) verifying read/write operations succeed without constraint violations, 500 errors, or silent failures.
-3. Proactively fix any broken queries, missing RLS policies, or database connection issues encountered, writing necessary SQL migrations or code fixes.
-4. Verify database health (e.g. simulated test submission without FK errors, course enrollment API route execution).
-5. Document all bugs found and fixed in a markdown summary.
+Integrity mode: development
 
-Please maintain progress in d:\education portal\.agents\orchestrator_1\progress.md and d:\education portal\.agents\orchestrator_1\BRIEFING.md. Dispatch subagents to explore, implement, test, and verify. Report back when all requirements are fully implemented and verified.
+## Requirements
+
+### R1. Global Question Bank & Database Migration
+Decouple questions from individual exams. Implement a central  Question Bank in the Admin Dashboard where questions can be created, tagged, and managed independently. 
+- Write strict Supabase SQL migrations to create junction tables (e.g., exam_questions).
+- **CRITICAL:** Existing hardcoded questions must be cleanly migrated into the new global bank without losing data. 
+- Updates to a question in the global bank must instantly reflect in all linked exams.
+
+### R2. CBT Exam Engine Mobile Overhaul (Critical)
+Completely redesign the mobile UI/UX of the Student Portal's CBT (Computer Based Testing) Exam Engine. 
+- Implement ergonomic, mobile-first paradigms (e.g., a bottom sheet or highly accessible collapsible menu for jumping between questions).
+- Ensure highly tap-friendly option buttons, persistent visible timers, and perfectly responsive math/image rendering. Horizontal scrolling is strictly prohibited unless inside a specific math formula block.
+
+### R3. Cross-Portal Mobile Optimization & Flaw Resolution
+Audit and optimize both the Admin Dashboard and the Student Portal for mobile viewports (phones and tablets). 
+- Navigation sidebars and data grids must degrade gracefully into mobile-friendly menus and cards.
+- Actively hunt for and resolve any database logic flaws, constraint errors, or Next.js hydration issues caused by the Question Bank architectural shift.
+
+## Acceptance Criteria
+
+### Functionality & Architecture
+- [ ] Running the SQL migration cleanly extracts existing questions into the new global bank and links them via a junction table.
+- [ ] Modifying a question in the bank updates it everywhere it is referenced.
+- [ ] Adding a new question to the bank and linking it to a test package renders perfectly in the student portal.
+
+### Mobile UI/UX Verification
+- [ ] E2E or visual inspection confirms the CBT Exam Engine is flawless on mobile viewports (iPhone/Android dimensions) with ergonomic navigation.
+- [ ] Navigation components across both portals function cleanly on small screens without layout breakage.

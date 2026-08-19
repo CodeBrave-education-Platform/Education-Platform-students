@@ -123,7 +123,7 @@ export default async function PolicyPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-20 md:pb-0">
       <Navbar />
       
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12 md:py-20">

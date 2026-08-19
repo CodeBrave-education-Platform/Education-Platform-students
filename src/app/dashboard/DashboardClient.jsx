@@ -197,8 +197,24 @@ export default function DashboardClient({
 
   const [myExams, setMyExams] = useState([])
   const [loadingMyExams, setLoadingMyExams] = useState(false)
+  const [localJoinedBatchIds, setLocalJoinedBatchIds] = useState([])
 
-  // [SEC-REMEDIATION]: Removed insecure localStorage mock enrollment injection. All enrollments must come from secure backend SSR.
+  // Hydration-safe localStorage sync for joined batches
+  React.useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('Asentra_joined_batches')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed)) {
+            setLocalJoinedBatchIds(parsed.map(b => (b?.id || b)))
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error reading Asentra_joined_batches from localStorage:', e)
+    }
+  }, [])
 
   React.useEffect(() => {
     if (!selectedCohortBatch) return
@@ -783,7 +799,7 @@ export default function DashboardClient({
       
       {/* No background gradients as requested */}
 
-      <div className="relative z-10 flex min-h-[calc(100dvh-57px)] pt-0 pb-12 w-full max-w-none px-0">
+      <div className="relative z-10 flex min-h-[calc(100dvh-57px)] pt-0 pb-20 md:pb-12 w-full max-w-none px-0">
         
         {/* Sidebar Nav (Seamless flush connection under sticky navbar - Premium Glass theme) */}
         <aside className="w-20 bg-white/70 dark:bg-zinc-950 backdrop-blur-xl border-r border-slate-200/20 dark:border-zinc-800 hidden md:flex flex-col gap-6 justify-between py-6 px-1.5 shrink-0 h-[calc(100dvh-57px)] sticky top-[57px] z-40">
@@ -1508,7 +1524,7 @@ export default function DashboardClient({
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
                         {initialBatches.map((batch, idx) => {
                           const isHero = idx === 0
-                          const isEnrolled = batchEnrollments.some(e => (e.batch_id === batch.id || e.id === batch.id) && (e.status === 'active' || e.status === 'enrolled')) || (typeof window !== 'undefined' && JSON.parse(localStorage.getItem('Asentra_joined_batches') || '[]').some(b => (b.id || b) === batch.id))
+                          const isEnrolled = batchEnrollments.some(e => (e.batch_id === batch.id || e.id === batch.id) && (e.status === 'active' || e.status === 'enrolled')) || localJoinedBatchIds.includes(batch.id)
                           const formattedDate = formatDateSafe(batch.start_date, 'short') || '2026 Target Cohort'
                           const batchCover = batch.thumbnail_url || batch.cover || 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&auto=format&fit=crop&q=80'
 

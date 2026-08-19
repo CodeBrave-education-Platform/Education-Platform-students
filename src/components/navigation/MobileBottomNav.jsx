@@ -13,7 +13,10 @@ export default function MobileBottomNav() {
   // List of paths/routes where the bottom navigation bar must be hidden
   const hideOnPaths = ['/', '/login', '/auth']
   const isHidden = 
+    !pathname ||
     hideOnPaths.includes(pathname) || 
+    pathname.startsWith('/test-series/engine') ||
+    pathname.includes('/test-series/engine') ||
     pathname.includes('/exams/') ||
     pathname.startsWith('/auth/')
 

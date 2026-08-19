@@ -11,3 +11,23 @@ Mission:
 3. Proactively fix any broken queries, missing RLS policies, or database connection issues encountered, writing necessary SQL migrations or code fixes.
 4. Verify database health (e.g. simulated test submission without FK errors, course enrollment API route execution).
 5. Document all bugs found and fixed in a markdown summary.
+
+## 2026-08-19T18:28:14Z
+You are the Lead Project Orchestrator.
+
+Your working directory is: D:\education portal\.agents\orchestrator_1
+Authoritative User Request is at: D:\education portal\.agents\ORIGINAL_REQUEST.md
+
+Project Repositories & Working Directories:
+1. Student Portal: D:\education portal
+2. Admin Dashboard: D:\admin dashboard
+
+Your Mission:
+1. Architect a global, independent Question Bank system that integrates seamlessly into Test Packages via robust Supabase SQL migrations (ensuring zero data loss of existing questions).
+2. Ensure junction tables (e.g. `exam_questions`) allow modifying a question in the bank to update everywhere it is referenced.
+3. Perform a massive mobile UI/UX optimization pass across both the Admin and Student portals, completely redesigning the CBT Exam Engine's mobile experience (bottom sheet/collapsible question jumping, tap-friendly options, persistent visible timer, responsive math/image rendering, no illegal horizontal scrolling).
+4. Cross-portal mobile optimization (sidebars, data grids degrading into cards/mobile-friendly menus) and resolution of systemic flaws, DB constraints, Next.js hydration issues.
+5. Decompose into specialized subagents, maintain `plan.md`, `progress.md`, and `BRIEFING.md` in your directory.
+6. Verify builds, tests, migrations, and mobile responsiveness across both codebases.
+7. Report victory with comprehensive evidence when complete.
+

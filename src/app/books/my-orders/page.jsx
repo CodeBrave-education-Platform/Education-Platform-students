@@ -51,7 +51,7 @@ export default function MyBookOrdersPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col select-none pb-20 md:pb-0">
       <Navbar />
 
       <main className="max-w-4xl mx-auto w-full px-6 py-10 flex-1 space-y-8">

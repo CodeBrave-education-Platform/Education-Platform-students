@@ -9,11 +9,7 @@ export default function KatexRenderer({ content, className = '' }) {
 
   // Convert plain text math notation (e.g. lim (x->0), dy/dx, integral) into LaTeX if not already LaTeX
   const formatLatexString = (text) => {
-    if (typeof text !== 'string') return String(text);
-
-    if (text.includes('\\') || text.includes('$')) {
-      return text;
-    }
+    if (typeof text !== 'string') return String(text ?? '');
 
     let formatted = text
       .replace(/lim\s*\(\s*x\s*->\s*0\s*\)/gi, '\\lim_{x \\to 0}')
@@ -30,10 +26,26 @@ export default function KatexRenderer({ content, className = '' }) {
   const formattedContent = formatLatexString(content);
 
   const renderMathContent = () => {
-    const parts = formattedContent.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\(.*?\\\)|\\\[.*?\\\])/g);
+    // Split by LaTeX delimiters ($$...$$, $...$, \(...\), \[...\]) or markdown images
+    const parts = formattedContent.split(/(!\[[^\]]*\]\([^)]+\)|\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\(.*?\\\)|\\\[.*?\\\])/g);
 
     return parts.map((part, index) => {
       if (!part) return null;
+
+      // Handle Markdown Images
+      const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (imgMatch) {
+        return (
+          <span key={index} className="block my-3 max-w-full">
+            <img 
+              src={imgMatch[2]} 
+              alt={imgMatch[1] || 'Question Diagram'} 
+              className="max-w-full h-auto rounded-lg object-contain mx-auto shadow-xs" 
+              loading="lazy"
+            />
+          </span>
+        );
+      }
 
       let isBlock = part.startsWith('$$') || part.startsWith('\\[');
       let isInline = part.startsWith('$') || part.startsWith('\\(');
@@ -55,15 +67,20 @@ export default function KatexRenderer({ content, className = '' }) {
             <span
               key={index}
               dangerouslySetInnerHTML={{ __html: html }}
-              className={isBlock ? 'block my-2 overflow-x-auto text-center' : 'inline-block px-1'}
+              className={
+                isBlock
+                  ? 'block my-2 max-w-full overflow-x-auto text-center py-1 scrollbar-none'
+                  : 'inline-block max-w-full overflow-x-auto align-middle px-0.5 scrollbar-none'
+              }
             />
           );
         } catch (e) {
-          return <span key={index} className="font-mono text-amber-700">{part}</span>;
+          return <span key={index} className="font-mono text-amber-700 break-all">{part}</span>;
         }
       }
 
-      if (part.includes('\\lim') || part.includes('\\frac') || part.includes('\\int') || part.includes('\\vec')) {
+      // Check for standalone LaTeX tokens without delimiters
+      if (/\\(lim|frac|int|vec|sqrt|sum|prod|alpha|beta|gamma|theta|lambda|Delta|delta|pi|sigma|omega|Omega|mu|epsilon|rho|tau|phi|psi|nabla|partial|approx|pm|times|cdot|le|ge|neq|in|infty|subset|cap|cup)/.test(part)) {
         try {
           const html = katex.renderToString(part, {
             displayMode: false,
@@ -73,7 +90,7 @@ export default function KatexRenderer({ content, className = '' }) {
             <span
               key={index}
               dangerouslySetInnerHTML={{ __html: html }}
-              className="inline-block px-1"
+              className="inline-block max-w-full overflow-x-auto align-middle px-0.5 scrollbar-none"
             />
           );
         } catch (e) {
@@ -86,7 +103,7 @@ export default function KatexRenderer({ content, className = '' }) {
   };
 
   return (
-    <span className={`katex-wrapper leading-relaxed ${className}`}>
+    <span className={`katex-wrapper inline max-w-full leading-relaxed break-words ${className}`}>
       {renderMathContent()}
     </span>
   );

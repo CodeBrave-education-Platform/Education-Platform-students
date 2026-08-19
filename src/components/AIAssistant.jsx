@@ -1,14 +1,27 @@
 'use client'
 
 import React, { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { MessageSquare, X, Send, Sparkles, Bot } from 'lucide-react'
 
 export default function AIAssistant() {
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hello! I am your AI Study Mentor. Ask me any doubt about your current courses!' }
   ])
   const [input, setInput] = useState('')
+
+  // Suppress rendering on active exam engine pages
+  if (
+    pathname && (
+      pathname.startsWith('/test-series/engine') ||
+      pathname.includes('/test-series/engine') ||
+      pathname.includes('/exams/')
+    )
+  ) {
+    return null
+  }
 
   const handleSend = (e) => {
     e.preventDefault()
