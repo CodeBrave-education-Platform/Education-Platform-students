@@ -1,0 +1,1230 @@
+{
+  "timezoneHydration": {
+    "passed": 54,
+    "failed": 2,
+    "details": [
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "UTC",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "America/New_York",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "Europe/London",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-01-01T00:00:00.000Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "1 Jan, 2026",
+        "testedShort": "1 Jan, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "UTC",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "America/New_York",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "Europe/London",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-06-15T18:30:00.000Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "15 Jun, 2026",
+        "testedShort": "15 Jun, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "UTC",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "America/New_York",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "Europe/London",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-08-18T22:21:38.000Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "18 Aug, 2026",
+        "testedShort": "18 Aug, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "UTC",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "America/New_York",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "Europe/London",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-12-31T23:59:59.999Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "31 Dec, 2026",
+        "testedShort": "31 Dec, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "UTC",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "America/New_York",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "Europe/London",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": "1970-01-01T00:00:00.000Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "1 Jan, 1970",
+        "testedShort": "1 Jan, 1970",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "UTC",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "Asia/Kolkata",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "America/New_York",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "Pacific/Auckland",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "Europe/London",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "Asia/Tokyo",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": 1772496000000,
+        "tz": "Pacific/Honolulu",
+        "refShort": "3 Mar, 2026",
+        "testedShort": "3 Mar, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "UTC",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "Asia/Kolkata",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "America/New_York",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "Pacific/Auckland",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "Europe/London",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "Asia/Tokyo",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      },
+      {
+        "input": "2026-02-28T23:30:00.000Z",
+        "tz": "Pacific/Honolulu",
+        "refShort": "28 Feb, 2026",
+        "testedShort": "28 Feb, 2026",
+        "isMatch": true
+      }
+    ]
+  },
+  "geometryBreakpoints": {
+    "passed": 98,
+    "failed": 0,
+    "details": [
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 2,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 3,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 4,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 5,
+        "totalRows": 5,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 6,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 7,
+        "totalRows": 7,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 8,
+        "totalRows": 8,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 9,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 10,
+        "totalRows": 10,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 15,
+        "totalRows": 15,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 25,
+        "totalRows": 25,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Ultra-Narrow Mobile (320px)",
+        "width": 320,
+        "count": 50,
+        "totalRows": 50,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 2,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 3,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 4,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 5,
+        "totalRows": 5,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 6,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 7,
+        "totalRows": 7,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 8,
+        "totalRows": 8,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 9,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 10,
+        "totalRows": 10,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 15,
+        "totalRows": 15,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 25,
+        "totalRows": 25,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Standard Mobile (375px)",
+        "width": 375,
+        "count": 50,
+        "totalRows": 50,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 2,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 3,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 4,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 5,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 6,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 7,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 8,
+        "totalRows": 5,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 9,
+        "totalRows": 5,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 10,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 15,
+        "totalRows": 8,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 25,
+        "totalRows": 13,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Portrait (768px)",
+        "width": 768,
+        "count": 50,
+        "totalRows": 26,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 2,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 3,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 4,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 5,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 6,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 7,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 8,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 9,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 10,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 15,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 25,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Tablet Landscape (1024px)",
+        "width": 1024,
+        "count": 50,
+        "totalRows": 17,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 2,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 3,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 4,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 5,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 6,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 7,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 8,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 9,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 10,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 15,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 25,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Desktop HD (1280px)",
+        "width": 1280,
+        "count": 50,
+        "totalRows": 17,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 2,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 3,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 4,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 5,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 6,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 7,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 8,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 9,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 10,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 15,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 25,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "Full HD Desktop (1920px)",
+        "width": 1920,
+        "count": 50,
+        "totalRows": 17,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 0,
+        "totalRows": 0,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 1,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 2,
+        "totalRows": 1,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 3,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 4,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 5,
+        "totalRows": 2,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 6,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 7,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 8,
+        "totalRows": 3,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 9,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 10,
+        "totalRows": 4,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 15,
+        "totalRows": 6,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 25,
+        "totalRows": 9,
+        "isOverflowing": false
+      },
+      {
+        "breakpoint": "2K / 4K Ultrawide (2560px)",
+        "width": 2560,
+        "count": 50,
+        "totalRows": 17,
+        "isOverflowing": false
+      }
+    ]
+  },
+  "thumbnailResilience": {
+    "passed": 11,
+    "failed": 0,
+    "details": [
+      {
+        "vector": "Null course",
+        "input": null,
+        "resolved": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+        "pass": true
+      },
+      {
+        "vector": "Empty string thumbnail",
+        "input": {
+          "thumbnail_url": ""
+        },
+        "resolved": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+        "pass": true
+      },
+      {
+        "vector": "Whitespace only",
+        "input": {
+          "thumbnail_url": "   "
+        },
+        "resolved": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+        "pass": true
+      },
+      {
+        "vector": "Non-string type (number)",
+        "input": {
+          "thumbnail_url": 12345
+        },
+        "resolved": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+        "pass": true
+      },
+      {
+        "vector": "Non-string type (object)",
+        "input": {
+          "thumbnail_url": {
+            "src": "pic.jpg"
+          }
+        },
+        "resolved": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
+        "pass": true
+      },
+      {
+        "vector": "Relative path",
+        "input": {
+          "thumbnail_url": "/images/physics.jpg"
+        },
+        "resolved": "/images/physics.jpg",
+        "pass": true
+      },
+      {
+        "vector": "Data URI SVG",
+        "input": {
+          "thumbnail_url": "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="
+        },
+        "resolved": "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=",
+        "pass": true
+      },
+      {
+        "vector": "Search engine redirect with mediaUrl",
+        "input": {
+          "thumbnail_url": "https://www.bing.com/images/search?q=physics&mediaurl=https%3A%2F%2Fexample.com%2Freal_pic.jpg"
+        },
+        "resolved": "https://example.com/real_pic.jpg",
+        "pass": true
+      },
+      {
+        "vector": "Search engine redirect with imgurl",
+        "input": {
+          "thumbnail_url": "https://www.google.com/imgres?imgurl=https%3A%2F%2Fcdn.study.com%2Fphoto.png&tbnid=1"
+        },
+        "resolved": "https://cdn.study.com/photo.png",
+        "pass": true
+      },
+      {
+        "vector": "Missing protocol auto-fix",
+        "input": {
+          "thumbnail_url": "cdn.education.com/thumbnails/jee_adv.png"
+        },
+        "resolved": "https://cdn.education.com/thumbnails/jee_adv.png",
+        "pass": true
+      },
+      {
+        "vector": "Malformed URL encoding with invalid % sequences",
+        "input": {
+          "thumbnail_url": "https://cdn.com/test?mediaurl=%%%BAD_ENCODING%%%"
+        },
+        "resolved": "https://cdn.com/test?mediaurl=%%%BAD_ENCODING%%%",
+        "pass": true
+      }
+    ]
+  },
+  "dataPayloadStress": {
+    "passed": 3,
+    "failed": 0,
+    "details": [
+      {
+        "test": "XSS and Script Injections in All Fields",
+        "clean": {
+          "title": "<img src=x onerror=alert(1)> Physics Advanced Pro",
+          "badge": "<iframe src=\"javascript:alert(1)\">FLAGSHIP</iframe>",
+          "instructor": "<svg onload=alert(document.cookie)> Dr. Hacker",
+          "checklistCount": 1,
+          "price": 0,
+          "rating": 5
+        },
+        "success": true
+      },
+      {
+        "test": "Massive Payload (10,000 chars non-breaking strings)",
+        "clean": {
+          "title": "SUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORDSUPERLONGWORD",
+          "badge": "",
+          "instructor": "Dr. LongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongNameLongName",
+          "checklistCount": 50,
+          "price": 0,
+          "rating": 4.9
+        },
+        "success": true
+      },
+      {
+        "test": "Totally Corrupted Types and Prototype Poisoning attempts",
+        "clean": {
+          "title": "Array instead of string",
+          "badge": "",
+          "instructor": "Faculty Team",
+          "checklistCount": 0,
+          "price": 0,
+          "rating": 4.9
+        },
+        "success": true
+      }
+    ]
+  },
+  "codebaseAudit": {
+    "passed": 4,
+    "failed": 1,
+    "details": [
+      {
+        "file": "src/app/courses/page.jsx",
+        "isDateSafe": true,
+        "isTokensClean": true,
+        "hasBentoGrid": true,
+        "hasUncroppedThumbnails": true,
+        "pass": true
+      },
+      {
+        "file": "src/app/batches/page.jsx",
+        "isDateSafe": true,
+        "isTokensClean": true,
+        "hasBentoGrid": true,
+        "hasUncroppedThumbnails": true,
+        "pass": true
+      },
+      {
+        "file": "src/app/test-series/TestSeriesHubClient.jsx",
+        "isDateSafe": true,
+        "isTokensClean": true,
+        "hasBentoGrid": true,
+        "hasUncroppedThumbnails": true,
+        "pass": true
+      },
+      {
+        "file": "src/app/dashboard/DashboardClient.jsx",
+        "isDateSafe": false,
+        "isTokensClean": true,
+        "hasBentoGrid": true,
+        "hasUncroppedThumbnails": true,
+        "pass": false
+      },
+      {
+        "file": "src/utils/dateFormat.js",
+        "isDateSafe": true,
+        "isTokensClean": true,
+        "hasBentoGrid": false,
+        "hasUncroppedThumbnails": false,
+        "pass": true
+      }
+    ]
+  },
+  "findings": [
+    "[DateFormat Edge Failure] input=null, expected=\"\", got=\"NaN\"",
+    "[DateFormat Edge Failure] input=false, expected=\"\", got=\"1 Jan, 1970\"",
+    "[Audit Warning] src/app/dashboard/DashboardClient.jsx contains unsafe locale date method: .toLocaleString(, .toLocaleString(, .toLocaleString(, .toLocaleString(, .toLocaleString(, .toLocaleString(, .toLocaleString("
+  ]
+}

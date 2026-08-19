@@ -157,15 +157,19 @@ export default function CbtEngineClient({ user, profile, exam }) {
           return
         }
 
+        const defaultDuration = (Number(exam?.duration_minutes) || 180) * 60
         const cached = await getExamState(exam.id)
-        if (cached) {
+        if (cached && typeof cached.secondsRemaining === 'number' && cached.secondsRemaining > 10) {
           setAnswers(cached.answers || {})
-          setSecondsRemaining(cached.secondsRemaining ?? exam.duration_minutes * 60)
+          setSecondsRemaining(cached.secondsRemaining)
           if (cached.markedReview) setMarkedReview(new Set(cached.markedReview))
+        } else {
+          setAnswers({})
+          setSecondsRemaining(defaultDuration)
+          setMarkedReview(new Set())
         }
       } catch (err) {
         console.warn('IndexedDB blocked or unavailable. Falling back to memory state.', err)
-        alert('Strict Privacy Mode Detected: Offline auto-save is disabled. Please ensure a stable connection before submitting.')
       } finally {
         setLoading(false)
       }

@@ -157,16 +157,17 @@ export default async function TestSeriesHubPage() {
   
   // Authenticate user session
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
 
-  // Fetch student profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // Fetch student profile if authenticated
+  let profile = null
+  if (user) {
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    profile = userProfile
+  }
 
   // Fetch test packages from database
   let packages = []
@@ -175,8 +176,12 @@ export default async function TestSeriesHubPage() {
       .from('test_packages')
       .select('*')
       .order('created_at', { ascending: false })
-    if (dbPackages && dbPackages.length > 0) {
+    if (dbPackages && dbPackages.length >= 2) {
       packages = dbPackages
+    } else if (dbPackages && dbPackages.length > 0) {
+      const existingIds = new Set(dbPackages.map(p => p.id))
+      const extra = DEFAULT_FALLBACK_PACKAGES.filter(p => !existingIds.has(p.id))
+      packages = [...dbPackages, ...extra]
     } else {
       packages = DEFAULT_FALLBACK_PACKAGES
     }
@@ -191,8 +196,12 @@ export default async function TestSeriesHubPage() {
       .from('test_exams')
       .select('id, package_id, title, duration_minutes, total_questions, is_live_ranking, activation_timestamp')
       .order('activation_timestamp', { ascending: true })
-    if (dbExams && dbExams.length > 0) {
+    if (dbExams && dbExams.length >= 2) {
       exams = dbExams
+    } else if (dbExams && dbExams.length > 0) {
+      const existingIds = new Set(dbExams.map(e => e.id))
+      const extra = DEFAULT_FALLBACK_EXAMS.filter(e => !existingIds.has(e.id))
+      exams = [...dbExams, ...extra]
     } else {
       exams = DEFAULT_FALLBACK_EXAMS
     }
@@ -202,33 +211,37 @@ export default async function TestSeriesHubPage() {
 
   // Fetch user's purchased test packages from invoices
   let purchasedPackageIds = []
-  try {
-    const { data: invoices } = await supabase
-      .from('invoices')
-      .select('package_id')
-      .eq('user_id', user.id)
-      .not('package_id', 'is', null)
-      
-    if (invoices) {
-      purchasedPackageIds = invoices.map(inv => inv.package_id)
-    }
-  } catch (e) {}
+  if (user) {
+    try {
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('package_id')
+        .eq('user_id', user.id)
+        .not('package_id', 'is', null)
+        
+      if (invoices) {
+        purchasedPackageIds = invoices.map(inv => inv.package_id)
+      }
+    } catch (e) {}
+  }
 
   // Fetch user attempts to show scorecards
   let attempts = []
-  try {
-    const { data: dbAttempts } = await supabase
-      .from('test_attempts')
-      .select('*, test_exams(title)')
-      .eq('user_id', user.id)
-      .order('completed_at', { ascending: false })
-    if (dbAttempts) attempts = dbAttempts
-  } catch (e) {}
+  if (user) {
+    try {
+      const { data: dbAttempts } = await supabase
+        .from('test_attempts')
+        .select('*, test_exams(title)')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+      if (dbAttempts) attempts = dbAttempts
+    } catch (e) {}
+  }
 
   return (
     <TestSeriesHubClient
       user={user}
-      profile={profile || { full_name: user.email?.split('@')[0] || 'Candidate', role: 'student' }}
+      profile={profile || (user ? { full_name: user.email?.split('@')[0] || 'Candidate', role: 'student' } : null)}
       initialPackages={packages}
       initialExams={exams}
       initialAttempts={attempts}

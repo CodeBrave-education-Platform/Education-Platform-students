@@ -152,8 +152,8 @@ export default function CoursesCatalogPage() {
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([])
   const [processingId, setProcessingId] = useState(null)
   const [isMounted, setIsMounted] = useState(false)
-  const [courses, setCourses] = useState([])
-  const [loadingCourses, setLoadingCourses] = useState(true)
+  const [courses, setCourses] = useState(DEFAULT_COURSES)
+  const [loadingCourses, setLoadingCourses] = useState(false)
   const [userXp, setUserXp] = useState(0)
   const supabase = createClient()
 

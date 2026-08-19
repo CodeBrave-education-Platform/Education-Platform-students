@@ -1,34 +1,91 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('CBT Exam Engine Core Loop', () => {
-  test('should allow a student to navigate questions and submit', async ({ page }) => {
-    // 1. Navigate to home and ensure it loads
-    await page.goto('/');
-    await expect(page).toHaveTitle(/ASENTRA/i);
+test.describe('CBT Exam Engine Core Loop & Question Telemetry', () => {
 
-    // Note: In a real CI environment, we would seed the Supabase database
-    // with a test user and use `page.request` to login via API to get the session cookie,
-    // or use the UI to login. 
-    // Since this is a template E2E test, we will mock the authentication state 
-    // or test public paths if applicable.
+  const targetExamUrl = '/test-series/engine/00000000-0000-0000-0000-000000000001';
 
-    // Example of navigating to a public path (like a free mock test intro)
-    // await page.goto('/learn/course-123/exams/exam-456');
-    // await expect(page.locator('text=Start Assessment')).toBeVisible();
+  const setupPageAndLaunch = async (page) => {
+    page.on('dialog', async dialog => {
+      await dialog.accept();
+    });
 
-    // The test validates that the engine doesn't crash on boot and 
-    // basic interactions (like Next/Prev question) work.
+    await page.goto(targetExamUrl, { waitUntil: 'domcontentloaded' });
     
-    // To complete this test, configure a `testUser` in Supabase Auth,
-    // intercept the Auth tokens, and write the full CBT click-path here.
+    // Wait for and click the CBT launcher button
+    const launchBtn = page.getByRole('button', { name: /Acknowledge & Launch|Launch Test Engine/i });
+    try {
+      await launchBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await launchBtn.click();
+    } catch (e) {
+      // Launcher already bypassed or not shown
+    }
+  };
+
+  test('should load CBT exam engine blueprint, questions, and palette', async ({ page }) => {
+    await setupPageAndLaunch(page);
+
+    // Verify CBT Exam Interface loads
+    const engineBadge = page.locator('span').filter({ hasText: 'NTA CBT ENGINE' }).first();
+    await expect(engineBadge).toBeVisible({ timeout: 15000 });
+
+    // Question header should be visible
+    const questionHeader = page.locator('span').filter({ hasText: /Question 1 of/i }).first();
+    await expect(questionHeader).toBeVisible({ timeout: 10000 });
+
+    // Katex math wrapper / question prompt should be visible
+    const katexWrapper = page.locator('.katex-wrapper').first();
+    await expect(katexWrapper).toBeVisible({ timeout: 10000 });
+
+    // Question palette header
+    const paletteHeader = page.locator('h4').filter({ hasText: /NTA Question Palette/i }).first();
+    await expect(paletteHeader).toBeVisible();
   });
 
-  test('offline mode should trigger indexedDB queue', async ({ page, context }) => {
-    // Simulate offline mode
-    await context.setOffline(true);
+  test('should allow student option selection and question navigation', async ({ page }) => {
+    await setupPageAndLaunch(page);
 
-    // In a real test, we would click submit while offline and verify the warning alert appears
-    // await page.getByRole('button', { name: /Submit/i }).click();
-    // await expect(page.locator('text=OFFLINE MODE')).toBeVisible();
+    // Wait for exam interface
+    const questionHeader = page.locator('span').filter({ hasText: /Question 1 of/i }).first();
+    await expect(questionHeader).toBeVisible({ timeout: 15000 });
+
+    // Option selection
+    const firstOption = page.locator('.space-y-3 button').first();
+    await expect(firstOption).toBeVisible({ timeout: 5000 });
+    await firstOption.click();
+    await page.waitForTimeout(300);
+
+    // Next Question button
+    const nextBtn = page.getByRole('button', { name: /Next Question/i });
+    await expect(nextBtn).toBeVisible();
+    await nextBtn.click();
+    await page.waitForTimeout(300);
+
+    // Verify question moved to Question 2
+    const question2Header = page.locator('span').filter({ hasText: /Question 2 of/i }).first();
+    await expect(question2Header).toBeVisible({ timeout: 5000 });
+  });
+
+  test('offline mode resilience verification', async ({ page, context }) => {
+    await setupPageAndLaunch(page);
+
+    // Verify CBT Engine loaded
+    const engineBadge = page.locator('span').filter({ hasText: 'NTA CBT ENGINE' }).first();
+    await expect(engineBadge).toBeVisible({ timeout: 15000 });
+
+    // Simulate network disconnection
+    await context.setOffline(true);
+    await page.waitForTimeout(500);
+
+    // Verify engine remains rendered without crashing
+    await expect(engineBadge).toBeVisible();
+
+    // Verify offline badge indicator
+    const offlineBadge = page.locator('text=/IndexedDB Offline Mode|Offline/i').first();
+    await expect(offlineBadge).toBeVisible({ timeout: 5000 });
+
+    // Restore network
+    await context.setOffline(false);
   });
 });
+
+

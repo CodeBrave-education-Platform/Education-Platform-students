@@ -10,7 +10,7 @@ const MONTHS_LONG = [
 ]
 
 export function formatDateSafe(dateInput, format = 'short') {
-  if (!dateInput) return ''
+  if (dateInput === null || dateInput === undefined || dateInput === '') return ''
   const d = new Date(dateInput)
   if (isNaN(d.getTime())) return String(dateInput)
 
@@ -34,7 +34,7 @@ export function formatDateSafe(dateInput, format = 'short') {
 }
 
 export function formatDateTimeSafe(dateInput) {
-  if (!dateInput) return ''
+  if (dateInput === null || dateInput === undefined || dateInput === '') return ''
   const d = new Date(dateInput)
   if (isNaN(d.getTime())) return String(dateInput)
 

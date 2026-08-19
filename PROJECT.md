@@ -26,9 +26,9 @@
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
 | M1 | Bento Grid UI Redesign | Courses, Test Packages, Batches, Dashboard Bento layout, thumbnail uncropping, Tailwind tokens & hydration fixes | none | DONE |
-| M2 | Database Schema & API QA Fixes | SQL migration (14_schema_integrity_and_qa_patch.sql), API route column alignments, RLS policies, query bug fixes | none | IN_PROGRESS |
-| M3 | Database Health & E2E Testing Suite | Playwright E2E suites for Bento UI, Test Submissions, Course Enrollments, and database connection health | M1, M2 | PLANNED |
-| M4 | Comprehensive QA Audit Documentation | Full documentation of bugs found, root causes, migrations, code fixes, and empirical test outcomes | M3 | PLANNED |
+| M2 | Database Schema & API QA Fixes | SQL migration (14_schema_integrity_and_qa_patch.sql), API route column alignments, RLS policies, query bug fixes | none | DONE |
+| M3 | Database Health & E2E Testing Suite | Playwright E2E suites for Bento UI, Test Submissions, Course Enrollments, and database connection health | M1, M2 | DONE |
+| M4 | Comprehensive QA Audit Documentation | Full documentation of bugs found, root causes, migrations, code fixes, and empirical test outcomes | M3 | DONE |
 
 ## Interface Contracts
 ### `courses` Table ↔ `profiles` Table

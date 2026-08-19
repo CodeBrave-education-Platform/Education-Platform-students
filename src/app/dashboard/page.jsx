@@ -92,7 +92,7 @@ export default async function DashboardPage(props) {
     // 2. Fetch students enrolled in courses created by this instructor
     const { data: enrollsData } = await supabase
       .from('enrollments')
-      .select('id, enrolled_at, course_id, user_id, courses!inner(instructor_id, title), profiles(full_name, email, phone)')
+      .select('id, enrolled_at, course_id, user_id, courses!inner(instructor_id, title), profiles!user_id(full_name, email, phone)')
       .eq('courses.instructor_id', user.id)
       
     initialEnrollments = enrollsData || []

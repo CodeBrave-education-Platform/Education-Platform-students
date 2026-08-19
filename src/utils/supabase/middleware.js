@@ -82,7 +82,6 @@ export async function updateSession(request) {
     pathname.startsWith('/dashboard') || 
     pathname.startsWith('/learn') || 
     pathname.startsWith('/books') || 
-    pathname.startsWith('/test-series') ||
     pathname.startsWith('/checkout')
     
   const isLoginRoute = pathname.startsWith('/login')

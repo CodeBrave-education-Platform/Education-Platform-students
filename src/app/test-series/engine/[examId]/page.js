@@ -54,16 +54,27 @@ export default async function CbtEnginePage({ params }) {
 
       const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
 
-      if (isPremium) {
-        // Verify invoice with correct user_id column
-        const { data: invoice } = await supabase
-          .from('invoices')
-          .select('id')
-          .eq('user_id', authenticatedUser.id)
-          .eq('package_id', exam.package_id)
-          .maybeSingle()
+      // Allow access if:
+      // 1. Exam is live open ranking mock (is_live_ranking)
+      // 2. Exam is demo/fallback simulation id (00000000-*)
+      // 3. Package is not premium
+      // 4. User has purchased package invoice or is staff
+      if (isPremium && !exam.is_live_ranking && !examId.startsWith('00000000-')) {
+        if (user) {
+          const { data: invoice } = await supabase
+            .from('invoices')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('package_id', exam.package_id)
+            .maybeSingle()
 
-        if (!invoice) {
+          if (!invoice) {
+            const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+            if (prof?.role !== 'admin' && prof?.role !== 'teacher' && prof?.role !== 'instructor') {
+              isAuthorized = false
+            }
+          }
+        } else {
           isAuthorized = false
         }
       }

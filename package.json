@@ -6,7 +6,15 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node tests/challenge_m2_apis.js && node tests/challenge_bento_grid_m1.js && node tests/empirical_m2_verification.mjs",
+    "test:e2e": "playwright test tests/bento-ui.spec.js tests/database-health.spec.js tests/gamification.spec.js tests/exam-engine.spec.js --project=chromium",
+    "test:e2e:all": "playwright test",
+    "test:bento": "playwright test tests/bento-ui.spec.js --project=chromium",
+    "test:db": "playwright test tests/database-health.spec.js --project=chromium",
+    "test:gamification": "playwright test tests/gamification.spec.js --project=chromium",
+    "test:exam": "playwright test tests/exam-engine.spec.js --project=chromium"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.23",

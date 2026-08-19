@@ -1,0 +1,245 @@
+{
+  "gradingEngine": {
+    "passed": 7,
+    "failed": 0,
+    "details": [
+      {
+        "testCase": "Perfect Score with String and Number Option Mix",
+        "passed": true,
+        "resultSummary": {
+          "score": 20,
+          "totalMarks": 20,
+          "percentage": 100,
+          "accuracy": 100,
+          "earnedXp": 75,
+          "newXp": 575,
+          "newStreak": 4,
+          "rankBadge": "Bronze"
+        }
+      },
+      {
+        "testCase": "Unattempted Questions & Empty Objects Handling",
+        "passed": true,
+        "resultSummary": {
+          "score": 0,
+          "totalMarks": 20,
+          "percentage": 0,
+          "accuracy": 0,
+          "earnedXp": 0,
+          "newXp": 200,
+          "newStreak": 5,
+          "rankBadge": "Bronze"
+        }
+      },
+      {
+        "testCase": "Negative Scoring on All Incorrect Answers",
+        "passed": true,
+        "resultSummary": {
+          "score": -5,
+          "totalMarks": 20,
+          "percentage": -25,
+          "accuracy": 0,
+          "earnedXp": 0,
+          "newXp": 1200,
+          "newStreak": 1,
+          "rankBadge": "Silver"
+        }
+      },
+      {
+        "testCase": "Rank Badge Thresholds: Bronze -> Silver -> Gold -> Platinum",
+        "passed": true,
+        "resultSummary": {
+          "score": 4,
+          "totalMarks": 20,
+          "percentage": 20,
+          "accuracy": 100,
+          "earnedXp": 15,
+          "newXp": 10005,
+          "newStreak": 1,
+          "rankBadge": "Platinum"
+        }
+      },
+      {
+        "testCase": "Serialized JSON string questions handling",
+        "passed": true,
+        "resultSummary": {
+          "score": 8,
+          "totalMarks": 20,
+          "percentage": 40,
+          "accuracy": 100,
+          "earnedXp": 30,
+          "newXp": 5010,
+          "newStreak": 1,
+          "rankBadge": "Gold"
+        }
+      },
+      {
+        "testCase": "Corrupted Questions String Graceful Fallback",
+        "passed": true,
+        "resultSummary": {
+          "score": 0,
+          "totalMarks": 0,
+          "percentage": 0,
+          "accuracy": 0,
+          "earnedXp": 0,
+          "newXp": 0,
+          "newStreak": 1,
+          "rankBadge": "Bronze"
+        }
+      },
+      {
+        "testCase": "Duration Seconds Boundary Clamping (negative remaining & excess remaining)",
+        "passed": true,
+        "resultSummary": {
+          "score": 4,
+          "totalMarks": 20,
+          "percentage": 20,
+          "accuracy": 100,
+          "earnedXp": 15,
+          "newXp": 15,
+          "newStreak": 1,
+          "rankBadge": "Bronze"
+        }
+      }
+    ]
+  },
+  "razorpayVerify": {
+    "passed": 8,
+    "failed": 0,
+    "details": [
+      {
+        "testCase": "Valid HMAC Signature for Course Purchase",
+        "passed": true,
+        "status": 200,
+        "error": null
+      },
+      {
+        "testCase": "Valid Free-Tier Bypass for Free Course (amount = 0)",
+        "passed": true,
+        "status": 200,
+        "error": null
+      },
+      {
+        "testCase": "Hostile Free-Tier Bypass Attack Attempt (amount = 499900 with fake signature)",
+        "passed": true,
+        "status": 400,
+        "error": "Signature verification failed"
+      },
+      {
+        "testCase": "Tampered Order ID Signature Rejection",
+        "passed": true,
+        "status": 400,
+        "error": "Signature verification failed"
+      },
+      {
+        "testCase": "Polymorphic Batch Onboarding via batchId legacy parameter",
+        "passed": true,
+        "status": 200,
+        "error": null
+      },
+      {
+        "testCase": "Physical Book Order with Shipping Address",
+        "passed": true,
+        "status": 200,
+        "error": null
+      },
+      {
+        "testCase": "Missing User Authentication",
+        "passed": true,
+        "status": 401,
+        "error": "Unauthorized: Secure user authentication required"
+      },
+      {
+        "testCase": "Missing Required Payment Fields",
+        "passed": true,
+        "status": 400,
+        "error": "Missing payment details for verification"
+      }
+    ]
+  },
+  "downloadsApi": {
+    "passed": 10,
+    "failed": 0,
+    "details": [
+      {
+        "testCase": "Missing Parameters (no file or ids)",
+        "passed": true,
+        "status": 400,
+        "error": "Missing required parameters: file and either lessonId or batchId"
+      },
+      {
+        "testCase": "Unauthenticated Request",
+        "passed": true,
+        "status": 401,
+        "error": "Unauthorized: Invalid session"
+      },
+      {
+        "testCase": "Staff Role (Admin) Bypass Enrollment Gate",
+        "passed": true,
+        "status": 307,
+        "error": null
+      },
+      {
+        "testCase": "Staff Role (Teacher/Instructor) Bypass",
+        "passed": true,
+        "status": 307,
+        "error": null
+      },
+      {
+        "testCase": "Student with Lowercase Active Enrollment",
+        "passed": true,
+        "status": 307,
+        "error": null
+      },
+      {
+        "testCase": "Student with Uppercase ACTIVE Enrollment",
+        "passed": true,
+        "status": 307,
+        "error": null
+      },
+      {
+        "testCase": "Student with Revoked Enrollment Forbidden",
+        "passed": true,
+        "status": 403,
+        "error": "Forbidden: Active enrollment required"
+      },
+      {
+        "testCase": "Student with No Enrollment Forbidden",
+        "passed": true,
+        "status": 403,
+        "error": "Forbidden: Active enrollment required"
+      },
+      {
+        "testCase": "Non-Existent Lesson 404",
+        "passed": true,
+        "status": 404,
+        "error": "Lesson not found"
+      },
+      {
+        "testCase": "Batch File Download with Active Batch Enrollment",
+        "passed": true,
+        "status": 307,
+        "error": null
+      }
+    ]
+  },
+  "errorHandling": {
+    "passed": 3,
+    "failed": 0,
+    "details": [
+      {
+        "testCase": "Grade API Missing Body or Exam ID (400)",
+        "passed": true
+      },
+      {
+        "testCase": "Constant-time comparison handles unequal string lengths without exception",
+        "passed": true
+      },
+      {
+        "testCase": "Constant-time comparison handles non-string inputs safely",
+        "passed": true
+      }
+    ]
+  },
+  "findings": []
+}

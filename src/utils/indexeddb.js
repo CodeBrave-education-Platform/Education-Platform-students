@@ -6,77 +6,142 @@ const DB_VERSION = 1
 const STORE_NAME = 'exam_attempts'
 
 export function initExamDb() {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.indexedDB) {
       resolve(null)
       return
     }
 
-    const request = window.indexedDB.open(DB_NAME, DB_VERSION)
+    const timer = setTimeout(() => {
+      resolve(null)
+    }, 1000)
 
-    request.onerror = (event) => {
-      console.error('[IndexedDB] Database open error:', event.target.error)
-      reject(event.target.error)
-    }
+    try {
+      const request = window.indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onsuccess = (event) => {
-      resolve(event.target.result)
-    }
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'examId' })
+      request.onerror = (event) => {
+        clearTimeout(timer)
+        console.warn('[IndexedDB] Database open error:', event.target.error)
+        resolve(null)
       }
+
+      request.onblocked = () => {
+        clearTimeout(timer)
+        resolve(null)
+      }
+
+      request.onsuccess = (event) => {
+        clearTimeout(timer)
+        resolve(event.target.result)
+      }
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'examId' })
+        }
+      }
+    } catch (e) {
+      clearTimeout(timer)
+      resolve(null)
     }
   })
 }
 
 export async function saveExamState(examId, state) {
-  const db = await initExamDb()
-  if (!db) return
+  try {
+    const db = await initExamDb()
+    if (!db) return false
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite')
-    const store = transaction.objectStore(transaction.objectStoreNames[0])
-    
-    const record = {
-      examId,
-      ...state,
-      updatedAt: Date.now()
-    }
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(false), 1000)
+      try {
+        const transaction = db.transaction([STORE_NAME], 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        
+        const record = {
+          examId,
+          ...state,
+          updatedAt: Date.now()
+        }
 
-    const request = store.put(record)
+        const request = store.put(record)
 
-    request.onsuccess = () => resolve(true)
-    request.onerror = (e) => reject(e.target.error)
-  })
+        request.onsuccess = () => {
+          clearTimeout(timer)
+          resolve(true)
+        }
+        request.onerror = () => {
+          clearTimeout(timer)
+          resolve(false)
+        }
+      } catch (err) {
+        clearTimeout(timer)
+        resolve(false)
+      }
+    })
+  } catch {
+    return false
+  }
 }
 
 export async function getExamState(examId) {
-  const db = await initExamDb()
-  if (!db) return null
+  try {
+    const db = await initExamDb()
+    if (!db) return null
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly')
-    const store = transaction.objectStore(transaction.objectStoreNames[0])
-    const request = store.get(examId)
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(null), 1000)
+      try {
+        const transaction = db.transaction([STORE_NAME], 'readonly')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.get(examId)
 
-    request.onsuccess = (event) => resolve(event.target.result || null)
-    request.onerror = (e) => reject(e.target.error)
-  })
+        request.onsuccess = (event) => {
+          clearTimeout(timer)
+          resolve(event.target.result || null)
+        }
+        request.onerror = () => {
+          clearTimeout(timer)
+          resolve(null)
+        }
+      } catch (err) {
+        clearTimeout(timer)
+        resolve(null)
+      }
+    })
+  } catch {
+    return null
+  }
 }
 
 export async function clearExamState(examId) {
-  const db = await initExamDb()
-  if (!db) return
+  try {
+    const db = await initExamDb()
+    if (!db) return false
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite')
-    const store = transaction.objectStore(transaction.objectStoreNames[0])
-    const request = store.delete(examId)
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(false), 1000)
+      try {
+        const transaction = db.transaction([STORE_NAME], 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.delete(examId)
 
-    request.onsuccess = () => resolve(true)
-    request.onerror = (e) => reject(e.target.error)
-  })
+        request.onsuccess = () => {
+          clearTimeout(timer)
+          resolve(true)
+        }
+        request.onerror = () => {
+          clearTimeout(timer)
+          resolve(false)
+        }
+      } catch (err) {
+        clearTimeout(timer)
+        resolve(false)
+      }
+    })
+  } catch {
+    return false
+  }
 }
+

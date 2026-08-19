@@ -1267,7 +1267,7 @@ export default function DashboardClient({
                           <Target className="w-5 h-5 text-slate-300 dark:text-zinc-500" />
                           <span className="text-sm font-black uppercase tracking-wider text-slate-300 dark:text-zinc-500">Total XP</span>
                         </div>
-                        <div className="text-4xl font-black">{(profile.xp || 0).toLocaleString()} <span className="text-lg text-slate-300 dark:text-zinc-500">XP</span></div>
+                        <div className="text-4xl font-black">{(profile.xp || 0).toLocaleString('en-IN')} <span className="text-lg text-slate-300 dark:text-zinc-500">XP</span></div>
                       </div>
 
                       <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden">
@@ -1925,8 +1925,7 @@ export default function DashboardClient({
                                     tickLine={false} 
                                     axisLine={false} 
                                     tickFormatter={(val) => {
-                                      const d = new Date(val)
-                                      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                      return formatDateSafe(val, 'short')
                                     }}
                                   />
                                   <YAxis 
@@ -1944,7 +1943,7 @@ export default function DashboardClient({
                                       fontWeight: 'bold',
                                       color: '#1e293b'
                                     }} 
-                                    labelFormatter={(label) => `Test Date: ${new Date(label).toLocaleDateString('en-US')}`}
+                                    labelFormatter={(label) => `Test Date: ${formatDateSafe(label, 'short')}`}
                                     formatter={(value) => [`Score: ${value} pts`, 'Grade']}
                                   />
                                   <Bar 
