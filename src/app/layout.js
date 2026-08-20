@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className={`${inter.variable} ${outfit.variable} font-sans`}>
-      <body className="overflow-x-hidden">
+      <body className="overflow-x-hidden pb-24 md:pb-0">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Skip to Content - Accessibility */}
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] bg-indigo-600 text-white px-4 py-2 font-bold rounded-lg shadow-xl">

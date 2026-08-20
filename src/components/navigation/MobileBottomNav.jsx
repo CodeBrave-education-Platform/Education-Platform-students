@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Home, Users, TrendingUp, User, Award } from 'lucide-react'
@@ -9,6 +9,25 @@ export default function MobileBottomNav() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const tab = searchParams ? searchParams.get('tab') : null
+  
+  const [isVisible, setIsVisible] = useState(true)
+  const lastScrollY = useRef(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      // Auto-hide when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
+        setIsVisible(false)
+      } else if (currentScrollY < lastScrollY.current || currentScrollY <= 60) {
+        setIsVisible(true)
+      }
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // List of paths/routes where the bottom navigation bar must be hidden
   const hideOnPaths = ['/', '/login', '/auth']
@@ -77,7 +96,11 @@ export default function MobileBottomNav() {
   ]
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800/80 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] transition-colors duration-300">
+    <div 
+      className={`md:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800/80 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0' : 'translate-y-[120%]'
+      }`}
+    >
       <div className="flex justify-around items-center h-16 max-w-md mx-auto px-4">
         {navItems.map((item) => {
           const Icon = item.icon
