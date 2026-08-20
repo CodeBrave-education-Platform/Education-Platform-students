@@ -15,9 +15,10 @@ export function SignOutButton() {
     setLoading(true)
     try {
       await supabase.auth.signOut()
-      router.refresh()
+      window.location.href = '/login'
     } catch (error) {
       console.error('Error signing out:', error)
+      window.location.href = '/login'
     } finally {
       setLoading(false)
     }

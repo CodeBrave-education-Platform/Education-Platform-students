@@ -95,9 +95,11 @@ export default function Navbar({ user: initialUser, profile: initialProfile }) {
       await supabase.auth.signOut()
       setCurrentUser(null)
       setCurrentProfile(null)
-      router.refresh()
+      window.location.href = '/login'
     } catch (error) {
       console.error('Error signing out:', error)
+      // Force redirect even on error to clear broken states
+      window.location.href = '/login'
     } finally {
       setIsLoggingOut(false)
       setIsDropdownOpen(false)
