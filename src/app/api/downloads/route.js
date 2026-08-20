@@ -124,7 +124,7 @@ export async function GET(request) {
     if (file.startsWith('http')) {
       try {
         const parsedUrl = new URL(file)
-        const parts = parsedUrl.pathname.split('/storage/v1/object/public/secure-assets/')
+        const parts = parsedUrl.pathname.split('/storage/v1/object/public/course-materials/')
         if (parts.length > 1) {
           filePath = decodeURIComponent(parts[1])
         } else {
@@ -138,7 +138,7 @@ export async function GET(request) {
     // 6. Generate signed URL (expires in 60s)
     const { data, error: signedUrlError } = await supabase
       .storage
-      .from('secure-assets')
+      .from('course-materials')
       .createSignedUrl(filePath, 60)
 
     if (signedUrlError || !data?.signedUrl) {
