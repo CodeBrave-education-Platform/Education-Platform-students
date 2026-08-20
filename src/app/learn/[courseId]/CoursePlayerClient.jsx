@@ -848,7 +848,11 @@ export default function CoursePlayerClient({
                       {currentLesson.assignment_url && (
                         <div className="w-full h-[600px] rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
                           <iframe
-                            src={getSecureDownloadUrl(currentLesson.assignment_url)}
+                            src={
+                              currentLesson.assignment_url.includes('drive.google.com')
+                                ? currentLesson.assignment_url.replace(/\/view.*$/, '/preview')
+                                : getSecureDownloadUrl(currentLesson.assignment_url)
+                            }
                             className="w-full h-full"
                             title="Worksheet Viewer"
                           />
