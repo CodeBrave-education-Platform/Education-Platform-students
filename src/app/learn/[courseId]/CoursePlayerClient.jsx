@@ -824,7 +824,7 @@ export default function CoursePlayerClient({
                       </div>
 
                       {/* Secure download action block */}
-                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-emerald-50/40 p-4 rounded-2xl border border-emerald-100/50">
+                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-emerald-50/40 p-4 rounded-2xl border border-emerald-100/50 mb-4">
                         <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 hidden sm:block" />
                         <div className="flex-1 text-center sm:text-left">
                           <h4 className="text-xs font-black text-emerald-800 uppercase tracking-wider">
@@ -844,6 +844,16 @@ export default function CoursePlayerClient({
                           </a>
                         )}
                       </div>
+
+                      {currentLesson.assignment_url && (
+                        <div className="w-full h-[600px] rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
+                          <iframe
+                            src={getSecureDownloadUrl(currentLesson.assignment_url)}
+                            className="w-full h-full"
+                            title="Worksheet Viewer"
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-slate-400 text-sm italic py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
