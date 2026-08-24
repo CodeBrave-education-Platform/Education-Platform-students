@@ -1071,7 +1071,7 @@ INSERT INTO public.question_bank (
     marks_positive, marks_negative, tags, is_active
 ) VALUES 
 (
-    'q1000000-0000-0000-0000-000000000001',
+    'd1000000-0000-0000-0000-000000000001',
     'A block of mass $m = 2\\text{ kg}$ is resting on a rough horizontal surface with coefficient of static friction $\\mu_s = 0.4$. A horizontal force $F = 6\\text{ N}$ is applied to the block. What is the magnitude of the frictional force acting on the block? ($g = 10\\text{ m/s}^2$)',
     'single_mcq',
     'mcq',
@@ -1090,7 +1090,7 @@ INSERT INTO public.question_bank (
     true
 ),
 (
-    'q1000000-0000-0000-0000-000000000002',
+    'd1000000-0000-0000-0000-000000000002',
     'Which of the following coordination complexes exhibits maximum paramagnetic behavior and maximum spin-only magnetic moment?',
     'single_mcq',
     'mcq',
@@ -1109,7 +1109,7 @@ INSERT INTO public.question_bank (
     true
 ),
 (
-    'q1000000-0000-0000-0000-000000000003',
+    'd1000000-0000-0000-0000-000000000003',
     'Evaluate the definite integral: $I = \\int_{0}^{\\pi/2} \\frac{\\sqrt{\\sin x}}{\\sqrt{\\sin x} + \\sqrt{\\cos x}} \\, dx$',
     'single_mcq',
     'mcq',
@@ -1128,7 +1128,7 @@ INSERT INTO public.question_bank (
     true
 ),
 (
-    'q1000000-0000-0000-0000-000000000004',
+    'd1000000-0000-0000-0000-000000000004',
     'During cardiac cycle in a healthy human adult, the first heart sound (LUB) is produced primarily by the closure of which valves?',
     'single_mcq',
     'mcq',
@@ -1147,7 +1147,7 @@ INSERT INTO public.question_bank (
     true
 ),
 (
-    'q1000000-0000-0000-0000-000000000005',
+    'd1000000-0000-0000-0000-000000000005',
     'A particle moves along the x-axis such that its position is given by $x(t) = 3t^3 - 6t^2 + 4t$. At what time $t > 0$ is the acceleration of the particle zero?',
     'single_mcq',
     'mcq',
@@ -1185,12 +1185,12 @@ ON CONFLICT (id) DO UPDATE SET
 -- Link Question Bank items to Test Exams
 INSERT INTO public.exam_questions (exam_id, question_id, order_index, section, marks_positive, marks_negative)
 VALUES
-    ('e1000000-0000-0000-0000-000000000001', 'q1000000-0000-0000-0000-000000000001', 1, 'Section A', 4.00, -1.00),
-    ('e1000000-0000-0000-0000-000000000001', 'q1000000-0000-0000-0000-000000000002', 2, 'Section A', 4.00, -1.00),
-    ('e1000000-0000-0000-0000-000000000001', 'q1000000-0000-0000-0000-000000000003', 3, 'Section A', 4.00, -1.00),
-    ('e1000000-0000-0000-0000-000000000004', 'q1000000-0000-0000-0000-000000000001', 1, 'Section A', 4.00, -1.00),
-    ('e1000000-0000-0000-0000-000000000004', 'q1000000-0000-0000-0000-000000000005', 2, 'Section A', 4.00, -1.00),
-    ('e1000000-0000-0000-0000-000000000005', 'q1000000-0000-0000-0000-000000000004', 1, 'Section A', 4.00, -1.00)
+    ('e1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', 1, 'Section A', 4.00, -1.00),
+    ('e1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 2, 'Section A', 4.00, -1.00),
+    ('e1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000003', 3, 'Section A', 4.00, -1.00),
+    ('e1000000-0000-0000-0000-000000000004', 'd1000000-0000-0000-0000-000000000001', 1, 'Section A', 4.00, -1.00),
+    ('e1000000-0000-0000-0000-000000000004', 'd1000000-0000-0000-0000-000000000005', 2, 'Section A', 4.00, -1.00),
+    ('e1000000-0000-0000-0000-000000000005', 'd1000000-0000-0000-0000-000000000004', 1, 'Section A', 4.00, -1.00)
 ON CONFLICT (exam_id, question_id) DO UPDATE SET
     order_index = EXCLUDED.order_index,
     section = EXCLUDED.section,
@@ -1204,7 +1204,7 @@ INSERT INTO public.announcements (
     id, title, message, target_audience, batch_id, author_id, is_pinned, created_at
 ) VALUES 
 (
-    'an000000-0000-0000-0000-000000000001',
+    'aa000000-0000-0000-0000-000000000001',
     'Welcome to Academic Year 2026-2027 Live Batches',
     'All enrolled students across JEE, NEET, and Foundation cohorts are invited to the National Orientation session this Sunday at 10:00 AM IST. Check your cohort schedules for live classroom links.',
     'all',
@@ -1214,7 +1214,7 @@ INSERT INTO public.announcements (
     now()
 ),
 (
-    'an000000-0000-0000-0000-000000000002',
+    'aa000000-0000-0000-0000-000000000002',
     'All-India Grand Mock Test 01 Live Window Opening',
     'The national window for NTA JEE Main Grand Mock Test 01 will be active from Saturday 9:00 AM to Sunday 9:00 PM. Results, national ranks, and AI diagnostic scorecards will be released Sunday at 10:00 PM.',
     'all',
@@ -1224,7 +1224,7 @@ INSERT INTO public.announcements (
     now()
 ),
 (
-    'an000000-0000-0000-0000-000000000003',
+    'aa000000-0000-0000-0000-000000000003',
     'Physical Master Book Kits & Courier Dispatch Notice',
     'Printed 6-Volume master textbook boxes and daily practice workbooks for Apex JEE and AIIMS NEET 2026 cohorts have been dispatched via Blue Dart Express. Track your delivery status under the My Orders tab.',
     'paid_students',
