@@ -459,12 +459,12 @@ ON CONFLICT (id) DO UPDATE SET
 -- 7.2 SEED LIVE COHORT BATCHES (public.batches)
 -- ----------------------------------------------------------------------------
 INSERT INTO public.batches (
-    id, title, description, faculty, faculty_role, instructor_name, instructor_role,
+    id, start_date, title, description, faculty, faculty_role, instructor_name, instructor_role,
     target_year, target_focus, schedule, seats_left, students_enrolled, price, original_price,
     rating, badge, checklist, book_kit, curriculum, cover, thumbnail_url, is_featured, is_active, status
 ) VALUES 
 (
-    'ba000000-0000-0000-0000-000000000001',
+    'ba000000-0000-0000-0000-000000000001', NOW(),
     'Apex JEE Main & Advanced 2026 Live Master Cohort',
     'Flagship 2-year live interactive cohort with daily classes, live polling, printed master book box delivered to home, and weekly national CBT simulations.',
     'Dr. Nitin Verma, Prof. Arvind Sharma & R. K. Singhal Sir',
@@ -524,7 +524,7 @@ INSERT INTO public.batches (
     'published'
 ),
 (
-    'ba000000-0000-0000-0000-000000000002',
+    'ba000000-0000-0000-0000-000000000002', NOW(),
     'AIIMS & NEET 2026 Super-Score Live Cohort',
     'Elite medical squad with 100% NCERT line-by-line lectures, 3D anatomy animations, printed diagrammatic atlas, and bi-weekly 200-Q NTA simulations.',
     'Dr. Radhika Kulkarni & Bangalore Medical Wing Faculty',
@@ -572,7 +572,7 @@ INSERT INTO public.batches (
     'published'
 ),
 (
-    'ba000000-0000-0000-0000-000000000003',
+    'ba000000-0000-0000-0000-000000000003', NOW(),
     'Class 10 Board + NTSE & Olympiad Accelerator Cohort',
     'Class 10 complete math and science acceleration with early Olympiad/NTSE problem solving and printed workbook set shipped free.',
     'Senior Foundation Mentors',
@@ -612,7 +612,7 @@ INSERT INTO public.batches (
     'published'
 ),
 (
-    'ba000000-0000-0000-0000-000000000004',
+    'ba000000-0000-0000-0000-000000000004', NOW(),
     'JEE 2026 Droppers Fast-Track Rank Booster Cohort',
     'High-intensity 1-year repeaters cohort focusing on high-weightage topics, speed enhancement, multi-concept problems, and daily test analysis.',
     'Kota Super-30 Senior Faculty Panel',
@@ -652,7 +652,7 @@ INSERT INTO public.batches (
     'published'
 ),
 (
-    'ba000000-0000-0000-0000-000000000005',
+    'ba000000-0000-0000-0000-000000000005', NOW(),
     'NEET 2026 Repeaters High-Yield Intensive Batch',
     'Dedicated repeater cohort focused on NCERT micro-concepts, error rectification, elimination of negative marks, and daily 100-Q timed drills.',
     'Dr. Ananya Ray & TopScore Medical Panel',
