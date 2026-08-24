@@ -1,25 +1,31 @@
-## 2026-08-20T00:08:35Z
-You are Worker M1 for Milestone 1: Global Question Bank Schema & Zero-Data-Loss Migration.
-Your working directory is: D:\education portal\.agents\worker_m1
-Project scope document: D:\education portal\PROJECT.md
-Original user request is at: D:\education portal\.agents\ORIGINAL_REQUEST.md
-Database explorer analysis and proposed SQL migration are at:
-- D:\education portal\.agents\explorer_survey_db_qb\analysis.md
-- D:\education portal\.agents\explorer_survey_db_qb\proposed_migration.sql
+## 2026-08-24T12:58:48Z
+You are Worker M1 (Supabase Database Schema & Migration Builder).
+Working directory: `d:\education portal\.agents\worker_m1`
+Original Request: `d:\education portal\.agents\ORIGINAL_REQUEST.md`
+Project Scope: `d:\education portal\PROJECT.md`
+DB Survey Report: `d:\education portal\.agents\teamwork_preview_explorer_survey_db_schema\survey_db_schema_report.md`
 
 MANDATORY INTEGRITY WARNING:
 DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results, create dummy/facade implementations, or circumvent the intended task. A teamwork_preview_auditor will independently verify your work. Integrity violations WILL be detected and your work WILL be rejected.
 
-Tasks:
-1. Write the production SQL migration file at `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql` (and copy to `D:\admin dashboard\supabase\migrations\15_question_bank_and_junction_tables.sql` if directory exists).
-2. The migration must:
-   - Create `public.question_bank` table with all fields (id, subject, tags, difficulty, type, content, diagram_url, options jsonb, correct_answer, explanation, created_at, updated_at).
-   - Create `public.exam_questions` junction table (id, exam_id, question_id, order_index, section, marks_positive, marks_negative, UNIQUE(exam_id, question_id)).
-   - Create `public.assessment_questions` junction table (id, assessment_id, question_id, order_index, marks_positive, marks_negative, UNIQUE(assessment_id, question_id)).
-   - Implement PostgreSQL trigger function `sync_test_exams_questions_from_bank()` and triggers on `question_bank` and `exam_questions` so any update in `question_bank` or `exam_questions` automatically synchronizes the backward-compatible `test_exams.questions` JSON column.
-   - Execute the zero-loss data extraction: extract all questions from `test_exams.questions` JSON and `test_questions` table into `question_bank` preserving their exact original UUIDs (so the 66 existing student test attempts remain 100% valid).
-   - Populate `exam_questions` junction links for all existing `test_exams`.
-   - Set up RLS policies and performance indexes (`idx_question_bank_subject`, `idx_exam_questions_exam_id`, `idx_exam_questions_question_id`).
-3. Execute the migration against the Supabase database using a verified Node.js script using `@supabase/supabase-js` or postgres client.
-4. Verify table creation, data integrity, row counts, trigger execution, and junction links empirically.
-5. Write your complete handoff report to `D:\education portal\.agents\worker_m1\handoff.md` and report back with send_message.
+Your Tasks:
+1. Write the comprehensive, production-grade SQL migration `16_dynamic_data_and_schema_sync.sql` and place it in both:
+   - `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+   - `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+2. Migration Requirements:
+   - Enhance `public.batches`: Add columns `faculty`, `faculty_role`, `instructor_name`, `instructor_role`, `target_year`, `schedule`, `seats_left`, `students_enrolled`, `original_price`, `rating`, `badge`, `checklist`, `book_kit`, `curriculum`, `is_featured`, `is_active` (using `ADD COLUMN IF NOT EXISTS`).
+   - Enhance `public.books`: Add columns `subject`, `category`, `rating`, `reviews_count`, `format`, `cover_image_url`, `stock` (using `ADD COLUMN IF NOT EXISTS`).
+   - Create `public.announcements` table with RLS enabled:
+     - `id UUID PRIMARY KEY DEFAULT gen_random_uuid()`, `title TEXT NOT NULL`, `message TEXT NOT NULL`, `target_audience TEXT NOT NULL DEFAULT 'all'`, `batch_id UUID REFERENCES public.batches(id) ON DELETE CASCADE`, `author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL`, `is_pinned BOOLEAN NOT NULL DEFAULT false`, `created_at TIMESTAMPTZ NOT NULL DEFAULT now()`.
+     - RLS policy: SELECT for `anon, authenticated`, ALL (management) for admins/instructors.
+   - Create `public.student_bookmarks` table with RLS enabled:
+     - `id UUID PRIMARY KEY DEFAULT gen_random_uuid()`, `user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE`, `item_type TEXT NOT NULL`, `item_id UUID NOT NULL`, `notes TEXT`, `created_at TIMESTAMPTZ NOT NULL DEFAULT now()`, UNIQUE (user_id, item_type, item_id).
+     - RLS policy: ALL for authenticated user where `(select auth.uid()) = user_id`.
+   - Create `public.instructors` view with `security_invoker = true` querying `public.profiles` where `role IN ('teacher', 'instructor', 'admin', 'superadmin')`.
+   - Insert comprehensive dynamic seed rows (using `ON CONFLICT DO NOTHING` or `DO UPDATE`) for:
+     - `public.courses`: Full set of flagship JEE, NEET, and Foundation courses with rich descriptions, syllabus, badges, ratings, and pricing.
+     - `public.batches`: Full set of live cohorts with faculty names, faculty roles, target years, schedules, seats left, enrollment metrics, checklists, book kits, and curricula.
+     - `public.books`: Comprehensive inventory of physical textbooks with titles, authors, categories, prices, ratings, and cover URLs.
+     - `public.test_packages` and `public.test_exams`: Rich test series packages and mock exams with subjects, time limits, total marks, and questions.
+3. Write `handoff.md` detailing the implemented SQL statements, RLS policies, foreign keys, and seed data.
+4. Report back via send_message to parent orchestrator.

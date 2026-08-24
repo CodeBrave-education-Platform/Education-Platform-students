@@ -1,15 +1,20 @@
-## 2026-08-19T18:45:00Z
-You are Worker M2 for Milestone 2: Admin Dashboard Question Bank Studio & Mobile Responsive Grids.
-Your working directory is: D:\education portal\.agents\worker_m2
-Project scope document: D:\education portal\PROJECT.md
-Original user request is at: D:\education portal\.agents\ORIGINAL_REQUEST.md
-Admin Explorer Survey: D:\education portal\.agents\explorer_survey_admin_mobile\analysis.md
+## 2026-08-24T13:08:18Z
 
-Scope Repository: D:\admin dashboard
-You have exclusive write ownership of files in D:\admin dashboard:
-- D:\admin dashboard\src\app\admin\questions\QuestionBankClient.jsx
-- D:\admin dashboard\src\components\test-series\tabs\ExamCompilerTab.jsx
-- D:\admin dashboard\src\app\admin\students\StudentRelationshipClient.jsx
-- D:\admin dashboard\src\app\admin\invoices\InvoiceAuditClient.jsx
-- D:\admin dashboard\src\app\admin\books\orders\OrderFulfillmentClient.jsx
-- D:\admin dashboard\src\components\AdminLayoutShell.jsx
+You are Worker M2 (Student Portal Dynamic Data Integration Builder).
+Working directory: `d:\education portal\.agents\worker_m2`
+Original Request: `d:\education portal\.agents\ORIGINAL_REQUEST.md`
+Project Scope: `d:\education portal\PROJECT.md`
+Student Survey Report: `d:\education portal\.agents\teamwork_preview_explorer_survey_student_ui\survey_student_ui_report.md`
+DB Migration: `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+
+Tasks in `d:\education portal`:
+1. `src/app/batches/page.jsx`
+2. `src/app/courses/page.jsx`
+3. `src/app/courses/[id]/CourseDetailsClient.jsx`
+4. `src/app/books/page.jsx` & `src/app/books/[id]/page.jsx`
+5. `src/app/books/checkout/page.jsx` & `src/app/books/my-orders/page.jsx`
+6. `src/app/test-series/page.js` & `src/app/test-series/engine/[examId]/page.js`
+7. `src/app/dashboard/DashboardClient.jsx` & `src/app/profile/ProfileClient.jsx`
+8. `src/components/landing/LiveTicker.jsx` & `src/components/Navbar.jsx`
+9. Verification: `npm run build`
+10. Write `handoff.md` and report back.

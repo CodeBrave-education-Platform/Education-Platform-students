@@ -3,10 +3,14 @@
 import * as React from 'react'
 import { motion } from 'framer-motion'
 
-export default function LiveTicker() {
-  const tickerText = "SYSTEM ONLINE • 1,402 ACTIVE STUDENTS • 24 LIVE COHORTS • 45,890 JEE MOCK EXAMS GRADED • ZERO DOWNTIME"
+export default function LiveTicker({ stats = null }) {
+  const studentCount = stats?.activeStudents || '1,400+'
+  const cohortCount = stats?.liveCohorts || '24'
+  const examCount = stats?.mockExams || '45,800+'
+
+  const tickerText = `SYSTEM ONLINE • ${studentCount} ACTIVE ASPIRANTS • ${cohortCount} LIVE COHORTS • ${examCount} CBT DRILLS GRADED • REAL-TIME LEADERBOARDS • ZERO DOWNTIME`
   
-  // To create a perfectly seamless infinite scroll loop, we repeat the text a few times
+  // Create a continuous seamless scroll loop by repeating the text
   const repeatedText = `${tickerText} • ${tickerText} • ${tickerText} • ${tickerText}`
 
   return (

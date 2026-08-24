@@ -142,10 +142,10 @@ export default function Navbar({ user: initialUser, profile: initialProfile }) {
                   <span>Subjects</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/dashboard?tab=browse&q=Physics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Physics (Mechanics, Optics)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Chemistry" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Chemistry (Organic, Physical)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Mathematics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Mathematics (Calculus, Algebra)</Link></li>
-                  <li><Link href="/dashboard?tab=browse&q=Foundation" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Foundation Science</Link></li>
+                  <li><Link href="/courses" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Physics (Mechanics, Optics)</Link></li>
+                  <li><Link href="/courses" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Chemistry (Organic, Physical)</Link></li>
+                  <li><Link href="/courses" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Mathematics (Calculus, Vectors)</Link></li>
+                  <li><Link href="/courses" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block font-bold text-teal-600">Explore All Courses &rarr;</Link></li>
                 </ul>
               </div>
 
@@ -156,10 +156,10 @@ export default function Navbar({ user: initialUser, profile: initialProfile }) {
                   <span>Featured Batches</span>
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">JEE Rankers Batch 2026</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">JEE Advanced Focus Batch</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Quick Revision Crash Course</Link></li>
-                  <li><Link href="/dashboard?tab=batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Rankers Cohort A</Link></li>
+                  <li><Link href="/batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Apex JEE 2026 Master Cohort</Link></li>
+                  <li><Link href="/batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">AIIMS & NEET 2026 Super-Score</Link></li>
+                  <li><Link href="/batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Class 10 Foundation Accelerator</Link></li>
+                  <li><Link href="/batches" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block font-bold text-teal-600">All Live Batches &rarr;</Link></li>
                 </ul>
               </div>
 
@@ -171,8 +171,8 @@ export default function Navbar({ user: initialUser, profile: initialProfile }) {
                 </h4>
                 <ul className="space-y-2 text-xs font-semibold text-slate-600 dark:text-zinc-400">
                   <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white font-bold text-slate-900 dark:text-white transition-colors block">🚀 CBT Test Series Hub</Link></li>
-                  <li><Link href="/dashboard?tab=exams" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Scheduled Mock Exams</Link></li>
-                  <li><Link href="/dashboard?tab=analytics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">Performance Analytics</Link></li>
+                  <li><Link href="/test-series" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block">All-India Grand Mock Tests</Link></li>
+                  <li><Link href="/dashboard?tab=analytics" onClick={() => setIsExploreOpen(false)} className="hover:text-slate-900 dark:text-white transition-colors block font-bold text-teal-600">Performance Analytics &rarr;</Link></li>
                 </ul>
               </div>
             </div>

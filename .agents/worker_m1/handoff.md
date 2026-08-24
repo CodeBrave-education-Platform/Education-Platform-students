@@ -1,82 +1,52 @@
-# Handoff Report — Milestone 1: Global Question Bank Schema & Zero-Data-Loss Migration
+# 5-Component Handoff Report: Worker M1 (Supabase Database Schema & Migration Builder)
 
 ## 1. Observation
-- **Pre-Migration Telemetry**: Live Supabase audit confirmed 2 `test_exams` holding 12 embedded JSON questions, 3 standalone `test_questions` rows, and 66 historical student test attempts in `test_attempts` with `answers_payload` keyed by UUIDs (`b0000000-...`, `b7396eca-...`, `6498384f-...`).
-- **Target Schema Requirements**: Required unified `public.question_bank` table, relational junction tables `public.exam_questions` and `public.assessment_questions`, performance indexes, RLS policies, secure blind views, and automated real-time trigger synchronization to maintain backward compatibility for `test_exams.questions` JSON.
-- **Migration Delivery Locations**:
-  - `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql`
-  - `D:\admin dashboard\supabase\migrations\15_question_bank_and_junction_tables.sql`
-- **Execution Output**: Migration successfully executed against live Supabase PostgreSQL database (`uggatacexipoidzhcjhx`).
-- **Post-Migration Telemetry**:
-  - `public.question_bank`: 14 rows with all contract columns (`id`, `content`, `format_type`, `type`, `subject`, `topic`, `sub_topic`, `difficulty`, `section`, `options`, `correct_option_index`, `correct_answer`, `explanation`, `diagram_url`, `marks_positive`, `marks_negative`, `tags`).
-  - `public.exam_questions`: 12 junction links mapping both `test_exams` to their respective question bank entries in exact sequential order.
-  - `public.assessment_questions`: Created with unique and foreign key constraints.
-  - `public.test_attempts`: 66/66 student attempts 100% intact and valid.
-
----
+- **Migration Files Created**:
+  - `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql` (1,262 lines, 54,036 bytes)
+  - `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql` (1,262 lines, 54,036 bytes)
+- **Validation Script**:
+  - `d:\education portal\tests\migration_16_validator.mjs`
+- **Schema Alterations & Enhancements**:
+  - `public.batches`: Added `faculty` (TEXT), `faculty_role` (TEXT), `instructor_name` (TEXT), `instructor_role` (TEXT), `target_year` (TEXT), `target_focus` (TEXT), `schedule` (TEXT), `seats_left` (INTEGER), `students_enrolled` (TEXT), `original_price` (NUMERIC), `rating` (NUMERIC), `badge` (TEXT), `checklist` (JSONB), `book_kit` (JSONB), `curriculum` (JSONB), `cover` (TEXT), `thumbnail_url` (TEXT), `is_featured` (BOOLEAN), `is_active` (BOOLEAN), `deleted_at` (TIMESTAMPTZ).
+  - `public.books`: Added `subtitle` (TEXT), `author` (TEXT), `target_exam_tag` (TEXT), `subject` (TEXT), `category` (TEXT), `rating` (NUMERIC), `reviews_count` (INTEGER), `format` (TEXT), `cover_url` (TEXT), `cover_image_url` (TEXT), `thumbnail_url` (TEXT), `sample_pdf_url` (TEXT), `original_price` (NUMERIC), `stock` (INTEGER), `stock_quantity` (INTEGER), `is_active` (BOOLEAN).
+  - `public.courses`: Added/ensured `instructor_id` (UUID FK), `instructor_name` (TEXT), `instructor_role` (TEXT), `original_price` (NUMERIC), `level` (TEXT), `subject` (TEXT), `badge` (VARCHAR), `rating` (NUMERIC), `students_count` (INTEGER), `duration` (TEXT), `lessons_count` (INTEGER), `checklist` (JSONB), `book_kit` (JSONB), `cover_url` (TEXT), `thumbnail_url` (TEXT), `is_featured` (BOOLEAN), `is_active` (BOOLEAN), `status` (VARCHAR), `deleted_at` (TIMESTAMPTZ).
+  - `public.test_packages` & `public.test_exams`: Ensured `is_active`, `is_featured`, `campus_branch`, `thumbnail_url`, `description`, `is_live_ranking`, `activation_timestamp`, `questions` (JSONB).
+- **New Tables & Views Created**:
+  - `public.announcements`: `id` (UUID PK), `title` (TEXT), `message` (TEXT), `target_audience` (TEXT), `batch_id` (UUID FK), `author_id` (UUID FK), `is_pinned` (BOOLEAN), `expires_at` (TIMESTAMPTZ), `created_at` (TIMESTAMPTZ). RLS enabled with public select and admin/instructor management policies.
+  - `public.student_bookmarks`: `id` (UUID PK), `user_id` (UUID FK), `item_type` (TEXT), `item_id` (UUID), `notes` (TEXT), `created_at` (TIMESTAMPTZ), `CONSTRAINT uq_student_bookmark UNIQUE (user_id, item_type, item_id)`. RLS enabled with `(select auth.uid()) = user_id` ownership policy.
+  - `public.instructors`: View created with `security_invoker = true` querying `public.profiles` where `role IN ('teacher', 'instructor', 'admin', 'superadmin')`.
+- **Dynamic Seed Rows Populated**:
+  - `public.courses`: 8 flagship courses across JEE Advanced, JEE Mains, NEET UG, and Class 9/10 Foundation programs with full syllabus, checklists, book kits, and pricing.
+  - `public.batches`: 5 live cohort batches with faculty details, schedules, enrollment telemetry, checklists, book boxes, and curricula.
+  - `public.books`: 8 physical and digital textbooks with author credentials, categories, ratings, reviews, and sample PDF links.
+  - `public.test_packages`: 5 CBT test series bundles across JEE Main, JEE Advanced, and NEET.
+  - `public.test_exams`: 5 comprehensive CBT exams linked to packages.
+  - `public.question_bank` & `public.exam_questions`: 5 canonical LaTeX-formatted MCQs across Physics, Chemistry, Math, and Biology linked to exams.
+  - `public.announcements`: 3 broadcast announcements for student feeds.
 
 ## 2. Logic Chain
-1. **Schema Standardization**:
-   - Designed `public.question_bank` with full support for both `format_type` and `type` fields, ensuring seamless interoperability with legacy readers and future Question Bank CRUD interfaces.
-   - Enforced check constraints on subjects (`'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Computer Science', 'General'`), difficulties (`'EASY', 'MEDIUM', 'HARD', 'easy', 'medium', 'hard'`), and formats (`'single_mcq', 'multi_mcq', 'numerical', 'assertion_reason', 'matrix_match', 'blanks', 'single', 'multiple', 'mcq'`).
-2. **Junction Table Architecture**:
-   - Implemented `public.exam_questions` with `(exam_id, question_id)` unique constraint and cascade deletion.
-   - Implemented `public.assessment_questions` with `(assessment_id, question_id)` unique constraint and cascade deletion.
-3. **Automated Bidirectional Propagation & Backward-Compatible Triggers**:
-   - Authored `public.sync_exam_questions_json_for_exam(target_exam_id UUID)` to compile full question objects (`id`, `content`, `question_text`, `questionText`, `subject`, `topic`, `sub_topic`, `difficulty`, `format_type`, `formatType`, `type`, `section`, `options`, `correct_option_index`, `correctOptionIndex`, `correct_answer`, `correctAnswer`, `explanation`, `solution_explanation`, `diagram_url`, `diagramUrl`, `marks_positive`, `marks_negative`, `tags`) directly into `test_exams.questions` JSONB array and maintain `test_exams.total_questions`.
-   - Created `public.sync_test_exams_questions_from_bank()` and `public.trigger_sync_exam_questions_from_bank()`.
-   - Attached triggers `trg_sync_exam_questions` on `public.exam_questions` (AFTER INSERT OR UPDATE OR DELETE) and `trg_sync_question_bank_update` on `public.question_bank` (AFTER UPDATE).
-4. **Zero-Data-Loss Extraction Algorithm**:
-   - Ingested standalone `test_questions` pool into `question_bank` with UUID preservation.
-   - Ingested legacy LMS `questions` if any into `question_bank`.
-   - Iterated over all `test_exams`, extracted embedded questions into `question_bank` preserving exact UUIDs, and populated `exam_questions` junction links.
-   - Invoked `sync_test_exams_questions_from_bank()` to re-compile clean, authoritative JSON snapshots across all exams.
-5. **Security & Performance**:
-   - Configured Row-Level Security (RLS) policies allowing `SELECT` to authenticated/anon users and full management to `admin`, `teacher`, `instructor`, `superadmin`.
-   - Established multi-column and GIN performance indexes on `subject`, `difficulty`, `topic`, `created_at`, `tags`, `exam_id`, and `question_id`.
-   - Created secure `student_exam_questions` view with `security_invoker = true` stripping answer keys for student-facing querying.
-
----
+1. **Audit & Discovery**: Exploring the frontend components (`BatchesPage.jsx`, `BookStorePage.jsx`, `CoursesCatalogPage`, `TestSeriesHubClient.jsx`, `StudentRelationshipClient.jsx`) revealed properties (like `faculty`, `schedule`, `seats_left`, `checklist`, `book_kit`, `category`, `format`, `reviews_count`) that were previously fallbacks or missing columns.
+2. **Backward-Compatible Schema DDL**: Employing `ADD COLUMN IF NOT EXISTS` and `CREATE TABLE IF NOT EXISTS` guarantees that applying migration 16 is idempotent, non-destructive, and creates zero downtime.
+3. **Supabase Security Compliance**:
+   - `auth.role()` was strictly omitted in favor of role checking via `app_metadata` and `public.profiles` lookup, and target role specification with `TO authenticated` / `TO anon`.
+   - All RLS subqueries use `(select auth.uid())` to enable Postgres scalar query caching.
+   - `public.instructors` view uses `security_invoker = true` to preserve RLS on `public.profiles`.
+4. **Data Synchronization**: Calling `public.sync_test_exams_questions_from_bank()` at the end of migration 16 ensures backward compatibility for any legacy frontend code still reading `test_exams.questions` serialized JSON while maintaining junction table integrity.
 
 ## 3. Caveats
-- No caveats. The migration is idempotent, completely non-destructive, and maintains full backward compatibility for both legacy JSON readers and relational junction queries.
-
----
+- `public.profiles.id` has a foreign key to `auth.users(id)`. Profile rows for instructors are populated when users register or are seeded in auth. The `public.instructors` view dynamically reflects all profiles with teacher/admin roles.
+- All JSONB payloads use UTF-8 strings (e.g. `π` for Greek letters) rather than escaped characters to ensure universal client and database compatibility.
 
 ## 4. Conclusion
-Milestone 1 is fully complete and verified. The global canonical question bank (`public.question_bank`) and relational junction tables (`public.exam_questions`, `public.assessment_questions`) are live in production. All 14 existing questions and 66 student test attempts are preserved with 100% integrity. Triggers dynamically synchronize any future question modifications across all linked exams in real-time.
-
----
+Migration `16_dynamic_data_and_schema_sync.sql` is completely written, fully verified, and synchronized across both repositories (`d:\education portal\supabase\migrations` and `d:\admin dashboard\supabase\migrations`). All schema extensions, tables, views, RLS policies, and dynamic seed catalogs required for full frontend dynamism are established.
 
 ## 5. Verification Method
-- **Automated Verification Script**:
-  - Script path: `D:\education portal\.agents\worker_m1\verify_m1_migration.js`
-  - Command: `node "D:\education portal\.agents\worker_m1\verify_m1_migration.js"`
-- **Empirical Test Results**:
-  ```
-  === STARTING EMPIRICAL MIGRATION VERIFICATION ===
-
-  [PASS] question_bank table exists and selectable (found 14 rows)
-  [PASS] question_bank has all extracted questions (>= 14 rows) count = 14
-  [PASS] question_bank has all required contract columns All present
-  [PASS] exam_questions table exists and selectable (found 12 rows)
-  [PASS] exam_questions junction links populated for both test_exams (1 + 11 = 12 links) count = 12
-  [PASS] assessment_questions table exists and selectable (found 0 rows)
-  [PASS] test_attempts table selectable (found 66 attempts)
-  [PASS] All 66 original student test attempts intact count = 66
-  [PASS] Known question UUIDs 100% preserved in question_bank All 8 sample UUIDs preserved
-  [PASS] student_exam_questions view works (sample length: 5)
-  [PASS] student_exam_questions view is secure (no correct answers exposed)
-
-  --- TESTING LIVE TRIGGER BIDIRECTIONAL PROPAGATION ---
-  [PASS] Update question_bank row successful
-  [PASS] Fetch exam MADHAN after question update
-  [PASS] Trigger propagated question update to test_exams.questions JSON in real-time! Found explanation: Kinematics Test Verification 1787165060199
-  [PASS] Inserted new link in exam_questions
-  [PASS] exam_questions trigger updated total_questions to 2 and injected question into JSON total_questions = 2
-  [PASS] exam_questions delete trigger updated total_questions back to 1 and removed question from JSON total_questions = 1
-
-  === VERIFICATION SUMMARY ===
-  PASSED: 17
-  FAILED: 0
-  ```
+1. Inspect the migration files:
+   - `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+   - `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+2. Run the automated validator:
+   ```bash
+   cd "d:\education portal"
+   node tests/migration_16_validator.mjs
+   ```
+3. Inspect `CREATE TABLE`, `ALTER TABLE`, `CREATE OR REPLACE VIEW`, and `INSERT INTO` statements to verify complete schema and seed coverage.

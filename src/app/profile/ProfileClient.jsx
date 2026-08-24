@@ -24,17 +24,17 @@ export default function ProfileClient({ user, profile }) {
   const [academicBatch, setAcademicBatch] = useState(profile.academic_batch || '')
   const [preferredSubject, setPreferredSubject] = useState(profile.preferred_subject || '')
   
-  // Original Metrics
+  // Dynamic Academic Metrics
   const [dailyStudyHours, setDailyStudyHours] = useState(profile.daily_study_hours || '8 Hours')
-  const [syllabusProgress, setSyllabusProgress] = useState(profile.syllabus_progress || '45%')
-  const [testAverage, setTestAverage] = useState(profile.test_average || '82%')
-  const [academicStrengths, setAcademicStrengths] = useState(profile.academic_strengths || 'Physics & Calculus')
+  const [syllabusProgress, setSyllabusProgress] = useState(profile.syllabus_progress || '0%')
+  const [testAverage, setTestAverage] = useState(profile.test_average || '0%')
+  const [academicStrengths, setAcademicStrengths] = useState(profile.academic_strengths || (profile.preferred_subject ? `${profile.preferred_subject} Focus` : 'Physics & Mathematics'))
   
-  // NEW Metrics
-  const [weeklyTestsAttempted, setWeeklyTestsAttempted] = useState(profile.weekly_tests_attempted || '3 tests/week')
+  // Extended Metrics
+  const [weeklyTestsAttempted, setWeeklyTestsAttempted] = useState(profile.weekly_tests_attempted || '0 tests/week')
   const [dreamCollege, setDreamCollege] = useState(profile.dream_college || 'IIT Bombay (Computer Science)')
   const [studyHoursSlept, setStudyHoursSlept] = useState(profile.study_hours_slept || '7 Hours')
-  const [studyMentor, setStudyMentor] = useState(profile.study_mentor || 'Dr. R. V. Sharma (IIT Delhi Alumnus)')
+  const [studyMentor, setStudyMentor] = useState(profile.study_mentor || 'Kota & AIIMS Faculty Panel')
 
   // Form loading states
   const [profileLoading, setProfileLoading] = useState(false)

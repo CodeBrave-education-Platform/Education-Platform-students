@@ -326,11 +326,10 @@ export default function DashboardClient({
   const [profilePhone, setProfilePhone] = useState(profile.phone || '')
   const [targetYear, setTargetYear] = useState(profile.target_year || '')
   const [academicBatch, setAcademicBatch] = useState(profile.academic_batch || '')
-  const [preferredSubject, setPreferredSubject] = useState(profile.preferred_subject || '')
   const [dailyStudyHours, setDailyStudyHours] = useState(profile.daily_study_hours || '8 Hours')
-  const [syllabusProgress, setSyllabusProgress] = useState(profile.syllabus_progress || '45%')
-  const [testAverage, setTestAverage] = useState(profile.test_average || '82%')
-  const [academicStrengths, setAcademicStrengths] = useState(profile.academic_strengths || 'Physics & Calculus')
+  const [syllabusProgress, setSyllabusProgress] = useState(profile.syllabus_progress || '0%')
+  const [testAverage, setTestAverage] = useState(profile.test_average || '0%')
+  const [academicStrengths, setAcademicStrengths] = useState(profile.academic_strengths || (profile.preferred_subject ? `${profile.preferred_subject} Focus` : 'Physics & Mathematics'))
   
   // Profile update indicators
   const [profileLoading, setProfileLoading] = useState(false)

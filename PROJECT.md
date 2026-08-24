@@ -1,96 +1,112 @@
-# Project: Global Question Bank Architecture & Cross-Portal Mobile Overhaul
+# Project: Supabase Dynamic Data Integration & Schema Parity
 
 ## Architecture
 - **Frameworks**:
-  - Student Portal: Next.js 16 (React 19, App Router) with Tailwind CSS (`D:\education portal`)
-  - Admin Dashboard: Next.js 15/16 (React 19, App Router) with Tailwind CSS (`D:\admin dashboard`)
-- **Database & Auth**: Supabase PostgreSQL with PostgREST, `@supabase/ssr`, RLS policies, PostgreSQL triggers, JSON sync backward compatibility
-- **Testing**: Playwright test runner (`@playwright/test`)
+  - Student Portal: Next.js 16 (React 19, App Router) with Tailwind CSS (`d:\education portal`)
+  - Admin Dashboard: Next.js 15/16 (React 19, App Router) with Tailwind CSS (`d:\admin dashboard`)
+- **Database & Auth**: Supabase PostgreSQL, `@supabase/ssr`, `@supabase/supabase-js`, Row Level Security (RLS), Postgres Views & Triggers
 - **Key Modules**:
-  - Central Question Bank (`public.question_bank`)
-  - Junction Tables (`public.exam_questions`, `public.assessment_questions`)
-  - Student CBT Exam Taking Engine (`src/app/test-series/engine/[examId]`)
-  - Admin Question Bank & Test Series Studio (`src/app/admin/questions`, `src/components/test-series/tabs/ExamCompilerTab.jsx`)
-  - Responsive Cross-Portal Navigation & Grids (`Navbar.jsx`, `MobileBottomNav.jsx`, `AdminLayoutShell.jsx`, Admin data tables)
+  - Supabase Schema & Sync Migration (`16_dynamic_data_and_schema_sync.sql`)
+  - Student Batches, Courses & Book Store Dynamic Data Fetching
+  - Student CBT Test Series & Dynamic Question Bank Data Integration
+  - Admin Student CRM Real-Time Enrollment CRUD & Announcements Broadcast
+  - Admin Dashboard Real-Time Statistics & Dynamic Instructor Assignment
+  - Admin Invoices & Test Compiler Dynamic Data Integration
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Centralized Question Bank Schema | `public.question_bank` table with content, options, correct answers, explanation, subject, tags, difficulty, format, latex/images | M1 | Survey DB |
-| 2 | Relational Junction Tables | `public.exam_questions` and `public.assessment_questions` with marks, negative marks, sort order, and section tagging | M1 | Survey DB |
-| 3 | Zero-Data-Loss Data Migration | Extract existing questions from `test_exams.questions` and `test_questions` into `question_bank` preserving all original UUIDs for 66 student attempts | M1 | Survey DB |
-| 4 | Live Propagation Sync Trigger | PostgreSQL trigger `sync_test_exams_questions_from_bank()` ensuring changes in `question_bank` propagate live to all linked exams & maintain JSON backward compatibility | M1 | Survey DB |
-| 5 | Admin Question Bank Studio | CRUD, filtering by subject/tag/difficulty, LaTeX live preview, and search interface in Admin Dashboard (`/admin/questions`) | M2 | Survey Admin |
-| 6 | Admin Exam Compiler Junction Integration | Select, assemble, and order questions from `question_bank` into test packages via `exam_questions` junction table (`/admin/test-series`) | M2 | Survey Admin |
-| 7 | Admin Data Grids Mobile Degradation | Responsive card layouts for wide tabular data grids (`StudentRelationshipClient`, `InvoiceAuditClient`, `OrderFulfillmentClient`) on mobile screens | M2 | Survey Admin |
-| 8 | Admin Mobile Navigation Fixes | Auto-closing mobile sidebar drawer on navigation clicks and responsive toolbar layout in `AdminLayoutShell.jsx` | M2 | Survey Admin |
-| 9 | Mobile Bottom Sheet Question Palette | Swipeable, filterable Framer Motion bottom sheet for question jumping on mobile viewports (<1024px) replacing rigid 320px desktop sidebar | M3 | Survey CBT |
-| 10 | Ergonomic Option Selection & Multi-Format | Option cards with letter badges (A/B/C/D), tactile active press states, single MCQ, MSQ multi-select, and numerical on-screen keypads | M3 | Survey CBT |
-| 11 | Sticky Header & Persistent Timer | 56px sticky top header with compact timer, question status badge, and dropdown menu for tools (calculator, scratchpad, clear) | M3 | Survey CBT |
-| 12 | Responsive KaTeX & Image Scaling | Formula containment (`max-w-full overflow-x-auto`) and image scaling to guarantee zero illegal horizontal page scrolling | M3 | Survey CBT |
-| 13 | Touch-Enabled HTML5 Scratchpad & Calculator | Canvas supporting touch events (`onTouchStart`, `onTouchMove`, `onTouchEnd`) with high-DPI scaling, and responsive calculator modal | M3 | Survey CBT |
-| 14 | Overlay Suppression & Offline Persistence | Hide `MobileBottomNav` and `AIAssistant` on `/test-series/engine/` routes; debounced IndexedDB persistence for offline/reload survival | M3 | Survey CBT |
-| 15 | Student Portal Top Navbar Reliability | Gracefully handle missing `user` prop in `Navbar.jsx` so top navigation renders on `/batches`, `/courses`, `/books`, `/policies` | M4 | Survey Admin |
-| 16 | Bottom Navigation Spacing Pass | Add `pb-20 md:pb-0` bottom padding across Student Portal pages to prevent content occlusion under `MobileBottomNav` | M4 | Survey Admin |
-| 17 | Next.js SSR Hydration Remediation | Guard `localStorage`, `window.navigator`, and localized date formatting against SSR/client mismatches | M4 | Survey Admin |
-| 18 | Multi-Viewport E2E Testing & Forensic Audit | Playwright E2E verification across mobile viewports (320px–768px), Question Bank junction updates, build verification, and forensic audit | M5 | Survey QA |
+| 1 | Supabase Migration `16_dynamic_data_and_schema_sync.sql` | Adds metadata columns to `batches` and `books`, creates `announcements` & `student_bookmarks` with RLS, creates `instructors` view | M1 | Survey DB |
+| 2 | Database Seed & Parity Fixtures | Insert comprehensive, realistic dynamic seed rows for `courses`, `batches`, `test_packages`, `test_exams`, and `books` | M1 | Survey DB |
+| 3 | Student Batches Dynamic Integration | Remove `DEFAULT_BATCHES` in `src/app/batches/page.jsx`, query `public.batches` via SSR, eliminate local fallback arrays | M2 | Survey Student |
+| 4 | Student Courses & Detail Integration | Remove `DEFAULT_COURSES` in `src/app/courses/page.jsx` & `CourseDetailsClient.jsx`, wire real enrollment creation on checkout | M2 | Survey Student |
+| 5 | Student Books & Orders Dynamic Integration | Remove `sampleBooks` and `defaultOrders` in `src/app/books/**`, query `public.books` and `public.book_orders`, insert real orders | M2 | Survey Student |
+| 6 | Student Test Series Dynamic Integration | Remove `DEFAULT_FALLBACK_PACKAGES` and `DEFAULT_FALLBACK_EXAMS` in `test-series/page.js` and `engine/[examId]/page.js`, query Supabase | M2 | Survey Student |
+| 7 | Student Dashboard & Profile Dynamic Telemetry | Replace hardcoded placeholder strings in `DashboardClient.jsx` and `ProfileClient.jsx` with dynamic user progress & attempt queries | M2 | Survey Student |
+| 8 | Admin Student CRM Real Enrollment CRUD | Wire real `INSERT` and `DELETE` on `public.enrollments` in `StudentRelationshipClient.jsx`, join `enrollments` table for enrolled courses | M3 | Survey Admin |
+| 9 | Admin Announcement Broadcast Integration | Persist admin broadcast announcements to `public.announcements` table with RLS | M3 | Survey Admin |
+| 10 | Admin Dashboard KPI Metrics & Instructor Assignment | Dynamic calculation of growth metrics in `AdminDashboardClient.jsx`, add dynamic instructor dropdown in `CourseCreateModal.jsx` | M3 | Survey Admin |
+| 11 | Admin Invoices & Test Compiler Cleanup | Remove hardcoded fallback IDs in `InvoiceAuditClient.jsx`, eliminate dummy fallback questions in `TestCompiler.jsx` | M3 | Survey Admin |
+| 12 | Cross-Portal Verification & Forensic Integrity Audit | Multi-agent build verification (`npm run build` on both portals), adversarial testing, RLS audit, and agent-as-judge verification | M4 | Survey QA |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Database Question Bank & Zero-Loss Migration | SQL migration (`15_question_bank_and_junction_tables.sql`), tables (`question_bank`, `exam_questions`, `assessment_questions`), data extraction of all existing questions with UUID preservation, sync trigger | none | IN_PROGRESS |
-| M2 | Admin Dashboard Question Bank & Mobile Grids | Question Bank Studio (`/admin/questions`), Exam Compiler junction linking (`/admin/test-series`), mobile card degradation for student/invoice/order tables, mobile sidebar auto-close | M1 | PLANNED |
-| M3 | Student Portal CBT Exam Engine Mobile Overhaul | Mobile bottom sheet question palette, ergonomic option cards with A/B/C/D badges, sticky timer header, touch scratchpad, responsive KaTeX formulas, overlay suppression, IndexedDB auto-save | M1 | PLANNED |
-| M4 | Cross-Portal Navigation Polish & Hydration Fixes | `Navbar.jsx` fallback for missing user prop, `pb-20` bottom padding on student pages, SSR hydration mismatch fixes | M2, M3 | PLANNED |
-| M5 | E2E Testing, Build Verification & Forensic Audit | Playwright E2E test suite (mobile viewports, Question Bank junction updates, navbar rendering), dual Next.js build verification, forensic audit | M1, M2, M3, M4 | PLANNED |
+| M1 | Supabase Database Schema & Migrations | Migration `16_dynamic_data_and_schema_sync.sql`, tables (`announcements`, `student_bookmarks`), view (`instructors`), batch/book columns, RLS policies & foreign keys, rich database seeds | none | DONE |
+| M2 | Student Portal Dynamic Data Integration | Batches, courses, books, book orders, test series, dashboard & profile dynamic Supabase fetching, eliminating all `DEFAULT_*` arrays | M1 | DONE |
+| M3 | Admin Dashboard Dynamic Data Integration | Student CRM real enrollment CRUD, announcement persistence, dynamic KPI calculations, instructor dropdown, invoice dynamic rendering | M1 | DONE |
+| M4 | Cross-Portal Build Verification & Forensic Integrity Audit | Dual Next.js build validation, reviewer verification, challenger stress tests, and forensic auditor integrity verification | M1, M2, M3 | DONE |
+
 
 ## Interface Contracts
-### `public.question_bank`
+### `public.batches`
 - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
-- `subject` VARCHAR(50) NOT NULL
-- `tags` TEXT[] DEFAULT '{}'
-- `difficulty` VARCHAR(20) DEFAULT 'medium' CHECK (difficulty IN ('easy', 'medium', 'hard'))
-- `type` VARCHAR(20) DEFAULT 'mcq' CHECK (type IN ('mcq', 'multi_mcq', 'numerical', 'matrix_match'))
-- `content` TEXT NOT NULL
-- `diagram_url` TEXT
-- `options` JSONB NOT NULL DEFAULT '[]'::jsonb
-- `correct_answer` TEXT NOT NULL
-- `explanation` TEXT
-- `created_at` TIMESTAMPTZ DEFAULT now()
-- `updated_at` TIMESTAMPTZ DEFAULT now()
+- `name` TEXT NOT NULL
+- `description` TEXT
+- `faculty` TEXT
+- `faculty_role` TEXT
+- `instructor_name` TEXT
+- `instructor_role` TEXT
+- `target_year` TEXT DEFAULT 'TARGET 2026'
+- `schedule` TEXT
+- `seats_left` INTEGER DEFAULT 15
+- `students_enrolled` TEXT
+- `price` NUMERIC NOT NULL DEFAULT 0
+- `original_price` NUMERIC DEFAULT 0
+- `rating` NUMERIC DEFAULT 4.95
+- `badge` TEXT DEFAULT 'FLAGSHIP LIVE COHORT'
+- `checklist` JSONB DEFAULT '[]'::jsonb
+- `book_kit` JSONB DEFAULT '{}'::jsonb
+- `curriculum` JSONB DEFAULT '[]'::jsonb
+- `is_featured` BOOLEAN DEFAULT false
+- `is_active` BOOLEAN DEFAULT true
 
-### `public.exam_questions` (Junction Table)
+### `public.books`
 - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
-- `exam_id` UUID NOT NULL REFERENCES public.test_exams(id) ON DELETE CASCADE
-- `question_id` UUID NOT NULL REFERENCES public.question_bank(id) ON DELETE CASCADE
-- `order_index` INTEGER NOT NULL DEFAULT 1
-- `section` VARCHAR(50) DEFAULT 'General'
-- `marks_positive` NUMERIC(4,2) DEFAULT 4.00
-- `marks_negative` NUMERIC(4,2) DEFAULT 1.00
-- UNIQUE(exam_id, question_id)
+- `title` TEXT NOT NULL
+- `author` TEXT NOT NULL
+- `subject` TEXT DEFAULT 'General'
+- `category` TEXT DEFAULT 'Standard'
+- `price` NUMERIC NOT NULL DEFAULT 0
+- `original_price` NUMERIC DEFAULT 0
+- `rating` NUMERIC DEFAULT 4.8
+- `reviews_count` INTEGER DEFAULT 120
+- `format` TEXT DEFAULT 'Hardcopy + PDF'
+- `cover_image_url` TEXT
+- `stock` INTEGER DEFAULT 50
 
-### `public.assessment_questions` (Junction Table)
+### `public.announcements`
 - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
-- `assessment_id` UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE
-- `question_id` UUID NOT NULL REFERENCES public.question_bank(id) ON DELETE CASCADE
-- `order_index` INTEGER NOT NULL DEFAULT 1
-- `marks_positive` NUMERIC(4,2) DEFAULT 1.00
-- `marks_negative` NUMERIC(4,2) DEFAULT 0.00
-- UNIQUE(assessment_id, question_id)
+- `title` TEXT NOT NULL
+- `message` TEXT NOT NULL
+- `target_audience` TEXT NOT NULL DEFAULT 'all' CHECK (target_audience IN ('all', 'paid_students', 'teachers', 'batch_students'))
+- `batch_id` UUID REFERENCES public.batches(id) ON DELETE CASCADE
+- `author_id` UUID REFERENCES public.profiles(id) ON DELETE SET NULL
+- `is_pinned` BOOLEAN NOT NULL DEFAULT false
+- `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
+
+### `public.student_bookmarks`
+- `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE
+- `item_type` TEXT NOT NULL CHECK (item_type IN ('question', 'lesson', 'course_file', 'book'))
+- `item_id` UUID NOT NULL
+- `notes` TEXT
+- `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
+- UNIQUE (user_id, item_type, item_id)
 
 ## Code Layout
-- `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql`: Central Question Bank & junction SQL migration
-- `D:\admin dashboard\src\app\admin\questions\QuestionBankClient.jsx`: Question Bank CRUD Studio
-- `D:\admin dashboard\src\components\test-series\tabs\ExamCompilerTab.jsx`: Exam Compiler with junction linking
-- `D:\admin dashboard\src\app\admin\students\StudentRelationshipClient.jsx`: Responsive student management with mobile card view
-- `D:\admin dashboard\src\app\admin\invoices\InvoiceAuditClient.jsx`: Responsive invoice audit table with mobile card view
-- `D:\admin dashboard\src\app\admin\books\orders\OrderFulfillmentClient.jsx`: Responsive order fulfillment table with mobile card view
-- `D:\admin dashboard\src\components\AdminLayoutShell.jsx`: Responsive admin sidebar with auto-close on mobile
-- `D:\education portal\src\app\test-series\engine\[examId]\CbtEngineClient.jsx`: Redesigned mobile CBT Exam taking engine
-- `D:\education portal\src\components\navigation\MobileBottomNav.jsx`: Mobile bottom nav with route exclusion on CBT engine
-- `D:\education portal\src\components\AIAssistant.jsx`: AI Assistant widget with route exclusion on CBT engine
-- `D:\education portal\src\components\KatexRenderer.jsx`: Responsive KaTeX formula wrapper
-- `D:\education portal\src\components\Navbar.jsx`: Top navigation with fallback for unauthenticated/prop-less pages
-- `D:\education portal\src\app\api\test-series\grade\route.js`: Server-authoritative grading with relational junction support
-- `D:\education portal\tests\mobile-cbt-and-qb.spec.js`: Playwright E2E test suite for mobile CBT & Question Bank
+- `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql`: Dynamic schema enhancements, tables, views, RLS policies, and seed data
+- `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql`: Admin portal migration mirror
+- `d:\education portal\src\app\batches\page.jsx`: Student Batches catalog (100% dynamic SSR)
+- `d:\education portal\src\app\courses\page.jsx`: Student Courses catalog (100% dynamic SSR)
+- `d:\education portal\src\app\courses\[id]\CourseDetailsClient.jsx`: Dynamic course details & real enrollment checkout
+- `d:\education portal\src\app\books\page.jsx`: Student Book Store (100% dynamic SSR)
+- `d:\education portal\src\app\books\[id]\page.jsx`: Dynamic book details SSR
+- `d:\education portal\src\app\books\my-orders\page.jsx`: Dynamic student book orders SSR
+- `d:\education portal\src\app\test-series\page.js`: Dynamic Test Series & Exam catalog
+- `d:\admin dashboard\src\app\admin\students\StudentRelationshipClient.jsx`: Admin Student CRM with real `enrollments` CRUD
+- `d:\admin dashboard\src\components\AdminDashboardClient.jsx`: Admin Dashboard with dynamic growth & live session telemetry
+- `d:\admin dashboard\src\components\courses\CourseCreateModal.jsx`: Dynamic instructor assignment dropdown
+- `d:\admin dashboard\src\app\admin\invoices\InvoiceAuditClient.jsx`: Dynamic invoice audit data grid
+
 

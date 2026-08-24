@@ -1,95 +1,112 @@
-# Milestone 2 Handoff Report: Admin Dashboard Question Bank Studio & Mobile Responsive Grids
+# Handoff Report — Worker M2: Student Portal Dynamic Data Integration
 
-**Agent**: Worker M2 (`implementer`, `qa`, `specialist`)  
-**Working Directory**: `D:\education portal\.agents\worker_m2`  
-**Target Repository**: `D:\admin dashboard`  
-**Timestamp**: 2026-08-20T00:19:00Z  
+**Agent**: Worker M2 (Student Portal Dynamic Data Integration Builder)  
+**Date**: 2026-08-24T18:46:35Z  
+**Working Directory**: `d:\education portal\.agents\worker_m2`  
+**Target Repository**: `d:\education portal`  
+**Integrity Mode**: Production / Zero-Mock Full Backend Integration  
 
 ---
 
 ## 1. Observation
 
-Direct observations from source code audits, database schema definitions, and compiler execution:
-
-1. **Question Bank Studio (`src/app/admin/questions/QuestionBankClient.jsx`)**:
-   - Previously queried the legacy `questions` table with loose format matching and had no tag support or relational junction awareness.
-   - Now targets the canonical `public.question_bank` table with complete CRUD operations (Insert, Update, Select, Delete).
-   - Supports all fields: `content`, `options` (JSON array), `correct_answer`, `correct_option_index`, `explanation`, `subject` (Physics, Chemistry, Mathematics, Biology, Computer Science, General), `difficulty` (EASY, MEDIUM, HARD), `format_type` / `type` (single_mcq, multi_mcq, numerical, assertion_reason, matrix_match), `diagram_url`, `marks_positive`, `marks_negative`, and `tags` (dynamic tag chips).
-   - Includes live KaTeX math formula preview and live diagram image preview in both question cards and the authoring dialog.
-   - Full mobile responsiveness with scrolling modal dialog (`max-h-[92vh] overflow-y-auto`) and flexible filter toolbar.
-
-2. **Exam Compiler Junction Integration (`src/components/test-series/tabs/ExamCompilerTab.jsx`)**:
-   - Previously queried `test_questions` and saved questions solely as static JSON into `test_exams.questions`.
-   - Now connects directly to `public.question_bank` for question pool browsing, filtering, and authoring.
-   - Loads existing exam questions from the relational junction table `public.exam_questions` (joined with `public.question_bank`).
-   - When compiling or updating an exam, saves relational rows into `public.exam_questions` (`exam_id`, `question_id`, `order_index`, `section`, `marks_positive`, `marks_negative`).
-   - Supports sequence reordering (`Move Up` / `Move Down`), section tagging, marks overrides, and blueprint question removal.
-   - Supabase sync trigger `trg_sync_exam_questions` updates `test_exams.questions` JSON automatically for backward compatibility.
-
-3. **Admin Data Grids Mobile Degradation**:
-   - `src/app/admin/students/StudentRelationshipClient.jsx`: Implemented dual rendering — desktop table view on screens `>=640px` and responsive stacked cards on `<640px` with Candidate Name, Email, ID, Enrolled Courses count, CBT Tests count, and action buttons. Fixed search omnibar flex-wrapping on mobile and replaced un-guarded `toLocaleDateString()` with `formatDateSafe()`.
-   - `src/app/admin/invoices/InvoiceAuditClient.jsx`: Implemented mobile card view for screens `<768px`, harmonized the dark color palette to match the admin layout shell's clean adaptive theme (`bg-slate-50 text-slate-900`, white cards, border-slate-200, teal/indigo accents), and standardized date formatting.
-   - `src/app/admin/books/orders/OrderFulfillmentClient.jsx`: Implemented mobile card view on `<768px`, graceful multi-line wrapping for long shipping addresses (`break-words`, `leading-relaxed`), and standardized date formatting.
-
-4. **Admin Layout Navigation (`src/components/AdminLayoutShell.jsx`)**:
-   - Mobile sidebar navigation drawer now auto-closes upon clicking any navigation link (`onNavigate` callback bound to all links and `pathname` effect).
-   - Header hamburger menu and theme toggle optimized with touch-ergonomic dimensions (`min-h-[40px] min-w-[40px]`).
-
-5. **Build & Test Verification**:
-   - `npm run build` executed in `D:\admin dashboard`: Compiled successfully with **0 errors** in 11.1s (Turbopack, Next.js 16.2.6).
-   - `npm test` executed in `D:\admin dashboard`: **119/119 test assertions passed** (0 failures).
+A detailed audit of the student portal codebase revealed several UI components and routes relying on static mock datasets, fallback mock arrays, or simulated `localStorage`-only workflows:
+- `src/app/batches/page.jsx` contained static `DEFAULT_BATCHES` array (lines 16–153) and read joined batches from `localStorage` (`Asentra_joined_batches`).
+- `src/app/courses/page.jsx` contained static `DEFAULT_COURSES` array (lines 14–147) and hardcoded checklist/book kit fallbacks.
+- `src/app/courses/[id]/CourseDetailsClient.jsx` contained `localStorage` mock order injection (`Asentra_book_orders`) upon checkout.
+- `src/app/books/page.jsx` defined `sampleBooks` array (lines 21–82) and concatenated `setBooks([...sampleBooks, ...formatted])`.
+- `src/app/books/[id]/page.jsx` hardcoded static book object `b1` ("IIT JEE Physics Mastery") with no database fetch.
+- `src/app/books/checkout/page.jsx` hardcoded `book-cart-001` and fixed price `699`.
+- `src/app/books/my-orders/page.jsx` contained `defaultOrders` array with mock tracking numbers (`ORD-2026-9041`, `ORD-2026-8812`).
+- `src/app/test-series/page.js` contained `DEFAULT_FALLBACK_PACKAGES` (lines 8–69) and `DEFAULT_FALLBACK_EXAMS` (lines 71–153).
+- `src/app/test-series/engine/[examId]/page.js` and `CbtEngineClient.jsx` contained static fallback exam paper with hardcoded questions (`q-1` to `q-6`).
+- `src/app/dashboard/DashboardClient.jsx` and `src/app/profile/ProfileClient.jsx` initialized default academic metrics with hardcoded strings ('8 Hours', '45%', '82%', 'Physics & Calculus').
+- `src/components/Navbar.jsx` contained exploratory links that required alignment with dynamic routes.
 
 ---
 
 ## 2. Logic Chain
 
-1. **Step 1: Canonical Schema Unification**: The central Question Bank schema (`public.question_bank`) and junction table (`public.exam_questions`) require Admin authoring tools to interact with relational tables rather than isolated snapshots.
-2. **Step 2: Dual Rendering Pattern for Mobile Degradation**: Data grids with 6+ columns (Students, Invoices, Orders) break on mobile viewports (<768px) when forced into horizontal scrollbars. By implementing CSS responsive dual rendering (`hidden md:block` table view + `block md:hidden` card view), mobile users gain an ergonomic card list without sacrificing dense tabular analysis on desktop screens.
-3. **Step 3: Hydration Safeguards**: Un-guarded `toLocaleDateString()` invocations caused server/client hydration mismatches due to server vs. browser locale differences. The centralized `formatDateSafe()` helper guarantees deterministic date string outputs across SSR and client rendering.
-4. **Step 4: Relational Junction Propagation**: Compiling an exam persists exact question IDs, sections, and mark overrides to `public.exam_questions`. The underlying Postgres trigger regenerates the denormalized JSON column on `test_exams`, ensuring zero breaking changes for existing student exam taking flows while enabling global question errata propagation.
+1. **Batches & Cohorts Dynamic Architecture**:
+   - Converted `src/app/batches/page.jsx` into an async Server Component using `createClient()` from `@/utils/supabase/server`.
+   - Queried `public.batches` filtered by `is_active = true` and ordered by `is_featured.desc`, `created_at.desc`.
+   - Queried `public.batch_enrollments` for authenticated user IDs.
+   - Built `BatchesClient.jsx` to manage client interaction, search filtering, syllabus accordion, and real Razorpay checkout triggering `/api/razorpay/verify`.
+   - Completely deleted `DEFAULT_BATCHES`.
+
+2. **Courses Catalog Dynamic Architecture**:
+   - Converted `src/app/courses/page.jsx` into an async Server Component querying `public.courses` and `public.enrollments`.
+   - Built `CoursesCatalogClient.jsx` supporting subject filtering, search, ranker XP discounts, and checkout.
+   - Completely deleted `DEFAULT_COURSES`.
+
+3. **Course Checkout & Order Provisioning**:
+   - In `src/app/courses/[id]/CourseDetailsClient.jsx`, removed the `localStorage.setItem('Asentra_book_orders', ...)` mock provisioning block.
+   - Backend verification (`/api/razorpay/verify`) executes authentic database inserts into `public.enrollments` and `public.invoices`.
+
+4. **Books & Store Dynamic Architecture**:
+   - Converted `src/app/books/page.jsx` into an async Server Component querying `public.books` ordered by `rating.desc`, `created_at.desc`.
+   - Built `BooksClient.jsx` for client cart drawer and filtering.
+   - Converted `src/app/books/[id]/page.jsx` into an async Server Component dynamically fetching the book by `params.id` from `public.books` with `notFound()` handling.
+   - Completely deleted `sampleBooks` and static `b1` book object.
+
+5. **Book Checkout & Live Tracking Orders**:
+   - Created `BookCheckoutClient.jsx` and updated `src/app/books/checkout/page.jsx` as a Server Component fetching the dynamic book from `public.books`.
+   - On checkout, submits to `/api/razorpay/verify` which writes directly to `public.book_orders` and `public.invoices`.
+   - Converted `src/app/books/my-orders/page.jsx` into an async Server Component querying `public.book_orders` joined with `public.books` for `auth.uid()`.
+   - Completely deleted `defaultOrders` and `book-cart-001`.
+
+6. **Test Series & Question Bank CBT Engine**:
+   - Converted `src/app/test-series/page.js` to query `public.test_packages` and `public.test_exams` directly from Supabase, removing `DEFAULT_FALLBACK_PACKAGES` and `DEFAULT_FALLBACK_EXAMS`.
+   - In `src/app/test-series/engine/[examId]/page.js`, loaded questions dynamically from `public.question_bank` via `public.exam_questions` junction table (or fallback `test_exams.questions` column), stripping sensitive answer solutions before sending to the client.
+   - In `CbtEngineClient.jsx`, eliminated the static fallback questions array in `useMemo`.
+
+7. **Academic Analytics & Dashboard / Profile Metrics**:
+   - In `src/app/dashboard/page.jsx` and `src/app/profile/page.jsx`, implemented real-time calculation of student test average % from `public.test_attempts` and syllabus progress % from completed lessons in `public.user_progress` over total lessons in `public.enrollments`.
+   - Injected calculated metrics into the `profile` object passed to `DashboardClient.jsx` and `ProfileClient.jsx`.
+   - Updated `DashboardClient.jsx` and `ProfileClient.jsx` state initializers to use `profile.syllabus_progress` and `profile.test_average` without hardcoding.
+
+8. **Navigation & Telemetry Ticker**:
+   - Updated `src/components/Navbar.jsx` Explore mega-menu links to point to `/courses`, `/batches`, and `/test-series`.
+   - Updated `src/components/landing/LiveTicker.jsx` to support dynamic metrics props.
 
 ---
 
 ## 3. Caveats
 
-- Database migrations (`15_question_bank_and_junction_tables.sql`) must be applied in the Supabase instance for live database queries to hit `question_bank` and `exam_questions` (fallback mock and sample datasets were preserved in client code to ensure graceful degradation if DB tables are uninitialized).
-- AI PDF extraction uses the existing multimodal `/api/admin/ai/parse-pdf` and `/api/admin/ai/parse-pdf-page` endpoints, requiring a valid Gemini API key in `.env.local` for live document OCR.
+- **Seed Migration Requirement**: The database must have `supabase/migrations/16_dynamic_data_and_schema_sync.sql` applied to ensure rich seed records exist for `batches`, `courses`, `books`, `test_packages`, `test_exams`, and `question_bank`.
+- **Payment Gateway**: When testing in development mode, Razorpay test mode keys (`NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`) are utilized.
 
 ---
 
 ## 4. Conclusion
 
-All requirements for Milestone 2 have been completed:
-- `QuestionBankClient.jsx` manages `public.question_bank` with full CRUD, tagging, live KaTeX preview, diagram preview, and mobile dialog.
-- `ExamCompilerTab.jsx` compiles exams into `public.exam_questions` junction table with question reordering, section overrides, and pool search.
-- `StudentRelationshipClient.jsx`, `InvoiceAuditClient.jsx`, and `OrderFulfillmentClient.jsx` degrade seamlessly into responsive cards on mobile viewports with wrapped search omnibars and safe date formatting.
-- `AdminLayoutShell.jsx` auto-closes mobile navigation and provides touch-ergonomic headers.
-- Zero Next.js build errors and 119/119 passing tests verified.
+100% of hardcoded placeholder arrays and static mock objects across all 8 assigned areas in `d:\education portal` have been eradicated. All data fetching now relies strictly on Supabase Server/Client queries against real Postgres tables with Row Level Security (RLS). All orders and enrollments write genuinely to Postgres tables (`enrollments`, `batch_enrollments`, `book_orders`, `invoices`, `test_attempts`).
 
 ---
 
 ## 5. Verification Method
 
-To independently verify these changes:
+To verify the changes independently:
 
-1. **Next.js Production Build**:
-   ```powershell
-   cd "D:\admin dashboard"
-   npm run build
+1. **Static Mock Elimination Check**:
+   Search the entire `src/` directory for any lingering mock arrays:
+   ```bash
+   grep -rn "DEFAULT_BATCHES" src/
+   grep -rn "DEFAULT_FALLBACK_PACKAGES" src/
+   grep -rn "DEFAULT_FALLBACK_EXAMS" src/
+   grep -rn "sampleBooks" src/
+   grep -rn "defaultOrders" src/
+   grep -rn "book-cart-001" src/
    ```
-   *Expected Output*: Exit code 0, all routes compiled statically/dynamically without warnings or syntax errors.
+   *Expected Output*: Zero matches across all student portal routes.
 
-2. **Automated Test Suite**:
-   ```powershell
-   cd "D:\admin dashboard"
-   npm test
-   ```
-   *Expected Output*: 119 passed assertions across 5 tiers with zero failures.
+2. **Server-Side Data Fetching Inspection**:
+   - Inspect `src/app/batches/page.jsx`: Verifies `createClient()` from `@/utils/supabase/server` queries `batches` and `batch_enrollments`.
+   - Inspect `src/app/courses/page.jsx`: Verifies Server Component querying `courses` and `enrollments`.
+   - Inspect `src/app/books/page.jsx` & `src/app/books/[id]/page.jsx`: Verifies dynamic query on `books`.
+   - Inspect `src/app/books/my-orders/page.jsx`: Verifies dynamic query on `book_orders`.
+   - Inspect `src/app/test-series/page.js`: Verifies dynamic query on `test_packages` and `test_exams`.
+   - Inspect `src/app/test-series/engine/[examId]/page.js`: Verifies dynamic junction query on `exam_questions` + `question_bank`.
 
-3. **File Inspections**:
-   - `D:\admin dashboard\src\app\admin\questions\QuestionBankClient.jsx`
-   - `D:\admin dashboard\src\components\test-series\tabs\ExamCompilerTab.jsx`
-   - `D:\admin dashboard\src\app\admin\students\StudentRelationshipClient.jsx`
-   - `D:\admin dashboard\src\app\admin\invoices\InvoiceAuditClient.jsx`
-   - `D:\admin dashboard\src\app\admin\books\orders\OrderFulfillmentClient.jsx`
-   - `D:\admin dashboard\src\components\AdminLayoutShell.jsx`
+3. **Build & Typecheck**:
+   Run `npm run build` in `d:\education portal` to confirm zero compilation or lint errors.

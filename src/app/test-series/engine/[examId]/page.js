@@ -1,176 +1,159 @@
 import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import CbtEngineClient from './CbtEngineClient'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = {
+  title: 'NTA CBT Exam Engine | Asentra Testing Service',
+  description: 'Proctored Computer-Based Testing (CBT) examination simulator matching official NTA interface.'
+}
 
 export default async function CbtEnginePage({ params }) {
   const { examId } = await params
   
   const supabase = await createClient()
 
-  // Authenticate user session
+  // 1. Authenticate user session
   const { data: { user } } = await supabase.auth.getUser()
-  const authenticatedUser = user || { id: 'test-user-01', email: 'candidate@Asentra.edu.in' }
+  const authenticatedUser = user || { id: 'test-user-01', email: 'candidate@asentra.edu.in' }
 
-  // Fetch student profile
+  // 2. Fetch student profile
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', authenticatedUser.id)
-    .single()
+    .maybeSingle()
 
-  // Fetch target exam blueprint from database
-  let examData = null
-  let isAuthorized = true
+  // 3. Fetch target exam from database
+  const { data: exam, error: examError } = await supabase
+    .from('test_exams')
+    .select('*, test_packages(price_ledger, title)')
+    .eq('id', examId)
+    .maybeSingle()
 
+  if (examError || !exam) {
+    notFound()
+  }
+
+  // 4. Authorization check for premium packages
+  const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
+  if (isPremium && !exam.is_live_ranking) {
+    if (user) {
+      const { data: invoice } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('package_id', exam.package_id)
+        .maybeSingle()
+
+      if (!invoice) {
+        const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+        if (prof?.role !== 'admin' && prof?.role !== 'teacher' && prof?.role !== 'instructor') {
+          redirect('/test-series')
+        }
+      }
+    } else {
+      redirect('/test-series')
+    }
+  }
+
+  // 5. Query questions dynamically from Global Question Bank via junction table
+  let questions = []
   try {
-    const { data: exam } = await supabase
-      .from('test_exams')
-      .select('*, test_packages(price_ledger)')
-      .eq('id', examId)
-      .single()
-      
-    if (exam) {
-      // SECURITY PATCH: Strip correct answers and explanations before sending to client
-      let sanitizedQuestions = []
-      if (typeof exam.questions === 'string') {
-        try { sanitizedQuestions = JSON.parse(exam.questions) } catch (e) { sanitizedQuestions = [] }
-      } else if (Array.isArray(exam.questions)) {
-        sanitizedQuestions = exam.questions
-      }
+    const { data: junctionRows, error: junctionError } = await supabase
+      .from('exam_questions')
+      .select('order_index, section, marks_positive, marks_negative, question_bank(*)')
+      .eq('exam_id', examId)
+      .order('order_index', { ascending: true })
 
-      examData = {
-        ...exam,
-        questions: sanitizedQuestions.map(q => {
-          const safeQ = { ...q }
-          delete safeQ.correct_option_index
-          delete safeQ.correctAnswer
-          delete safeQ.solution_explanation
-          delete safeQ.explanation
-          return safeQ
-        })
-      }
-
-      const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
-
-      // Allow access if:
-      // 1. Exam is live open ranking mock (is_live_ranking)
-      // 2. Exam is demo/fallback simulation id (00000000-*)
-      // 3. Package is not premium
-      // 4. User has purchased package invoice or is staff
-      if (isPremium && !exam.is_live_ranking && !examId.startsWith('00000000-')) {
-        if (user) {
-          const { data: invoice } = await supabase
-            .from('invoices')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('package_id', exam.package_id)
-            .maybeSingle()
-
-          if (!invoice) {
-            const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-            if (prof?.role !== 'admin' && prof?.role !== 'teacher' && prof?.role !== 'instructor') {
-              isAuthorized = false
-            }
-          }
-        } else {
-          isAuthorized = false
+    if (!junctionError && junctionRows && junctionRows.length > 0) {
+      questions = junctionRows.map((jr, idx) => {
+        const q = jr.question_bank || {}
+        let parsedOptions = []
+        if (Array.isArray(q.options)) {
+          parsedOptions = q.options
+        } else if (typeof q.options === 'string') {
+          try { parsedOptions = JSON.parse(q.options) } catch (e) { parsedOptions = [] }
         }
-      }
+
+        let rawFormat = (q.format_type || q.type || 'MCQ').toUpperCase()
+        if (rawFormat.includes('SINGLE') || rawFormat.includes('MCQ')) rawFormat = 'MCQ'
+        else if (rawFormat.includes('MULTIPLE') || rawFormat.includes('MSQ')) rawFormat = 'MSQ'
+        else if (rawFormat.includes('NUM')) rawFormat = 'NUMERICAL'
+
+        return {
+          id: q.id || `eq-${idx + 1}`,
+          format: rawFormat,
+          format_type: q.format_type || 'single_mcq',
+          type: q.type || 'mcq',
+          subject: q.subject || 'General',
+          topic: q.topic || '',
+          sub_topic: q.sub_topic || q.topic || 'General Topic',
+          section: jr.section || q.section || 'Section A',
+          question_text: q.content || 'Question content pending.',
+          content: q.content || '',
+          options: parsedOptions,
+          image_url: q.image_url || null,
+          marks_positive: Number(jr.marks_positive || q.marks_positive) || 4,
+          marks_negative: Number(jr.marks_negative || q.marks_negative) || -1
+        }
+      })
     }
-  } catch (e) {
-    console.error('Error fetching exam details:', e)
+  } catch (err) {
+    console.error('[CBT ENGINE] Error fetching junction questions:', err)
   }
 
-  if (!isAuthorized) {
-    redirect('/test-series')
+  // 6. Fallback to exam.questions column if junction had no rows
+  if (questions.length === 0 && exam.questions) {
+    let embeddedQuestions = []
+    if (typeof exam.questions === 'string') {
+      try { embeddedQuestions = JSON.parse(exam.questions) } catch (e) { embeddedQuestions = [] }
+    } else if (Array.isArray(exam.questions)) {
+      embeddedQuestions = exam.questions
+    }
+
+    questions = embeddedQuestions.map((q, idx) => {
+      let rawFormat = (q.format || q.format_type || q.type || 'MCQ').toUpperCase()
+      if (rawFormat.includes('SINGLE') || rawFormat.includes('MCQ')) rawFormat = 'MCQ'
+      else if (rawFormat.includes('MULTIPLE') || rawFormat.includes('MSQ')) rawFormat = 'MSQ'
+      else if (rawFormat.includes('NUM')) rawFormat = 'NUMERICAL'
+
+      return {
+        id: q.id || `eq-${idx + 1}`,
+        format: rawFormat,
+        format_type: q.format_type || 'single_mcq',
+        type: q.type || 'mcq',
+        subject: q.subject || 'General',
+        topic: q.topic || '',
+        sub_topic: q.sub_topic || q.topic || 'General Topic',
+        section: q.section || 'Section A',
+        question_text: q.question_text || q.content || 'Question content pending.',
+        content: q.content || q.question_text || '',
+        options: Array.isArray(q.options) ? q.options : [],
+        image_url: q.image_url || null,
+        marks_positive: Number(q.marks_positive) || 4,
+        marks_negative: Number(q.marks_negative) || -1
+      }
+    })
   }
 
-  // High-fidelity fallback exam paper with 6 multi-format questions for testing NTA CBT features
-  if (!examData) {
-    examData = {
-      id: examId === 'nta-grand-mock-1' ? '00000000-0000-0000-0000-000000000001' : (examId || '00000000-0000-0000-0000-000000000001'),
-      title: examId === 'jee-physics-sprint-1' ? 'JEE Physics Mechanics Speed Sprint 01' : 'NTA JEE Mains All India Grand Mock Test 2026',
-      duration_minutes: 180,
-      total_questions: 75,
-      marks_scheme: { positive_marks: 4, negative_marks: -1 },
-      questions: [
-        {
-          id: 'q-1',
-          format: 'MCQ',
-          subject: 'Physics',
-          sub_topic: 'Mechanics & Rotational Dynamics',
-          question_text: 'A uniform disc of mass M = 4 kg and radius R = 0.5 m is rolling purely on a horizontal surface with a velocity of v = 6 m/s. Calculate its total kinetic energy in Joules.',
-          options: ['72 J', '108 J', '144 J', '54 J'],
-          correct_option_index: 1,
-          solution_explanation: 'Total K.E. = (1/2) M v^2 + (1/2) I w^2 = (3/4) M v^2 = (3/4) * 4 * 36 = 108 Joules.'
-        },
-        {
-          id: 'q-2',
-          format: 'MCQ',
-          subject: 'Chemistry',
-          sub_topic: 'Organic Reaction Mechanisms',
-          question_text: 'Which of the following carbocations is most stable due to maximum hyperconjugative and resonance stabilization?',
-          options: ['Triphenylmethyl carbocation', 'Tert-butyl carbocation', 'Allyl carbocation', 'Isopropyl carbocation'],
-          correct_option_index: 0,
-          solution_explanation: 'Triphenylmethyl carbocation is stabilized by extensive resonance delocalization across 3 phenyl rings.'
-        },
-        {
-          id: 'q-3',
-          format: 'MSQ',
-          subject: 'Physics',
-          sub_topic: 'Electrostatics & Gauss Law',
-          question_text: 'Select ALL correct statements regarding a conducting spherical shell of radius R carrying charge Q:',
-          options: [
-            'Electric field inside the conducting shell is zero.',
-            'Electric potential is constant throughout the volume inside the shell.',
-            'Electric field just outside the surface is Q / (4 * pi * epsilon_0 * R^2).',
-            'Surface charge density is uniform.'
-          ],
-          correct_option_index: 0,
-          solution_explanation: 'All four statements are correct fundamental properties of electrostatic conductors.'
-        },
-        {
-          id: 'q-4',
-          format: 'NUMERICAL',
-          subject: 'Mathematics',
-          sub_topic: 'Calculus & Integration',
-          question_text: 'Evaluate the definite integral integral from 0 to pi/2 of (sin(x) / (sin(x) + cos(x))) dx. Enter exact decimal value.',
-          options: [],
-          correct_option_index: 0,
-          correct_value: 0.785,
-          solution_explanation: 'Using King Property integral I = integral (pi/2 - x) => 2I = pi/2 => I = pi/4 approx 0.785.'
-        },
-        {
-          id: 'q-5',
-          format: 'MCQ',
-          subject: 'Mathematics',
-          sub_topic: '3D Geometry & Vectors',
-          question_text: 'Find the shortest distance between lines (r_vec = a_vec + lambda * b_vec) and (r_vec = c_vec + mu * d_vec).',
-          options: ['|(a - c) . (b x d)| / |b x d|', '|(a + c) . (b x d)| / |b x d|', '|b x d|', 'Zero'],
-          correct_option_index: 0,
-          solution_explanation: 'Shortest distance formula for skew lines in vector form is |(a - c) . (b x d)| / |b x d|.'
-        },
-        {
-          id: 'q-6',
-          format: 'MCQ',
-          subject: 'Chemistry',
-          sub_topic: 'Physical Chemistry & Equilibrium',
-          question_text: 'Calculate the pH of 0.01 M HCl solution at 25 degrees Celsius.',
-          options: ['2.0', '1.0', '7.0', '14.0'],
-          correct_option_index: 0,
-          solution_explanation: 'pH = -log10([H+]) = -log10(10^-2) = 2.0.'
-        }
-      ]
-    }
+  const sanitizedExam = {
+    id: exam.id,
+    package_id: exam.package_id,
+    title: exam.title,
+    duration_minutes: Number(exam.duration_minutes) || 180,
+    total_questions: Number(exam.total_questions) || (questions.length || 75),
+    marks_scheme: exam.marks_scheme || { positive_marks: 4, negative_marks: -1 },
+    is_live_ranking: !!exam.is_live_ranking,
+    questions: questions
   }
 
   return (
     <CbtEngineClient
       user={authenticatedUser}
-      profile={profile || { full_name: 'Test Candidate', role: 'student' }}
-      exam={examData}
+      profile={profile || { full_name: 'Candidate', role: 'student' }}
+      exam={sanitizedExam}
     />
   )
 }

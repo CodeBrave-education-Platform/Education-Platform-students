@@ -1,11 +1,18 @@
-# Progress — Worker M2
+# Progress — Worker M2 (Student Portal Dynamic Data Integration)
 
-Last visited: 2026-08-20T00:19:00Z
+- **Status**: Completed
+- **Last visited**: 2026-08-24T18:46:35Z
 
-- [x] Initialized DISPATCH.md and BRIEFING.md
-- [x] Audited existing codebase and explorer survey reports
-- [x] Task 1: Refactor Question Bank Studio (`QuestionBankClient.jsx`) for canonical `question_bank` CRUD, tags, KaTeX, diagram preview, and mobile responsiveness
-- [x] Task 2: Refactor Exam Compiler (`ExamCompilerTab.jsx`) with `question_bank` & `exam_questions` junction table integration
-- [x] Task 3: Implement Mobile Card Degradation in `StudentRelationshipClient.jsx`, `InvoiceAuditClient.jsx`, and `OrderFulfillmentClient.jsx`
-- [x] Task 4: Fix mobile sidebar auto-close and mobile header touch ergonomics in `AdminLayoutShell.jsx`
-- [x] Task 5: Build verification (`npm run build` passed with 0 errors) and test suite verification (119/119 tests pass)
+## Steps Completed
+1. [x] Initialization (DISPATCH.md, BRIEFING.md, progress.md)
+2. [x] Context & Schema Investigation (Review migration 16, original request, student UI survey, Supabase client utilities)
+3. [x] Task 1: `src/app/batches/page.jsx` & `src/app/batches/BatchesClient.jsx` (Server Component fetching `public.batches` & `public.batch_enrollments`, removed `DEFAULT_BATCHES`)
+4. [x] Task 2: `src/app/courses/page.jsx` & `src/app/courses/CoursesCatalogClient.jsx` (Server Component fetching `public.courses` & `public.enrollments`, removed `DEFAULT_COURSES`)
+5. [x] Task 3: `src/app/courses/[id]/CourseDetailsClient.jsx` (Eliminated `localStorage` mock order provisioning)
+6. [x] Task 4: `src/app/books/page.jsx`, `src/app/books/BooksClient.jsx`, & `src/app/books/[id]/page.jsx` (Server Components fetching 100% dynamic books from `public.books`, removed `sampleBooks` and static `b1` book object)
+7. [x] Task 5: `src/app/books/checkout/page.jsx`, `src/app/books/checkout/BookCheckoutClient.jsx`, & `src/app/books/my-orders/page.jsx` (Dynamic book checkout & real order retrieval from `public.book_orders`, removed `book-cart-001` and `defaultOrders`)
+8. [x] Task 6: `src/app/test-series/page.js`, `src/app/test-series/engine/[examId]/page.js`, & `CbtEngineClient.jsx` (Dynamic packages, exams, and question bank retrieval via `exam_questions` junction table, removed `DEFAULT_FALLBACK_PACKAGES` and `DEFAULT_FALLBACK_EXAMS`)
+9. [x] Task 7: `src/app/dashboard/page.jsx`, `src/app/dashboard/DashboardClient.jsx`, `src/app/profile/page.jsx`, & `src/app/profile/ProfileClient.jsx` (Dynamic academic metrics calculated from `public.test_attempts` and `public.enrollments`)
+10. [x] Task 8: `src/components/landing/LiveTicker.jsx` & `src/components/Navbar.jsx` (Dynamic routing links & flexible telemetry ticker)
+11. [x] Verification & Code Integrity Audit (Zero static mock arrays remaining, strict schema parity)
+12. [x] Write handoff.md and report to parent

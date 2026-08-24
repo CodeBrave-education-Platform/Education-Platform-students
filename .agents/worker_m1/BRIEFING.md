@@ -1,57 +1,54 @@
-# BRIEFING — 2026-08-20T00:15:00Z
+# BRIEFING — 2026-08-24T13:08:00Z
 
 ## Mission
-Author and apply the production SQL migration for Milestone 1: Global Question Bank Schema & Zero-Data-Loss Migration (`15_question_bank_and_junction_tables.sql`), creating `question_bank`, `exam_questions`, `assessment_questions`, indexes, RLS policies, trigger synchronizers, and zero-loss question extraction preserving all UUIDs for historical student attempts.
+Author and deploy production-grade Supabase SQL migration `16_dynamic_data_and_schema_sync.sql` across Student Portal and Admin Dashboard workspaces to support dynamic data fetching, schema enhancements for batches and books, announcements, student bookmarks, instructor views, and rich seed data.
 
 ## 🔒 My Identity
-- Archetype: worker
+- Archetype: Implementer & Database Architect
 - Roles: implementer, qa, specialist
-- Working directory: D:\education portal\.agents\worker_m1
-- Original parent: 956a3c37-e5af-4b34-8164-7d6aee236e08
-- Milestone: M1 (Database Question Bank & Zero-Loss Migration)
+- Working directory: `d:\education portal\.agents\worker_m1`
+- Original parent: `59ab231a-b8f9-42bd-b147-b32955fd7afe`
+- Milestone: M1 Database Schema & Migration Builder
 
 ## 🔒 Key Constraints
-- Production SQL migration file must be written to `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql` and copied to `D:\admin dashboard\supabase\migrations\15_question_bank_and_junction_tables.sql`.
-- Migration must create `public.question_bank`, `public.exam_questions`, `public.assessment_questions`.
-- Implement PostgreSQL trigger function `sync_test_exams_questions_from_bank()` and triggers on `question_bank` and `exam_questions` for live bidirectional JSON backward compatibility.
-- Zero-loss extraction: extract all questions from `test_exams.questions` JSON and `test_questions` preserving exact UUIDs for all 66 student attempts.
-- Populate `exam_questions` junction table links.
-- Create indexes and RLS policies.
-- Execute against Supabase DB and verify empirically.
+- Production-grade PostgreSQL / Supabase SQL syntax
+- Place identical migration files in both `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql` and `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+- Add columns to `public.batches` (faculty, faculty_role, instructor_name, instructor_role, target_year, schedule, seats_left, students_enrolled, original_price, rating, badge, checklist, book_kit, curriculum, is_featured, is_active)
+- Add columns to `public.books` (subject, category, rating, reviews_count, format, cover_image_url, stock)
+- Create `public.announcements` table with RLS enabled and proper policies
+- Create `public.student_bookmarks` table with RLS enabled and user ownership policies
+- Create `public.instructors` view with `security_invoker = true`
+- Insert comprehensive dynamic seed rows for courses, batches, books, test packages, test exams, question bank, exam questions, and announcements
+- Adhere to Supabase best practices: avoid deprecated `auth.role()`, use `(select auth.uid())` for subquery scalar caching, enforce RLS on all exposed schemas
 
 ## Current Parent
-- Conversation ID: 956a3c37-e5af-4b34-8164-7d6aee236e08
-- Updated: 2026-08-20T00:15:00Z
+- Conversation ID: `59ab231a-b8f9-42bd-b147-b32955fd7afe`
+- Updated: 2026-08-24T13:08:00Z
 
 ## Task Summary
-- **What to build**: Production migration script `15_question_bank_and_junction_tables.sql` + DB execution + empirical verification
-- **Success criteria**:
-  1. `public.question_bank` created with all specified columns and constraints (14 extracted rows)
-  2. `public.exam_questions` created with foreign keys and unique constraints (12 junction links)
-  3. `public.assessment_questions` created with foreign keys and unique constraints
-  4. Triggers created and verified to synchronize `test_exams.questions` and `total_questions` on question/junction update
-  5. 100% of existing questions extracted into `question_bank` with preserved UUIDs
-  6. All 66 student test attempts remain completely valid and intact
-  7. Junction records created for all exams
-  8. Migration file present in both student portal and admin dashboard
-- **Interface contracts**: `PROJECT.md` & `explorer_survey_db_qb/analysis.md`
-- **Code layout**: `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql`
+- **What to build**: Migration `16_dynamic_data_and_schema_sync.sql` in both repositories with complete schema enhancements, RLS, indexes, and full seed catalog.
+- **Success criteria**: 100% parity across both repos, all schema additions and new tables with RLS and constraints, valid SQL and JSON data, test coverage.
+- **Interface contracts**: Supabase PostgreSQL 15+, Next.js 16 / React 19 SSR client integration.
+
+## Key Decisions Made
+- Used `ADD COLUMN IF NOT EXISTS` for seamless backward-compatibility and zero downtime.
+- Used `security_invoker = true` on `public.instructors` view to preserve RLS on the underlying `public.profiles` table.
+- Seeded comprehensive catalog rows for Flagship JEE, NEET, and Foundation programs with realistic pricing, checklists, book kits, and curricula.
+- Implemented automated sync call to `public.sync_test_exams_questions_from_bank()` ensuring CBT test exams JSON questions remain fully synced.
 
 ## Change Tracker
 - **Files modified**:
-  - `D:\education portal\supabase\migrations\15_question_bank_and_junction_tables.sql` (Created & Applied)
-  - `D:\admin dashboard\supabase\migrations\15_question_bank_and_junction_tables.sql` (Created)
-  - `D:\education portal\.agents\worker_m1\verify_m1_migration.js` (Verification Suite - 17/17 tests passed)
-- **Build status**: PASS (17/17 verification tests passed)
+  - `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql` — Main production migration 16
+  - `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql` — Synchronized migration 16 copy
+  - `d:\education portal\tests\migration_16_validator.mjs` — Automated validation test suite
+- **Build status**: PASS
 - **Pending issues**: None
 
 ## Quality Status
-- **Build/test result**: PASS (17/17 empirical tests passed)
-- **Lint status**: Clean
-- **Tests added/modified**: `verify_m1_migration.js`
+- **Build/test result**: Pass (Verified all 9 structural, schema, RLS, and seed validation criteria)
+- **Lint status**: Clean (Supabase best practices compliant, no deprecated functions)
+- **Tests added/modified**: `tests/migration_16_validator.mjs`
 
 ## Loaded Skills
-- **Source**: `D:\education portal\.agents\skills\supabase\SKILL.md`
-  - Core methodology: Supabase best practices, SQL migrations, triggers, RLS, schema design
-- **Source**: `D:\education portal\.agents\skills\supabase-postgres-best-practices\SKILL.md`
-  - Core methodology: Postgres performance, indexing, security invoker views, constraints
+- **Source**: `d:\education portal\.agents\skills\supabase\SKILL.md`
+- **Source**: `d:\education portal\.agents\skills\supabase-postgres-best-practices\SKILL.md`

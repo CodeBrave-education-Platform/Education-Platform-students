@@ -1,13 +1,12 @@
-# Progress Log — Worker M1 (Question Bank Schema & Zero-Loss Migration)
+# Progress — Worker M1 (Supabase Database Schema & Migration Builder)
 
-- [x] Analyze codebase, database state, and existing question formats
-- [x] Verified current live DB state: 2 test exams, 12 embedded questions, 3 test_questions pool items, 66 test attempts
-- [x] Initialized DISPATCH.md and BRIEFING.md
-- [x] Authored production SQL migration `15_question_bank_and_junction_tables.sql`
-- [x] Copied migration to `D:\admin dashboard\supabase\migrations\15_question_bank_and_junction_tables.sql`
-- [x] Executed migration against Supabase PostgreSQL database
-- [x] Empirically verified table creation, indexes, RLS policies, trigger synchronizations, and data extraction
-- [x] Verified 66 test attempts remain intact and valid (17/17 tests passing)
-- [x] Authored handoff report `handoff.md`
+Last visited: 2026-08-24T13:08:30Z
 
-Last visited: 2026-08-20T00:15:00Z
+- [x] Read DISPATCH.md, ORIGINAL_REQUEST.md, survey_db_schema_report.md, and existing migrations
+- [x] Analyze schema requirements for batches, books, courses, announcements, student_bookmarks, instructors view, and dynamic seed rows
+- [x] Formulate production-grade SQL migration `16_dynamic_data_and_schema_sync.sql`
+- [x] Deploy migration to `d:\education portal\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+- [x] Deploy migration to `d:\admin dashboard\supabase\migrations\16_dynamic_data_and_schema_sync.sql`
+- [x] Author automated validator test `d:\education portal\tests\migration_16_validator.mjs`
+- [x] Verify 100% schema parity, foreign keys, RLS security policies, grants, and seed data
+- [x] Update BRIEFING.md and prepare comprehensive handoff.md

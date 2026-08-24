@@ -31,83 +31,8 @@ export default function CbtEngineClient({ user, profile, exam }) {
     rawQuestions = exam.questions
   }
   
-  // Ensure default robust NTA question fallback if rawQuestions is short or missing properties
   const questions = useMemo(() => {
-    if (rawQuestions.length >= 5) return rawQuestions
-    return [
-      {
-        id: 'q-1',
-        format: 'MCQ',
-        subject: 'Physics',
-        sub_topic: 'Kinematics & Rotational Dynamics',
-        question_text: 'A uniform disc of mass M = 4 kg and radius R = 0.5 m is rolling purely on a horizontal surface with a velocity of v = 6 m/s. Calculate its total kinetic energy in Joules.',
-        options: ['72 J', '108 J', '144 J', '54 J'],
-        correct_option_index: 1,
-        solution_explanation: 'Total K.E. = (1/2) M v² + (1/2) I ω² = (3/4) M v² = (3/4) * 4 * 36 = 108 Joules.'
-      },
-      {
-        id: 'q-2',
-        format: 'MCQ',
-        subject: 'Chemistry',
-        sub_topic: 'Chemical Equilibrium & Kinetics',
-        question_text: 'For a first-order gaseous reaction A(g) → 2B(g) + C(g), the initial pressure is P₀ and total pressure after time t is P_t. The rate constant k is expressed as:',
-        options: [
-          'k = (1/t) ln [P₀ / (2P₀ - P_t)]',
-          'k = (1/t) ln [2P₀ / (3P₀ - P_t)]',
-          'k = (1/t) ln [P₀ / (3P₀ - 2P_t)]',
-          'k = (1/t) ln [2P₀ / (P₀ - P_t)]'
-        ],
-        correct_option_index: 1,
-        solution_explanation: 'At time t, P_total = P₀ - x + 2x + x = P₀ + 2x => x = (P_t - P₀)/2. Pressure of A = P₀ - x = (3P₀ - P_t)/2. Hence k = (1/t) ln[2P₀ / (3P₀ - P_t)].'
-      },
-      {
-        id: 'q-3',
-        format: 'MSQ',
-        subject: 'Physics',
-        sub_topic: 'Electrostatics & Conductors',
-        question_text: 'Select ALL correct statements regarding a charged conducting sphere of radius R carrying total positive charge Q:',
-        options: [
-          'Electric field intensity everywhere inside the volume of the sphere is zero.',
-          'Electric potential is constant and uniform throughout the volume inside the sphere.',
-          'Electric field just outside the surface is Q / (4πε₀R²).',
-          'Surface charge density is uniform on the conducting sphere.'
-        ],
-        correct_options: [0, 1, 2, 3],
-        correct_option_index: 0,
-        solution_explanation: 'All 4 options represent fundamental physical properties of electrostatic conductors in equilibrium.'
-      },
-      {
-        id: 'q-4',
-        format: 'NUMERICAL',
-        subject: 'Mathematics',
-        sub_topic: 'Definite Integration & King Property',
-        question_text: 'Evaluate the definite integral ∫₀^(π/2) (sin(x) / (sin(x) + cos(x))) dx. Enter the exact decimal value up to 3 decimal places (e.g. 0.785).',
-        options: [],
-        correct_value: 0.785,
-        tolerance: 0.01,
-        solution_explanation: 'Using King Property: 2I = π/2 => I = π/4 ≈ 0.785.'
-      },
-      {
-        id: 'q-5',
-        format: 'MCQ',
-        subject: 'Mathematics',
-        sub_topic: 'Definite Integration & Areas',
-        question_text: 'Evaluate the area enclosed between the parabolas y² = 4ax and x² = 4ay (where a > 0).',
-        options: ['16a² / 3', '8a² / 3', '4a² / 3', '32a² / 3'],
-        correct_option_index: 0,
-        solution_explanation: 'Points of intersection are (0,0) and (4a, 4a). Area = ∫₀^(4a) [√(4ax) - (x²/4a)] dx = 16a²/3.'
-      },
-      {
-        id: 'q-6',
-        format: 'MCQ',
-        subject: 'Chemistry',
-        sub_topic: 'Organic Reaction Mechanisms',
-        question_text: 'Which of the following carbocations is most stable due to maximum hyperconjugative and resonance stabilization?',
-        options: ['Triphenylmethyl carbocation', 'Tert-butyl carbocation', 'Allyl carbocation', 'Isopropyl carbocation'],
-        correct_option_index: 0,
-        solution_explanation: 'Triphenylmethyl carbocation is stabilized by extensive resonance delocalization across 3 phenyl rings.'
-      }
-    ]
+    return rawQuestions
   }, [rawQuestions])
 
   const marksScheme = exam.marks_scheme || { positive_marks: 4, negative_marks: -1 }
