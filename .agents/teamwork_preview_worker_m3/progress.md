@@ -1,16 +1,21 @@
 # Progress Log - teamwork_preview_worker_m3
 
-**Last visited**: 2026-08-18T15:51:30Z
-**Current Status**: Initializing & Reading context files
+**Last visited**: 2026-09-04T10:55:00Z
+**Current Status**: Investigating existing AI Vision parser files
 
 ## Checklist
-- [x] Create DISPATCH.md, BRIEFING.md, progress.md
-- [ ] Read context files (ORIGINAL_REQUEST.md, PROJECT.md, explorer handoffs, challenger handoffs, playwright.config.js, package.json)
-- [ ] Apply query disambiguation fix on `src/app/dashboard/page.jsx:95`
-- [ ] Examine existing test files in `tests/` or create `tests/bento-ui.spec.js` and `tests/database-health.spec.js`
-- [ ] Configure `package.json` scripts if needed
-- [ ] Run test suites and verify 100% pass rate
-- [ ] Generate and publish `d:\education portal\TEST_READY.md`
-- [ ] Run `npm run build` to verify 30/30 routes with 0 errors
-- [ ] Write `handoff.md`
-- [ ] Send completion message to parent orchestrator_2
+- [x] Create/Update DISPATCH.md, BRIEFING.md, progress.md
+- [ ] Inspect existing AI vision parser files:
+  - `d:\admin dashboard\src\app\api\admin\ai\parse-pdf\route.js`
+  - `d:\admin dashboard\src\app\api\admin\ai\parse-pdf-page\route.js`
+  - `d:\admin dashboard\src\components\UniversalPdfImporterModal.jsx`
+- [ ] Design and implement:
+  - Multi-subject boundary auto-detection (Physics, Chemistry, Mathematics ranges + Section A/B)
+  - End-of-PDF Answer Key Matrix scanning & binding (MCQ, MSQ, Numerical, Matrix Match)
+  - Diagram bounding box extraction ([ymin, xmin, ymax, xmax]) & Supabase Storage upload (`question-papers` bucket)
+  - Robust fallback handling with deterministic regex when AI keys are unavailable
+  - Shared parsing utilities in `d:\admin dashboard\src\lib\pdf-vision-parser.js` and `d:\admin dashboard\src\lib\diagram-cropper.js`
+- [ ] Test with empirical validation script across edge cases (all question formats, multi-subject boundaries, diagram bounding boxes, end-of-PDF answer key matrix binding, deterministic regex fallback)
+- [ ] Run build verification (`npm run build` in `d:\admin dashboard`)
+- [ ] Write 5-component handoff report to `d:\education portal\.agents\teamwork_preview_worker_m3\handoff.md`
+- [ ] Send message to orchestrator with findings

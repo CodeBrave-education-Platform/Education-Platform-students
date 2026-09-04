@@ -65,3 +65,69 @@ If a UI component (like the course catalog or batch listings) lacks an underlyin
 ### Verification (Agent-as-Judge)
 - [ ] An independent agent reviews the modified React components and confirms that the data mapping relies on a backend fetch (e.g., via `@supabase/ssr` or `@supabase/supabase-js`) rather than static arrays or objects.
 - [ ] An independent agent confirms that any newly created Supabase tables have Row Level Security (RLS) enabled and proper foreign key constraints where applicable.
+
+## 2026-09-04T10:35:58Z
+
+# Teamwork Project Prompt
+
+Working directory: d:\admin dashboard and d:\education portal
+Integrity mode: development
+
+Transform the Education Platform's assessment suite into an intuitive, Classplus-grade Test Portal with a dedicated Question Paper PDF Repository, automated end-of-PDF answer-key matching, diagram extraction, multi-format JEE Main/Advanced exam blueprints, and an NTA-standard student CBT engine with zero "Free Material" and no mandatory "Test Packages".
+
+## Requirements
+
+### R1. Database Migration & Standalone Exam Decoupling
+- Execute Supabase migration to make `test_exams.package_id` nullable, allowing tests to exist as independent standalone entities.
+- Add `sections_config` (JSONB) and `blueprint_type` columns to `public.test_exams` to store section-level marking (+4/-1 for MCQs, +4/0 for Integers, partial marking for MSQs) and optional attempt rules (e.g. attempt any 5 of 10).
+- Create `public.question_paper_documents` table to track uploaded PDFs with metadata (`title`, `file_url`, `file_name`, `file_size_bytes`, `subject`, `target_exam`, `status`, `compiled_exam_id`, `created_at`).
+- Ensure Supabase Storage bucket `question-papers` is configured with appropriate RLS policies for file upload and retrieval.
+
+### R2. Admin Test Portal & Question Paper PDF Repository
+- In `d:\admin dashboard`, update `AdminLayoutShell.jsx` to replace "Test Packages" with a unified "Test Portal" navigation item, removing all references to "Free Material".
+- Refactor `/admin/test-series` into a clean 2-Tab interface:
+  - **Tab 1 (`All Tests`)**: Direct table of all compiled exams with titles, subject tags, question count, duration, student attempt tally, and action buttons.
+  - **Tab 2 (`PDF Question Papers`)**: Grid/list of uploaded PDF question papers with upload date, size, status badges ("Ready to Compile" vs "Compiled"), PDF preview, and a 1-click **"Compile into Exam"** action.
+- Include a drag-and-drop PDF uploader with progress tracking that saves raw PDFs to Supabase storage.
+
+### R3. AI Vision Parser: End-of-PDF Answer Key Scanning & Diagram Extraction
+- Upgrade the backend AI parser (`/api/admin/ai/parse-pdf` / multimodal pipeline) to:
+  1. Scan all question pages for questions, options, and question types (Single MCQ, Multi MSQ, Integer/Numerical, Matrix Matching).
+  2. Detect and parse the **Answer Key Matrix** typically located on the final pages (e.g., `1: B, 2: D, 3: 45...`) and automatically bind correct keys/values to their respective questions.
+  3. Extract diagram bounding boxes (geometry, circuits, organic chemistry) as image assets, save them to storage, and embed diagram URLs into question payloads.
+  4. Auto-detect multi-subject boundaries (Maths Q1-30, Physics Q31-60, Chemistry Q61-90) and assign questions to corresponding Subject Tabs.
+
+### R4. Overhauled Visual Exam Compiler & In-Place Editor
+- Redesign `TestCompiler.jsx` into a clean, intuitive workspace:
+  - **Header**: One-click Blueprint selector (`[JEE Main]` | `[JEE Advanced]` | `[Custom]`).
+  - **Subject Tabs**: Top tabs for `[Physics]`, `[Chemistry]`, `[Mathematics]`.
+  - **Section Sub-Pills**: Clear pills (e.g. Physics -> `[Section A: MCQs (20 Qs, +4/-1)]` | `[Section B: Numerical (10 Qs, +4/0, max 5)]`).
+  - **In-Place Question Cards**: Click any question in the list to expand and edit in-place with format-specific inputs (direct number for Integer, 4x4 matching rows for Matrix, radio/checkbox for MCQ/MSQ) and live KaTeX math formula preview.
+  - Quick action to "Move to Section", reorder, or delete questions.
+  - Add an **"Export Printable PDF"** feature generating a clean 2-column offline question paper booklet for classroom mock tests.
+
+### R5. Student Portal CBT Engine & Discovery
+- Update `d:\education portal\src\app\test-series\page.js` to list all active standalone mock tests directly with subject/exam filters, letting students click "Attempt Test" without navigating through packages.
+- Update `CbtEngineClient.jsx` in the student exam taking engine:
+  - Render Subject Tabs and Section Pills matching the exam blueprint.
+  - Support format-specific inputs: virtual on-screen number pad for Integers, clickable matrix grid for Matrix Matching, and checkboxes for MSQs.
+  - Enforce JEE Section B rule: display live counter `"Section B: 4 / 5 answered"`, and prevent answering more than the section's maximum allowed questions (with friendly prompt to clear an earlier response if desired).
+
+## Acceptance Criteria
+
+### Compilation & Parsing Integrity
+- [ ] Uploading a sample JEE PDF extracts questions, detects the answer key on the last page, binds correct options, and separates subjects into Physics, Chemistry, and Mathematics tabs.
+- [ ] Extracted diagram images are hosted on Supabase storage and render visibly in both compiler preview and student CBT engine.
+
+### Admin Usability & Editing
+- [ ] No "Free Material" tab or confusing "Test Package" requirement appears anywhere in the admin portal.
+- [ ] Clicking any question card in the compiler expands it in-place; editing text, options, or integer values updates the KaTeX preview and persists on save.
+- [ ] Sections correctly reflect independent scoring (+4/-1 for Sec A; +4/0 for Sec B Integers).
+- [ ] "Export Printable PDF" generates a clean, printable exam paper.
+
+### Student Exam Engine Compliance
+- [ ] Students can discover and launch compiled exams directly from `/test-series`.
+- [ ] On-screen virtual keypad inputs integer numbers seamlessly.
+- [ ] Attempting more than 5 questions in Section B triggers the warning and prevents over-attempting.
+- [ ] Dual portal builds (`npm run build` in both `d:\admin dashboard` and `d:\education portal`) succeed with zero type or lint errors.
+

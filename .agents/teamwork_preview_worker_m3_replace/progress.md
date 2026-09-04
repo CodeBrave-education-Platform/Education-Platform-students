@@ -1,11 +1,13 @@
-﻿# Progress Log
+# Progress Log
+ 
+- Last visited: 2026-09-04T16:50:00+05:30
+- Current Status: Completed implementation, verification, and hardening of Milestone 3 AI Vision Parser Pipeline.
+- Completed Tasks:
+   1. [COMPLETED] Enhanced `src/lib/pdf-vision-parser.js` with multi-subject boundary auto-detection (explicit header recognition and 90-Q/75-Q/thirds segmentation), 4-strategy end-of-PDF answer key matrix scanning, and dual-field binding (`correctOptionIdx`, `correctOptions`, `integerAnswer`, `matrixMatchAnswer`).
+   2. [COMPLETED] Enhanced `src/lib/diagram-cropper.js` with Sharp cropping for normalized `[ymin, xmin, ymax, xmax]` bounding boxes, Supabase Storage bucket `question-papers` upload targeting `diagrams/${Date.now()}_q${qNum}.png`, and base64 data URL fallback.
+   3. [COMPLETED] Updated `src/app/api/admin/ai/parse-pdf/route.js` and `parse-pdf-page/route.js` with two-pass answer key binding, image diagram cropping, CJS test runner bridge, and deterministic regex fallback.
+   4. [COMPLETED] Updated `src/components/UniversalPdfImporterModal.jsx` to accumulate answer keys across pages, run post-scan binding, subject boundary segmentation, and map dual-naming conventions.
+   5. [COMPLETED] Created and verified comprehensive empirical test suite in `test-m3-ai-vision-parser.js` with 100% pass rate across all 4 suites.
+   6. [COMPLETED] Added `test:ai-parser` script to `package.json`.
+   7. [COMPLETED] Prepared 5-component handoff report in `handoff.md`.
 
-- Last visited: 2026-08-18T21:51:00+05:30
-- Current Status: Starting discovery and file inspection.
-- Next Steps:
-  1. Inspect ORIGINAL_REQUEST.md, PROJECT.md, and all 3 explorer handoffs.
-  2. Inspect package.json, playwright.config.js, and tests/*.
-  3. Verify/update package.json scripts.
-  4. Run and diagnose tests.
-  5. Run production build.
-  6. Generate TEST_READY.md and handoff.md.

@@ -36,9 +36,8 @@ export default async function CbtEnginePage({ params }) {
     notFound()
   }
 
-  // 4. Authorization check for premium packages
-  const isPremium = exam.test_packages?.price_ledger?.status === 'premium'
-  if (isPremium && !exam.is_live_ranking) {
+  // 4. Authorization check for premium packages (Standalone tests with package_id === null are always open)
+  if (exam.package_id && exam.test_packages?.price_ledger?.status === 'premium' && !exam.is_live_ranking) {
     if (user) {
       const { data: invoice } = await supabase
         .from('invoices')
@@ -56,6 +55,15 @@ export default async function CbtEnginePage({ params }) {
     } else {
       redirect('/test-series')
     }
+  }
+
+  // Helper for strict format normalization
+  const normalizeFormat = (formatType, format, type) => {
+    const raw = String(formatType || format || type || '').toUpperCase()
+    if (raw.includes('MATRIX')) return 'MATRIX_MATCH'
+    if (raw.includes('MULTI') || raw.includes('MSQ')) return 'MSQ'
+    if (raw.includes('NUM') || raw.includes('INTEGER') || raw.includes('NAT')) return 'NUMERICAL'
+    return 'MCQ'
   }
 
   // 5. Query questions dynamically from Global Question Bank via junction table
@@ -77,26 +85,28 @@ export default async function CbtEnginePage({ params }) {
           try { parsedOptions = JSON.parse(q.options) } catch (e) { parsedOptions = [] }
         }
 
-        let rawFormat = (q.format_type || q.type || 'MCQ').toUpperCase()
-        if (rawFormat.includes('SINGLE') || rawFormat.includes('MCQ')) rawFormat = 'MCQ'
-        else if (rawFormat.includes('MULTIPLE') || rawFormat.includes('MSQ')) rawFormat = 'MSQ'
-        else if (rawFormat.includes('NUM')) rawFormat = 'NUMERICAL'
+        const normalizedFormat = normalizeFormat(q.format_type, q.format, q.type)
+        const diagramUrl = q.diagram_url || q.diagramUrl || q.image_url || null
 
         return {
           id: q.id || `eq-${idx + 1}`,
-          format: rawFormat,
-          format_type: q.format_type || 'single_mcq',
-          type: q.type || 'mcq',
-          subject: q.subject || 'General',
+          format: normalizedFormat,
+          format_type: q.format_type || normalizedFormat.toLowerCase(),
+          type: q.type || (normalizedFormat === 'NUMERICAL' ? 'numerical' : 'mcq'),
+          subject: q.subject || 'Physics',
           topic: q.topic || '',
           sub_topic: q.sub_topic || q.topic || 'General Topic',
-          section: jr.section || q.section || 'Section A',
-          question_text: q.content || 'Question content pending.',
-          content: q.content || '',
+          section: jr.section || q.section || (normalizedFormat === 'NUMERICAL' ? 'Section B' : 'Section A'),
+          question_text: q.content || q.question_text || 'Question content pending.',
+          content: q.content || q.question_text || '',
           options: parsedOptions,
-          image_url: q.image_url || null,
+          matrix_rows: q.matrix_rows || q.options?.rows || null,
+          matrix_cols: q.matrix_cols || q.options?.cols || null,
+          diagram_url: diagramUrl,
+          diagramUrl: diagramUrl,
+          image_url: diagramUrl,
           marks_positive: Number(jr.marks_positive || q.marks_positive) || 4,
-          marks_negative: Number(jr.marks_negative || q.marks_negative) || -1
+          marks_negative: Number(jr.marks_negative || q.marks_negative) || (normalizedFormat === 'NUMERICAL' ? 0 : -1)
         }
       })
     }
@@ -114,26 +124,28 @@ export default async function CbtEnginePage({ params }) {
     }
 
     questions = embeddedQuestions.map((q, idx) => {
-      let rawFormat = (q.format || q.format_type || q.type || 'MCQ').toUpperCase()
-      if (rawFormat.includes('SINGLE') || rawFormat.includes('MCQ')) rawFormat = 'MCQ'
-      else if (rawFormat.includes('MULTIPLE') || rawFormat.includes('MSQ')) rawFormat = 'MSQ'
-      else if (rawFormat.includes('NUM')) rawFormat = 'NUMERICAL'
+      const normalizedFormat = normalizeFormat(q.format_type, q.format, q.type)
+      const diagramUrl = q.diagram_url || q.diagramUrl || q.image_url || null
 
       return {
         id: q.id || `eq-${idx + 1}`,
-        format: rawFormat,
-        format_type: q.format_type || 'single_mcq',
-        type: q.type || 'mcq',
-        subject: q.subject || 'General',
+        format: normalizedFormat,
+        format_type: q.format_type || normalizedFormat.toLowerCase(),
+        type: q.type || (normalizedFormat === 'NUMERICAL' ? 'numerical' : 'mcq'),
+        subject: q.subject || 'Physics',
         topic: q.topic || '',
         sub_topic: q.sub_topic || q.topic || 'General Topic',
-        section: q.section || 'Section A',
+        section: q.section || (normalizedFormat === 'NUMERICAL' ? 'Section B' : 'Section A'),
         question_text: q.question_text || q.content || 'Question content pending.',
         content: q.content || q.question_text || '',
         options: Array.isArray(q.options) ? q.options : [],
-        image_url: q.image_url || null,
+        matrix_rows: q.matrix_rows || q.options?.rows || null,
+        matrix_cols: q.matrix_cols || q.options?.cols || null,
+        diagram_url: diagramUrl,
+        diagramUrl: diagramUrl,
+        image_url: diagramUrl,
         marks_positive: Number(q.marks_positive) || 4,
-        marks_negative: Number(q.marks_negative) || -1
+        marks_negative: Number(q.marks_negative) || (normalizedFormat === 'NUMERICAL' ? 0 : -1)
       }
     })
   }
@@ -146,6 +158,8 @@ export default async function CbtEnginePage({ params }) {
     total_questions: Number(exam.total_questions) || (questions.length || 75),
     marks_scheme: exam.marks_scheme || { positive_marks: 4, negative_marks: -1 },
     is_live_ranking: !!exam.is_live_ranking,
+    blueprint_type: exam.blueprint_type || 'jee_main',
+    sections_config: exam.sections_config || [],
     questions: questions
   }
 

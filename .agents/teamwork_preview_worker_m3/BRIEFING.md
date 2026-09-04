@@ -1,46 +1,66 @@
-﻿# BRIEFING — 2026-08-18T15:53:00Z
+# BRIEFING — 2026-09-04T10:55:00Z
 
 ## Mission
-Implement Milestone 3 Database Health & E2E Testing Suite (Playwright test specs, package.json scripts, 100% test pass verification).
+Upgrade the backend AI vision parser pipeline in `d:\admin dashboard` to support multi-subject boundary auto-detection, end-of-PDF answer key matrix scanning and binding, and diagram bounding-box extraction with Supabase Storage upload, plus deterministic regex fallbacks.
 
 ## 🔒 My Identity
 - Archetype: teamwork_preview_worker_m3
 - Roles: implementer, qa, specialist
 - Working directory: d:\education portal\.agents\teamwork_preview_worker_m3\
-- Original parent: 5c3636e6-2a19-4914-b4a0-81cf2c18ce53
-- Milestone: M3 (Database Health & E2E Testing Suite)
+- Original parent: ccf11704-6595-45bd-972f-9db7f9ce0932
+- Milestone: M3 (AI Vision Parser: End-of-PDF Answer Key Scanning & Diagram Extraction)
 
 ## 🔒 Key Constraints
 - Genuine implementation with no hardcoding or facade testing.
-- Deliverables: package.json test scripts, tests/bento-ui.spec.js, tests/database-health.spec.js, 100% passing tests.
+- Multi-subject boundary auto-detection in /api/admin/ai/parse-pdf pipeline: recognize Physics, Chemistry, Mathematics ranges and assign subject tabs.
+- End-of-PDF Answer Key Matrix parsing: scan final pages, parse answer matrix (single MCQ, multi MSQ, numerical, matrix match), and bind correct keys/options to questions.
+- Diagram bounding box extraction: detect diagram bounding boxes [ymin, xmin, ymax, xmax], crop images, upload to Supabase storage bucket `question-papers`, and bind diagram URLs.
+- Robust fallback handling with deterministic regex when AI keys are unavailable.
+- Build must pass in both portals (`npm run build`).
 
 ## Current Parent
-- Conversation ID: 5c3636e6-2a19-4914-b4a0-81cf2c18ce53
-- Updated: 2026-08-18T15:53:00Z
+- Conversation ID: ccf11704-6595-45bd-972f-9db7f9ce0932
+- Updated: 2026-09-04T10:55:00Z
 
 ## Task Summary
-- **What to build**: Comprehensive Playwright E2E & API test suites: tests/bento-ui.spec.js, tests/database-health.spec.js, update package.json test scripts.
-- **Success criteria**: 100% test pass across all 6 test commands (challenge_m2_apis.js, empirical_m2_verification.mjs, bento-ui.spec.js, database-health.spec.js, gamification.spec.js, exam-engine.spec.js).
-- **Interface contracts**: PROJECT.md § Interface Contracts.
-- **Code layout**: PROJECT.md § Code Layout.
+- **What to build**: 
+  1. Multi-subject boundary auto-detection in `d:\admin dashboard\src\app\api\admin\ai\parse-pdf\route.js` and `parse-pdf-page\route.js` and supporting utilities.
+  2. End-of-PDF Answer Key Matrix parsing and auto-binding (two-pass scanning, support single_mcq, multi_mcq, numerical, matrix_match).
+  3. Diagram bounding box extraction and storage upload (Gemini prompt with [ymin, xmin, ymax, xmax], canvas/image crop, upload to Supabase storage `question-papers`, bind `diagram_url`).
+  4. Deterministic regex fallback parsing handling multi-subject, matrix match, numericals, and answer keys when Gemini API key is missing.
+- **Success criteria**: 
+  - Complete two-pass AI vision & regex parsing pipeline with end-of-PDF answer key extraction and binding.
+  - Diagram bounding box extraction with storage upload logic and diagram URL binding.
+  - Multi-subject contiguous segmentation (Physics, Chemistry, Mathematics) with Section A/B detection.
+  - Full test suite passing and Next.js build clean.
+- **Interface contracts**: `PROJECT.md` & `d:\education portal\.agents\explorer_survey_db_storage\analysis.md`
+- **Code layout**: 
+  - `d:\admin dashboard\src\app\api\admin\ai\parse-pdf\route.js`
+  - `d:\admin dashboard\src\app\api\admin\ai\parse-pdf-page\route.js`
+  - `d:\admin dashboard\src\lib\pdf-vision-parser.js`
+  - `d:\admin dashboard\src\lib\diagram-cropper.js`
+  - `d:\admin dashboard\src\components\UniversalPdfImporterModal.jsx`
 
 ## Change Tracker
-- **Files modified**: package.json, tests/bento-ui.spec.js, tests/database-health.spec.js, tests/exam-engine.spec.js
-- **Build status**: Pending test runs
-- **Pending issues**: Writing comprehensive test suites
+- **Files modified**: TBD
+- **Build status**: Pending
+- **Pending issues**: Investigation of existing implementation
 
 ## Quality Status
-- **Build/test result**: challenge_m2_apis (28/28 pass), empirical_m2_verification (13/13 pass)
-- **Lint status**: Clean
-- **Tests added/modified**: tests/bento-ui.spec.js, tests/database-health.spec.js
+- **Build/test result**: Pending
+- **Lint status**: Pending
+- **Tests added/modified**: Pending
 
 ## Loaded Skills
-- None required
+- **Source**: `d:\education portal\.agents\skills\supabase\SKILL.md`
+- **Local copy**: `d:\education portal\.agents\skills\supabase\SKILL.md`
+- **Core methodology**: Storage bucket management, RLS policies, Supabase client initialization in Next.js
 
 ## Key Decisions Made
-- Use Playwright with Chromium headless for deterministic E2E assertions across Bento UI (375px, 768px, 1280px, 1536px) and API route integration tests.
+- Implement two-pass parsing architecture: Pass 1 questions extraction, Pass 2 answer key matrix extraction & binding.
+- Server-side and client-side diagram cropping & upload support for Supabase Storage bucket `question-papers`.
 
 ## Artifact Index
-- d:\education portal\.agents\teamwork_preview_worker_m3\DISPATCH.md
-- d:\education portal\.agents\teamwork_preview_worker_m3\progress.md
-- d:\education portal\.agents\teamwork_preview_worker_m3\handoff.md
+- `d:\education portal\.agents\teamwork_preview_worker_m3\DISPATCH.md`
+- `d:\education portal\.agents\teamwork_preview_worker_m3\progress.md`
+- `d:\education portal\.agents\teamwork_preview_worker_m3\handoff.md`

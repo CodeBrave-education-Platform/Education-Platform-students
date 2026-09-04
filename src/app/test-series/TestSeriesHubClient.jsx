@@ -35,6 +35,9 @@ export default function TestSeriesHubClient({
   const [activeTag, setActiveTag] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedPackageId, setExpandedPackageId] = useState(null)
+  const [activeViewTab, setActiveViewTab] = useState('STANDALONE_TESTS') // 'STANDALONE_TESTS' | 'PACKAGES'
+  const [blueprintFilter, setBlueprintFilter] = useState('ALL') // 'ALL' | 'JEE_MAIN' | 'JEE_ADVANCED' | 'NEET' | 'CUSTOM'
+  const [subjectFilter, setSubjectFilter] = useState('ALL') // 'ALL' | 'PHYSICS' | 'CHEMISTRY' | 'MATHEMATICS'
 
   // Razorpay In-Website Payment Gateway State
   const [paymentModalItem, setPaymentModalItem] = useState(null)
@@ -156,6 +159,45 @@ export default function TestSeriesHubClient({
     })
   }, [packages, activeTag, searchQuery])
 
+  // Filter standalone mock tests for the direct Standalone Mock Test Catalog
+  const mockCatalogExams = React.useMemo(() => {
+    return exams.filter(exam => {
+      // 1. Blueprint filter
+      if (blueprintFilter !== 'ALL') {
+        const bp = (exam.blueprint_type || 'jee_main').toLowerCase()
+        if (blueprintFilter === 'JEE_MAIN' && bp !== 'jee_main') return false
+        if (blueprintFilter === 'JEE_ADVANCED' && bp !== 'jee_advanced') return false
+        if (blueprintFilter === 'NEET' && bp !== 'neet') return false
+        if (blueprintFilter === 'CUSTOM' && bp !== 'custom') return false
+      }
+
+      // 2. Subject filter
+      if (subjectFilter !== 'ALL') {
+        const subUpper = subjectFilter.toUpperCase()
+        let examSubs = []
+        if (Array.isArray(exam.sections_config) && exam.sections_config.length > 0) {
+          examSubs = exam.sections_config.map(s => String(s.subject || '').toUpperCase())
+        }
+        if (examSubs.length === 0 && Array.isArray(exam.questions)) {
+          examSubs = exam.questions.map(q => String(q.subject || '').toUpperCase())
+        }
+        const matchesTitle = (exam.title || '').toUpperCase().includes(subUpper)
+        const matchesSub = examSubs.some(s => s.includes(subUpper))
+        if (!matchesTitle && !matchesSub) return false
+      }
+
+      // 3. Search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const titleMatch = (exam.title || '').toLowerCase().includes(query)
+        const bpMatch = (exam.blueprint_type || '').toLowerCase().includes(query)
+        if (!titleMatch && !bpMatch) return false
+      }
+
+      return true
+    })
+  }, [exams, blueprintFilter, subjectFilter, searchQuery])
+
   // Toggle package accordion to show list of exams
   const togglePackage = (pkgId) => {
     setExpandedPackageId(prev => (prev === pkgId ? null : pkgId))
@@ -218,37 +260,284 @@ export default function TestSeriesHubClient({
           </div>
         </div>
 
-        {/* Filter Toolbar & Search Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
-          {/* Tag Selectors */}
-          <div className="flex flex-wrap gap-2 w-full md:w-auto">
-            {tags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => setActiveTag(tag)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition select-none cursor-pointer border ${
-                  activeTag === tag
-                    ? 'bg-teal-600 text-white font-black border-teal-600 shadow-sm'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+        {/* Primary View Switcher: Standalone Mock Tests vs Test Packages */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => setActiveViewTab('STANDALONE_TESTS')}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+                activeViewTab === 'STANDALONE_TESTS'
+                  ? 'bg-white text-teal-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Target className="w-4 h-4 text-teal-600" />
+              <span>Standalone Mock Tests ({mockCatalogExams.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveViewTab('PACKAGES')}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+                activeViewTab === 'PACKAGES'
+                  ? 'bg-white text-teal-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Layers className="w-4 h-4 text-indigo-600" />
+              <span>Test Packages ({packages.length})</span>
+            </button>
           </div>
 
-          {/* Search Box */}
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search Test Series Packages..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs text-slate-900 outline-none focus:ring-1 focus:ring-teal-600 focus:border-teal-600 transition font-bold"
-            />
-          </div>
+          <span className="text-xs text-slate-500 font-medium">
+            {activeViewTab === 'STANDALONE_TESTS'
+              ? 'Attempt any mock test directly with zero package restrictions.'
+              : 'Explore comprehensive test series bundles and chapterwise drills.'}
+          </span>
         </div>
+
+        {/* View Mode 1: Standalone Mock Test Catalog */}
+        {activeViewTab === 'STANDALONE_TESTS' && (
+          <div className="space-y-6">
+            {/* Filter Toolbar for Standalone Mock Tests */}
+            <div className="space-y-4 bg-white border border-slate-200 p-5 rounded-3xl shadow-sm">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                {/* Blueprint Filters */}
+                <div className="space-y-1.5 w-full lg:w-auto">
+                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                    Blueprint Filter:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: 'All Exams', val: 'ALL' },
+                      { label: 'JEE Main', val: 'JEE_MAIN' },
+                      { label: 'JEE Advanced', val: 'JEE_ADVANCED' },
+                      { label: 'NEET', val: 'NEET' },
+                      { label: 'Custom', val: 'CUSTOM' }
+                    ].map(bp => (
+                      <button
+                        key={bp.val}
+                        type="button"
+                        onClick={() => setBlueprintFilter(bp.val)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wider uppercase transition cursor-pointer border ${
+                          blueprintFilter === bp.val
+                            ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {bp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search Box */}
+                <div className="relative w-full lg:w-80">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search mock tests by name..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs text-slate-900 outline-none focus:ring-1 focus:ring-teal-600 focus:border-teal-600 transition font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Subject Filters */}
+              <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mr-1">
+                  Subject Filter:
+                </span>
+                {[
+                  { label: 'All Subjects', val: 'ALL' },
+                  { label: 'Physics', val: 'PHYSICS' },
+                  { label: 'Chemistry', val: 'CHEMISTRY' },
+                  { label: 'Mathematics', val: 'MATHEMATICS' }
+                ].map(sub => (
+                  <button
+                    key={sub.val}
+                    type="button"
+                    onClick={() => setSubjectFilter(sub.val)}
+                    className={`px-3 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
+                      subjectFilter === sub.val
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {sub.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Standalone Mock Tests Grid */}
+            {mockCatalogExams.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-3">
+                <Target className="w-10 h-10 text-slate-300 mx-auto" />
+                <h3 className="text-base font-bold text-slate-700">No mock tests match current filters</h3>
+                <p className="text-xs text-slate-500">Try selecting "All Exams" or "All Subjects".</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mockCatalogExams.map((exam) => {
+                  const attempt = getExamAttempt(exam.id)
+                  const bpType = (exam.blueprint_type || 'jee_main').toLowerCase()
+                  const isAdv = bpType === 'jee_advanced'
+                  const isNeet = bpType === 'neet'
+                  const isCustom = bpType === 'custom'
+
+                  const totalMarks = (exam.total_questions || 75) * (Number(exam.marks_scheme?.positive_marks) || 4)
+
+                  let bpBadgeStyle = 'bg-teal-50 text-teal-800 border-teal-200'
+                  let bpLabel = 'JEE Main'
+                  if (isAdv) {
+                    bpBadgeStyle = 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                    bpLabel = 'JEE Advanced'
+                  } else if (isNeet) {
+                    bpBadgeStyle = 'bg-rose-50 text-rose-800 border-rose-200'
+                    bpLabel = 'NEET'
+                  } else if (isCustom) {
+                    bpBadgeStyle = 'bg-slate-100 text-slate-700 border-slate-200'
+                    bpLabel = 'Custom Drill'
+                  }
+
+                  return (
+                    <div
+                      key={exam.id}
+                      className="bg-white border border-slate-200 hover:border-teal-500 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-5 group"
+                    >
+                      <div className="space-y-4">
+                        {/* Badges Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs ${bpBadgeStyle}`}>
+                            {bpLabel}
+                          </span>
+
+                          <div className="flex items-center gap-1.5">
+                            {exam.is_live_ranking && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-black uppercase tracking-wider">
+                                <Activity className="w-3 h-3 text-emerald-600 animate-pulse" />
+                                Live Rank
+                              </span>
+                            )}
+                            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold">
+                              Direct Mock
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Test Title */}
+                        <div>
+                          <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-teal-700 transition leading-snug">
+                            {exam.title}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                            Simulated NTA examination test environment with full scoring analytics.
+                          </p>
+                        </div>
+
+                        {/* Telemetry Spec Chips */}
+                        <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                          <div>
+                            <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Duration</span>
+                            <span className="text-xs font-black text-slate-800 font-mono mt-0.5 block">{exam.duration_minutes || 180} Mins</span>
+                          </div>
+                          <div className="border-x border-slate-200">
+                            <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Questions</span>
+                            <span className="text-xs font-black text-slate-800 font-mono mt-0.5 block">{exam.total_questions || 75} Qs</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Max Marks</span>
+                            <span className="text-xs font-black text-teal-700 font-mono mt-0.5 block">{totalMarks} Pts</span>
+                          </div>
+                        </div>
+
+                        {/* Structure Summary */}
+                        <div className="text-[11px] text-slate-600 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between font-medium">
+                          <span>Section Marking:</span>
+                          <span className="font-bold text-slate-800">
+                            Sec A (+4/-1) • Sec B (+4/0, Max 5)
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Launcher Buttons: 1-Click "Attempt Test" with ZERO blockers */}
+                      <div className="pt-2 border-t border-slate-100">
+                        {attempt ? (
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/test-series/analytics/${attempt.id}`)}
+                              className="flex-1 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <BarChart3 className="w-3.5 h-3.5" />
+                              <span>Scorecard ({attempt.score} pts)</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/test-series/engine/${exam.id}?reset=true`)}
+                              className="px-3.5 py-3 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
+                              title="Retake test"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Retake</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/test-series/engine/${exam.id}`)}
+                            className="w-full py-3.5 bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                          >
+                            <Play className="w-4 h-4 fill-current" />
+                            <span>Attempt Test</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* View Mode 2: Test Packages View */}
+        {activeViewTab === 'PACKAGES' && (
+          <div className="space-y-6">
+            {/* Filter Toolbar & Search Bar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+              {/* Tag Selectors */}
+              <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                {tags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setActiveTag(tag)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition select-none cursor-pointer border ${
+                      activeTag === tag
+                        ? 'bg-teal-600 text-white font-black border-teal-600 shadow-sm'
+                        : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Box */}
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search Test Series Packages..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs text-slate-900 outline-none focus:ring-1 focus:ring-teal-600 focus:border-teal-600 transition font-bold"
+                />
+              </div>
+            </div>
 
         {/* Asymmetrical Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
@@ -444,16 +733,7 @@ export default function TestSeriesHubClient({
 
                                       {/* Exam Action Triggers */}
                                       <div className="flex items-center gap-2 shrink-0">
-                                        {isPremium && !isPurchased ? (
-                                          <button
-                                            disabled
-                                            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 cursor-not-allowed"
-                                            title="Unlock package to access this exam"
-                                          >
-                                            <Lock className="w-3.5 h-3.5" />
-                                            <span>Locked</span>
-                                          </button>
-                                        ) : attempt ? (
+                                        {attempt ? (
                                           <div className="flex items-center gap-1.5 shrink-0">
                                             <button
                                               onClick={() => router.push(`/test-series/analytics/${attempt.id}`)}
@@ -477,7 +757,7 @@ export default function TestSeriesHubClient({
                                             className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition shrink-0 shadow-xs cursor-pointer"
                                           >
                                             <Play className="w-3 h-3 fill-current" />
-                                            <span>Launch CBT</span>
+                                            <span>Attempt Test</span>
                                             <ArrowRight className="w-3.5 h-3.5" />
                                           </button>
                                         )}
@@ -611,16 +891,7 @@ export default function TestSeriesHubClient({
                                   </div>
 
                                   {/* Action Buttons */}
-                                  {isPremium && !isPurchased ? (
-                                    <button
-                                      disabled
-                                      className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 border border-slate-200 text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-wider shrink-0 cursor-not-allowed"
-                                      title="Unlock package to access this exam"
-                                    >
-                                      <Lock className="w-3 h-3" />
-                                      <span>Locked</span>
-                                    </button>
-                                  ) : attempt ? (
+                                  {attempt ? (
                                     <div className="flex items-center gap-1 shrink-0">
                                       <button
                                         onClick={() => router.push(`/test-series/analytics/${attempt.id}`)}
@@ -667,6 +938,8 @@ export default function TestSeriesHubClient({
               <h4 className="text-sm font-black text-slate-900">No test series packages found</h4>
               <p className="text-xs text-slate-500 font-medium">Adjust filters or refine search text</p>
             </div>
+          </div>
+        )}
           </div>
         )}
 

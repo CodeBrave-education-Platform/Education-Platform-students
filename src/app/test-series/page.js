@@ -46,13 +46,13 @@ export default async function TestSeriesHubPage() {
     console.error('[TEST SERIES PAGE] Package fetch error:', e)
   }
 
-  // 4. Fetch test exams dynamically from public.test_exams
+  // 4. Fetch test exams dynamically from public.test_exams (including standalone mock tests)
   let exams = []
   try {
     const { data: dbExams, error: examsError } = await supabase
       .from('test_exams')
-      .select('id, package_id, title, duration_minutes, total_questions, is_live_ranking, activation_timestamp, marks_scheme')
-      .order('activation_timestamp', { ascending: true })
+      .select('id, package_id, title, duration_minutes, total_questions, is_live_ranking, activation_timestamp, marks_scheme, blueprint_type, sections_config, questions, created_at')
+      .order('activation_timestamp', { ascending: false })
 
     if (examsError) {
       console.error('[TEST SERIES PAGE] Error fetching test exams:', examsError)

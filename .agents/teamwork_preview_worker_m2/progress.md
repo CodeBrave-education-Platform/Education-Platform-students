@@ -1,25 +1,17 @@
-# Progress — Milestone 2 Implementation
+# Progress — Milestone 2 Admin Test Portal & Question Paper Repository
 
-Last visited: 2026-08-18T15:02:30Z
+Last visited: 2026-09-04T11:05:00Z
 
-- [x] Read DISPATCH.md, ORIGINAL_REQUEST.md, PROJECT.md, and all 3 Explorer handoff reports.
-- [x] Task 1: Inspect existing migration files in `supabase/migrations/` and verify `supabase/migrations/14_schema_integrity_and_qa_patch.sql` & `supabase/migrations/20260530170000_14_schema_integrity_and_qa_patch.sql`.
-- [x] Task 2: Implement and verify API routes:
-  - `src/app/api/razorpay/verify/route.js`
-  - `src/app/api/test-series/grade/route.js`
-  - `src/app/api/downloads/route.js`
-  - `src/app/api/live/classroom/route.js`
-  - `src/app/api/debug-courses/route.js`
-  - `src/app/api/razorpay/webhook/route.js`
-  - `src/app/api/video/token/route.js`
-- [x] Task 3: Implement and verify Pages & Client Components:
-  - `src/app/courses/page.jsx`
-  - `src/app/batches/page.jsx`
-  - `src/app/dashboard/page.jsx`
-  - `src/app/dashboard/DashboardClient.jsx`
-  - `src/app/test-series/engine/[examId]/page.js`
-  - `src/app/test-series/analytics/[attemptId]/page.js`
-  - `src/app/analytics/page.jsx`
-- [x] Task 4: Run build verification (`npm run build`) — SUCCESS (0 errors, code 0).
-- [x] Task 5: Write comprehensive handoff report to `handoff.md`.
-- [ ] Task 6: Send completion message to parent.
+- [x] Read DISPATCH.md, ORIGINAL_REQUEST.md, PROJECT.md, and Explorer Survey reports.
+- [x] Initialized BRIEFING.md and updated progress.md.
+- [x] Step 1: Update AdminLayoutShell.jsx and CommandPalette.jsx (replace "Test Packages" with "Test Portal", icon: Layers, verify zero "Free Material").
+- [x] Step 2: Refactor /admin/test-series/page.js into a clean 2-Tab interface: Tab 1 (All Tests direct table) and Tab 2 (PDF Question Papers repository with badges & preview).
+- [x] Step 3: Implement components in `src/components/test-series/`:
+  - `TestPortalTabs.jsx` (tab switcher & stats summary)
+  - `AllTestsTable.jsx` (compiled exams table, search, blueprint filter, attempt metrics, actions, printable PDF booklet)
+  - `PdfQuestionPaperGrid.jsx` (PDF cards, badges, iframe preview modal, 1-click compile, delete)
+  - `PdfUploader.jsx` (drag-and-drop zone, metadata inputs, progress bar, Supabase storage bucket `question-papers`, DB insert into `question_paper_documents`)
+- [x] Step 4: Verify files and quality assurance.
+- [ ] Step 5: Write 5-component handoff report to `handoff.md`.
+- [ ] Step 6: Send completion message to parent.
+

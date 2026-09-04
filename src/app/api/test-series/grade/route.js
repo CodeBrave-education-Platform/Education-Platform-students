@@ -89,23 +89,35 @@ export async function POST(request) {
     let unanswered = 0
     let rawScore = 0
 
-    // 3. Multi-Format Server-Authoritative Grading Engine (MCQ, MSQ, Numerical)
+    // Track Section B attempts per subject to enforce max 5 attempts cap
+    const subjectSectionBAttempts = {}
+
+    // 3. Multi-Format Server-Authoritative Grading Engine (MCQ, MSQ, Numerical, Matrix Match)
     questions.forEach((q) => {
       const qId = q.id || q.question_id
       const ans = answers[qId] || answers[String(qId)]
 
+      const isMatrix = 
+        q.format === 'MATRIX_MATCH' || 
+        q.format_type === 'matrix_match' || 
+        q.question_type === 'matrix_match'
+
       const isNumerical = 
-        q.format === 'NUMERICAL' || 
-        q.format === 'NAT' || 
-        q.question_type === 'numerical' || 
-        q.correct_value !== undefined ||
-        (!q.options || q.options.length === 0)
+        !isMatrix && (
+          q.format === 'NUMERICAL' || 
+          q.format === 'NAT' || 
+          q.question_type === 'numerical' || 
+          q.correct_value !== undefined ||
+          (!q.options || q.options.length === 0)
+        )
 
       const isMsq = 
-        q.format === 'MSQ' || 
-        q.question_type === 'msq' || 
-        Array.isArray(q.correct_options) ||
-        (Array.isArray(q.correct_option_index) && q.correct_option_index.length > 1)
+        !isMatrix && !isNumerical && (
+          q.format === 'MSQ' || 
+          q.question_type === 'msq' || 
+          Array.isArray(q.correct_options) ||
+          (Array.isArray(q.correct_option_index) && q.correct_option_index.length > 1)
+        )
 
       const qPosMarks = Number(q.marks_positive ?? positiveMarks)
       const qNegMarks = -Math.abs(Number(q.marks_negative ?? negativeMarks))
@@ -115,7 +127,69 @@ export async function POST(request) {
         return
       }
 
-      if (isNumerical) {
+      // Check Section B attempt cap: Max 5 questions evaluated per subject in Section B
+      const qSubject = q.subject || 'Physics'
+      const isSecB = (q.section || '').toLowerCase().includes('section b') || (isNumerical && !q.section)
+      if (isSecB) {
+        const currentAttempts = subjectSectionBAttempts[qSubject] || 0
+        if (currentAttempts >= 5) {
+          // Exceeds allowed 5 attempts for Section B: treat as uncounted
+          unanswered++
+          return
+        }
+        subjectSectionBAttempts[qSubject] = currentAttempts + 1
+      }
+
+      if (isMatrix) {
+        // --- MATRIX MATCH EVALUATION ---
+        const submittedMatrix = ans.matrix || {}
+        let targetMatrix = {}
+        try {
+          if (typeof q.correct_answer === 'object' && q.correct_answer !== null) {
+            targetMatrix = q.correct_answer
+          } else if (typeof q.correct_answer === 'string') {
+            targetMatrix = JSON.parse(q.correct_answer)
+          } else if (typeof q.correct_matrix === 'object' && q.correct_matrix !== null) {
+            targetMatrix = q.correct_matrix
+          } else if (typeof q.options === 'object' && q.options?.answer_matrix) {
+            targetMatrix = q.options.answer_matrix
+          }
+        } catch {
+          targetMatrix = {}
+        }
+
+        const rowKeys = ['A', 'B', 'C', 'D']
+        let matchingRows = 0
+        let attemptedRows = 0
+
+        rowKeys.forEach(r => {
+          const subCols = Array.isArray(submittedMatrix[r]) ? [...submittedMatrix[r]].sort() : []
+          const tgtCols = Array.isArray(targetMatrix[r]) ? [...targetMatrix[r]].sort() : []
+
+          if (subCols.length > 0) attemptedRows++
+
+          if (tgtCols.length > 0 && subCols.length === tgtCols.length && subCols.every((val, i) => val === tgtCols[i])) {
+            matchingRows++
+          }
+        })
+
+        if (attemptedRows === 0) {
+          unanswered++
+          return
+        }
+
+        if (matchingRows === rowKeys.length) {
+          correct++
+          rawScore += qPosMarks
+        } else if (matchingRows > 0) {
+          // Partial credit: proportional per correct row
+          correct++
+          rawScore += matchingRows * (qPosMarks / 4)
+        } else {
+          incorrect++
+          rawScore += qNegMarks
+        }
+      } else if (isNumerical) {
         // --- NUMERICAL / NAT EVALUATION ---
         const submittedRaw = ans.numerical_value !== undefined 
           ? ans.numerical_value 

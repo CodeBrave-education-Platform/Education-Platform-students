@@ -578,28 +578,28 @@
     ]
   },
   "cssLayoutAudit": {
-    "passed": 4,
-    "failed": 0,
+    "passed": 2,
+    "failed": 2,
     "details": [
       {
         "file": "src/app/courses/page.jsx",
         "hasEmptyState": false,
-        "hasUncroppedMedia": true,
-        "hasTruncateOrClamp": true,
-        "hasResponsiveGrid": true,
-        "hasHeroColSpan": true,
+        "hasUncroppedMedia": false,
+        "hasTruncateOrClamp": false,
+        "hasResponsiveGrid": false,
+        "hasHeroColSpan": false,
         "hasUnsafeDateMethod": false,
-        "pass": true
+        "pass": false
       },
       {
         "file": "src/app/batches/page.jsx",
         "hasEmptyState": false,
-        "hasUncroppedMedia": true,
-        "hasTruncateOrClamp": true,
-        "hasResponsiveGrid": true,
-        "hasHeroColSpan": true,
+        "hasUncroppedMedia": false,
+        "hasTruncateOrClamp": false,
+        "hasResponsiveGrid": false,
+        "hasHeroColSpan": false,
         "hasUnsafeDateMethod": false,
-        "pass": true
+        "pass": false
       },
       {
         "file": "src/app/test-series/TestSeriesHubClient.jsx",
@@ -623,5 +623,10 @@
       }
     ]
   },
-  "findings": []
+  "findings": [
+    "[Layout Notice] src/app/courses/page.jsx missing 16:9 uncropped media container",
+    "[Layout Notice] src/app/courses/page.jsx missing text line-clamp / truncation safeguards",
+    "[Layout Notice] src/app/batches/page.jsx missing 16:9 uncropped media container",
+    "[Layout Notice] src/app/batches/page.jsx missing text line-clamp / truncation safeguards"
+  ]
 }

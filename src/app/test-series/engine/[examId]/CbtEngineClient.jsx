@@ -13,8 +13,12 @@ import {
   HelpCircle, Monitor, ShieldAlert, User, Zap, RefreshCw, RotateCcw,
   Calculator, Edit3, BookOpen, Bookmark, Trash2, X, Check,
   Grid, Menu, ChevronLeft, ChevronRight, CheckSquare, Square,
-  FileText, Send, Eraser, PenTool, Hash, Info, Layers
+  FileText, Send, Eraser, PenTool, Hash, Info, Layers, Maximize2
 } from 'lucide-react'
+import VirtualNumpad from '@/components/cbt/VirtualNumpad'
+import MatrixMatchGrid from '@/components/cbt/MatrixMatchGrid'
+import DiagramLightboxModal from '@/components/cbt/DiagramLightboxModal'
+import SectionAttemptLimitModal from '@/components/cbt/SectionAttemptLimitModal'
 
 export default function CbtEngineClient({ user, profile, exam }) {
   const router = useRouter()
@@ -65,6 +69,10 @@ export default function CbtEngineClient({ user, profile, exam }) {
   const [showScratchpad, setShowScratchpad] = useState(false)
   const [showQuestionPaper, setShowQuestionPaper] = useState(false)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
+  const [lightboxImageUrl, setLightboxImageUrl] = useState(null)
+  const [lightboxTitle, setLightboxTitle] = useState('')
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [showSectionBWarningModal, setShowSectionBWarningModal] = useState(false)
 
   // Calculator State
   const [calcInput, setCalcInput] = useState('')
@@ -346,21 +354,119 @@ export default function CbtEngineClient({ user, profile, exam }) {
   const currentAnswer = answers[currentQuestion?.id]
   const isMarked = markedReview.has(currentQuestion?.id)
 
+  // Determine question format
+  const isMatrix = 
+    currentQuestion?.format === 'MATRIX_MATCH' || 
+    currentQuestion?.format_type === 'matrix_match' || 
+    currentQuestion?.question_type === 'matrix_match'
+
   const isNumerical = 
-    currentQuestion?.format === 'NUMERICAL' || 
-    currentQuestion?.format === 'NAT' || 
-    currentQuestion?.question_type === 'numerical' || 
-    currentQuestion?.correct_value !== undefined ||
-    (!currentQuestion?.options || currentQuestion?.options.length === 0)
+    !isMatrix && (
+      currentQuestion?.format === 'NUMERICAL' || 
+      currentQuestion?.format === 'NAT' || 
+      currentQuestion?.question_type === 'numerical' || 
+      currentQuestion?.correct_value !== undefined ||
+      (!currentQuestion?.options || currentQuestion?.options.length === 0)
+    )
 
   const isMsq = 
-    currentQuestion?.format === 'MSQ' || 
-    currentQuestion?.question_type === 'msq' || 
-    Array.isArray(currentQuestion?.correct_options) || 
-    (Array.isArray(currentQuestion?.correct_option_index) && currentQuestion?.correct_option_index.length > 1)
+    !isMatrix && !isNumerical && (
+      currentQuestion?.format === 'MSQ' || 
+      currentQuestion?.question_type === 'msq' || 
+      Array.isArray(currentQuestion?.correct_options) || 
+      (Array.isArray(currentQuestion?.correct_option_index) && currentQuestion?.correct_option_index.length > 1)
+    )
+
+  // Validation helper for any question format
+  const isAnswerFilled = (ans) => {
+    if (!ans) return false
+    if (ans.selected_option !== undefined && ans.selected_option !== null && ans.selected_option !== '') return true
+    if (Array.isArray(ans.selected_options) && ans.selected_options.length > 0) return true
+    if (ans.numerical_value !== undefined && ans.numerical_value !== null && String(ans.numerical_value).trim() !== '') return true
+    if (ans.matrix && typeof ans.matrix === 'object' && Object.keys(ans.matrix).length > 0) return true
+    return false
+  }
+
+  // Multi-subject navigation logic
+  const examSubjects = useMemo(() => {
+    const subs = new Set()
+    questions.forEach(q => {
+      if (q.subject) subs.add(q.subject)
+    })
+    if (subs.size > 0) return Array.from(subs)
+    return ['Physics', 'Chemistry', 'Mathematics']
+  }, [questions])
+
+  const activeSubject = currentQuestion?.subject || examSubjects[0] || 'Physics'
+  const activeSection = currentQuestion?.section || 'Section A'
+
+  const sectionsInActiveSubject = useMemo(() => {
+    const secs = new Set()
+    questions
+      .filter(q => (q.subject || 'Physics') === activeSubject)
+      .forEach(q => secs.add(q.section || 'Section A'))
+    if (secs.size > 0) return Array.from(secs)
+    return ['Section A', 'Section B']
+  }, [questions, activeSubject])
+
+  const jumpToSubject = (sub) => {
+    setSelectedSubjectTab(sub)
+    const targetIdx = questions.findIndex(q => (q.subject || 'Physics') === sub)
+    if (targetIdx !== -1) setCurrentIdx(targetIdx)
+  }
+
+  const jumpToSection = (sec) => {
+    const targetIdx = questions.findIndex(q => (q.subject || 'Physics') === activeSubject && (q.section || 'Section A') === sec)
+    if (targetIdx !== -1) setCurrentIdx(targetIdx)
+  }
+
+  // Answered tally per subject
+  const subjectStats = useMemo(() => {
+    const map = {}
+    examSubjects.forEach(sub => {
+      const subQuestions = questions.filter(q => (q.subject || 'Physics') === sub)
+      let answered = 0
+      subQuestions.forEach(q => {
+        if (isAnswerFilled(answers[q.id])) answered++
+      })
+      map[sub] = { answered, total: subQuestions.length }
+    })
+    return map
+  }, [examSubjects, questions, answers])
+
+  // JEE Section B Attempt Rules (Max 5 out of 10)
+  const isCurrentSecB = (currentQuestion?.section || '').toLowerCase().includes('section b') || (isNumerical && !currentQuestion?.section)
+
+  const subjectSecBQuestions = useMemo(() => {
+    return questions
+      .map((q, idx) => ({ ...q, originalIndex: idx }))
+      .filter(q => {
+        const matchesSub = (q.subject || 'Physics') === activeSubject
+        const matchesSecB = (q.section || '').toLowerCase().includes('section b') || (q.format === 'NUMERICAL' && !q.section)
+        return matchesSub && matchesSecB
+      })
+  }, [questions, activeSubject])
+
+  const answeredSecBQuestions = useMemo(() => {
+    return subjectSecBQuestions.filter(q => isAnswerFilled(answers[q.id]))
+  }, [subjectSecBQuestions, answers])
+
+  const secBAnsweredCount = answeredSecBQuestions.length
+  const maxSecBAllowed = 5
+  const isCurrentQuestionAnswered = isAnswerFilled(currentAnswer)
+
+  const checkSectionBLimit = () => {
+    if (isCurrentSecB && !isCurrentQuestionAnswered && secBAnsweredCount >= maxSecBAllowed) {
+      setShowSectionBWarningModal(true)
+      return false
+    }
+    return true
+  }
 
   // Question selection handlers
   const handleSingleMcqSelect = (optIdx) => {
+    if (!checkSectionBLimit()) return
+
     setAnswers(prev => {
       const updated = {
         ...prev,
@@ -381,6 +487,8 @@ export default function CbtEngineClient({ user, profile, exam }) {
   }
 
   const handleMsqToggle = (optIdx) => {
+    if (!checkSectionBLimit()) return
+
     setAnswers(prev => {
       const prevAns = prev[currentQuestion.id]
       let currentOptions = []
@@ -418,6 +526,8 @@ export default function CbtEngineClient({ user, profile, exam }) {
   }
 
   const handleNumericalInput = (val) => {
+    if (val && !checkSectionBLimit()) return
+
     setAnswers(prev => {
       const updated = { ...prev }
       if (val === '' || val === null || val === undefined) {
@@ -446,18 +556,46 @@ export default function CbtEngineClient({ user, profile, exam }) {
     } else if (char === 'BACKSPACE') {
       handleNumericalInput(curVal.slice(0, -1))
     } else if (char === '+/-') {
+      if (!checkSectionBLimit()) return
       if (curVal.startsWith('-')) {
         handleNumericalInput(curVal.slice(1))
       } else if (curVal.length > 0) {
         handleNumericalInput('-' + curVal)
       }
     } else if (char === '.') {
+      if (!checkSectionBLimit()) return
       if (!curVal.includes('.')) {
         handleNumericalInput(curVal + '.')
       }
     } else {
+      if (!checkSectionBLimit()) return
       handleNumericalInput(curVal + char)
     }
+  }
+
+  const handleMatrixMatchChange = (matrixValue) => {
+    const hasSelections = matrixValue && Object.keys(matrixValue).length > 0
+    if (hasSelections && !checkSectionBLimit()) return
+
+    setAnswers(prev => {
+      const updated = { ...prev }
+      if (!hasSelections) {
+        delete updated[currentQuestion.id]
+      } else {
+        updated[currentQuestion.id] = {
+          matrix: matrixValue,
+          format: 'MATRIX_MATCH',
+          seconds_spent: (prev[currentQuestion.id]?.seconds_spent || 0) + 5
+        }
+      }
+      saveExamState(exam.id, {
+        answers: updated,
+        markedReview: Array.from(markedReview),
+        secondsRemaining,
+        currentIdx
+      })
+      return updated
+    })
   }
 
   const handleClearResponse = () => {
@@ -501,11 +639,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
       }
       // Status filter
       const ans = answers[q.id]
-      const hasAnswer = ans && (
-        (ans.selected_option !== undefined && ans.selected_option !== null && ans.selected_option !== '') ||
-        (Array.isArray(ans.selected_options) && ans.selected_options.length > 0) ||
-        (ans.numerical_value !== undefined && ans.numerical_value !== null && String(ans.numerical_value).trim() !== '')
-      )
+      const hasAnswer = isAnswerFilled(ans)
       const isMark = markedReview.has(q.id)
 
       if (paletteFilter === 'Answered') return hasAnswer
@@ -521,12 +655,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
     let marked = 0
     questions.forEach(q => {
       const ans = answers[q.id]
-      const hasAnswer = ans && (
-        (ans.selected_option !== undefined && ans.selected_option !== null && ans.selected_option !== '') ||
-        (Array.isArray(ans.selected_options) && ans.selected_options.length > 0) ||
-        (ans.numerical_value !== undefined && ans.numerical_value !== null && String(ans.numerical_value).trim() !== '')
-      )
-      if (hasAnswer) answered++
+      if (isAnswerFilled(ans)) answered++
       if (markedReview.has(q.id)) marked++
     })
     return {
@@ -730,7 +859,88 @@ export default function CbtEngineClient({ user, profile, exam }) {
         </div>
       </header>
 
-      {/* 2. Main split workspace */}
+      {/* 2. Top-Level Exam Navigation Strip: Subject Tabs & Section Pills */}
+      <div className="bg-slate-100/90 border-b border-slate-200 px-2 sm:px-6 py-2 shrink-0 space-y-2 shadow-2xs z-10">
+        {/* Row 1: Subject Tabs with Live Answer Telemetry */}
+        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider hidden sm:inline mr-1">
+              Subjects:
+            </span>
+            {examSubjects.map(sub => {
+              const stats = subjectStats[sub] || { answered: 0, total: 0 }
+              const isActive = activeSubject === sub
+
+              return (
+                <button
+                  key={sub}
+                  type="button"
+                  onClick={() => jumpToSubject(sub)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer select-none active:scale-95 shadow-xs ${
+                    isActive
+                      ? 'bg-teal-600 text-white shadow-teal-600/20 ring-1 ring-teal-700'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{sub}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                    isActive ? 'bg-teal-700/80 text-teal-100' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {stats.answered}/{stats.total}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Live Section B Attempt Telemetry Pill */}
+          {subjectSecBQuestions.length > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className={`px-2.5 py-1 rounded-xl text-[11px] font-black font-mono border flex items-center gap-1.5 shadow-xs transition-colors ${
+                secBAnsweredCount >= maxSecBAllowed
+                  ? 'bg-amber-50 border-amber-300 text-amber-900 ring-1 ring-amber-400'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              }`}>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${secBAnsweredCount >= maxSecBAllowed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`} />
+                <span>Section B: {secBAnsweredCount} / {maxSecBAllowed} answered</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Row 2: Sub-Level Section Pills */}
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-0.5 scrollbar-none">
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider hidden sm:inline mr-1">
+            Sections:
+          </span>
+          {sectionsInActiveSubject.map(secName => {
+            const isActive = (currentQuestion?.section || 'Section A') === secName
+            const isSecB = secName.toLowerCase().includes('section b')
+
+            return (
+              <button
+                key={secName}
+                type="button"
+                onClick={() => jumpToSection(secName)}
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer select-none active:scale-95 ${
+                  isActive
+                    ? 'bg-slate-900 text-white font-black shadow-xs'
+                    : 'bg-white/90 hover:bg-white text-slate-600 border border-slate-200/80'
+                }`}
+              >
+                <span>{secName}</span>
+                {isSecB && (
+                  <span className="text-[9px] px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded font-mono font-bold">
+                    Max {maxSecBAllowed} Attempts
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 3. Main split workspace */}
       <div className="flex-1 flex overflow-hidden relative">
         
         {/* Question Panel */}
@@ -745,8 +955,18 @@ export default function CbtEngineClient({ user, profile, exam }) {
                 </span>
 
                 <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-black uppercase rounded-md">
-                  {isNumerical ? 'Numerical (NAT)' : isMsq ? 'Multi-Select (MSQ)' : 'Single Choice (MCQ)'}
+                  {isMatrix ? 'Matrix Match' : isNumerical ? 'Numerical (NAT)' : isMsq ? 'Multi-Select (MSQ)' : 'Single Choice (MCQ)'}
                 </span>
+
+                {isCurrentSecB && (
+                  <span className={`px-2.5 py-0.5 text-[10px] font-black uppercase rounded-md border flex items-center gap-1 ${
+                    secBAnsweredCount >= maxSecBAllowed
+                      ? 'bg-amber-50 text-amber-900 border-amber-300'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  }`}>
+                    Section B: {secBAnsweredCount} / {maxSecBAllowed} answered
+                  </span>
+                )}
 
                 {isMarked && (
                   <span className="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black uppercase rounded-md flex items-center gap-1">
@@ -769,109 +989,134 @@ export default function CbtEngineClient({ user, profile, exam }) {
                 <KatexRenderer content={questionPrompt} />
               </div>
 
-              {/* Responsive Question Diagram */}
-              {(currentQuestion?.diagram_url || currentQuestion?.diagramUrl) && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-w-xl mx-auto relative h-56 sm:h-72 w-full overflow-hidden">
+              {/* Responsive Question Diagram with Click-to-Zoom Lightbox */}
+              {(currentQuestion?.diagram_url || currentQuestion?.diagramUrl || currentQuestion?.image_url) && (
+                <div 
+                  onClick={() => {
+                    setLightboxImageUrl(currentQuestion.diagram_url || currentQuestion.diagramUrl || currentQuestion.image_url)
+                    setLightboxTitle(`Question ${currentIdx + 1} Diagram • ${currentQuestion.subject || 'General'}`)
+                    setIsLightboxOpen(true)
+                  }}
+                  className="p-3 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 hover:border-teal-500 rounded-2xl max-w-xl mx-auto relative h-56 sm:h-72 w-full overflow-hidden group cursor-pointer transition-all shadow-xs"
+                  title="Click to zoom schematic diagram"
+                >
                   <Image 
-                    src={currentQuestion.diagram_url || currentQuestion.diagramUrl} 
+                    src={currentQuestion.diagram_url || currentQuestion.diagramUrl || currentQuestion.image_url} 
                     alt="Question Diagram" 
                     fill
-                    className="object-contain rounded-xl max-w-full h-auto" 
+                    className="object-contain rounded-xl max-w-full h-auto group-hover:scale-102 transition-transform duration-200" 
                   />
+                  <div className="absolute top-3 right-3 bg-slate-900/80 group-hover:bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md transition-colors">
+                    <Maximize2 className="w-3.5 h-3.5 text-teal-400" />
+                    <span>Click to Zoom</span>
+                  </div>
                 </div>
               )}
 
               {/* Option Rendering: Multi-Format Support */}
               <div className="space-y-3 pt-2">
                 
-                {/* Format 1: Numerical Input (NAT) */}
+                {/* Format 1: Numerical Input with Virtual Numpad */}
                 {isNumerical && (
-                  <div className="bg-slate-50 p-4 sm:p-6 rounded-2xl border border-slate-200 space-y-4 max-w-lg">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-black uppercase text-slate-600 flex items-center gap-1.5">
-                        <Hash className="w-4 h-4 text-teal-600" />
-                        <span>Enter Numerical Answer:</span>
-                      </label>
-                      <button 
-                        onClick={() => handleNumericalKeypad('CLEAR')}
-                        className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
-                      >
-                        Clear
-                      </button>
+                  <div className="space-y-4 max-w-lg">
+                    <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-black uppercase text-slate-600 flex items-center gap-1.5">
+                          <Hash className="w-4 h-4 text-teal-600" />
+                          <span>Enter Numerical Answer:</span>
+                        </label>
+                        {currentAnswer?.numerical_value && (
+                          <button 
+                            type="button"
+                            onClick={() => handleNumericalKeypad('CLEAR')}
+                            className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      <input
+                        type="text"
+                        value={currentAnswer?.numerical_value ?? ''}
+                        onChange={(e) => handleNumericalInput(e.target.value)}
+                        placeholder="Type decimal or integer..."
+                        className="w-full text-center text-2xl font-black font-mono p-3.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900 shadow-inner"
+                      />
                     </div>
 
-                    <input
-                      type="text"
+                    {/* NTA-standard touch / mouse virtual numpad */}
+                    <VirtualNumpad
                       value={currentAnswer?.numerical_value ?? ''}
-                      onChange={(e) => handleNumericalInput(e.target.value)}
-                      placeholder="Type decimal or integer value..."
-                      className="w-full text-center text-xl font-black font-mono p-3.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900"
+                      onChange={(nextVal) => handleNumericalInput(nextVal)}
+                      onClear={() => handleNumericalInput('')}
+                      disabled={isCurrentSecB && !isCurrentQuestionAnswered && secBAnsweredCount >= maxSecBAllowed}
                     />
-
-                    {/* Integrated On-Screen Touch Keypad */}
-                    <div className="grid grid-cols-4 gap-2 pt-2">
-                      {['7', '8', '9', 'BACKSPACE', '4', '5', '6', '+/-', '1', '2', '3', '.', '0', 'CLEAR'].map((key) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => handleNumericalKeypad(key)}
-                          className={`min-h-[48px] rounded-xl font-black text-sm transition-all select-none active:scale-95 cursor-pointer shadow-xs ${
-                            key === 'BACKSPACE' 
-                              ? 'bg-amber-100 text-amber-900 border border-amber-200' 
-                              : key === 'CLEAR' 
-                                ? 'bg-rose-100 text-rose-900 border border-rose-200 col-span-2' 
-                                : key === '+/-' || key === '.' 
-                                  ? 'bg-slate-200 text-slate-800' 
-                                  : 'bg-white hover:bg-slate-100 text-slate-900 border border-slate-200'
-                          }`}
-                        >
-                          {key === 'BACKSPACE' ? '⌫' : key}
-                        </button>
-                      ))}
-                    </div>
                   </div>
                 )}
 
-                {/* Format 2: Multi-Select MSQ (Checkbox Behavior) */}
-                {isMsq && !isNumerical && currentQuestion?.options?.map((opt, optIdx) => {
-                  const selectedList = Array.isArray(currentAnswer?.selected_options) 
-                    ? currentAnswer.selected_options 
-                    : (currentAnswer?.selected_option !== undefined ? [Number(currentAnswer.selected_option)] : [])
-                  const isSelected = selectedList.includes(optIdx)
-                  const letterBadge = ['A', 'B', 'C', 'D', 'E', 'F'][optIdx] || optIdx + 1
+                {/* Format 2: Matrix Matching Clickable Grid */}
+                {isMatrix && (
+                  <MatrixMatchGrid
+                    matrixRows={currentQuestion?.matrix_rows || ['(A) A', '(B) B', '(C) C', '(D) D']}
+                    matrixCols={currentQuestion?.matrix_cols || ['(P) P', '(Q) Q', '(R) R', '(S) S']}
+                    value={currentAnswer?.matrix || {}}
+                    onChange={handleMatrixMatchChange}
+                    disabled={isCurrentSecB && !isCurrentQuestionAnswered && secBAnsweredCount >= maxSecBAllowed}
+                  />
+                )}
 
-                  return (
-                    <button
-                      key={optIdx}
-                      onClick={() => handleMsqToggle(optIdx)}
-                      className={`min-h-[52px] w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3.5 select-none active:scale-[0.98] ${
-                        isSelected 
-                          ? 'bg-teal-50/90 border-teal-600 text-teal-950 font-bold shadow-xs ring-1 ring-teal-600/30' 
-                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-black text-xs transition-colors ${
-                          isSelected ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 border border-slate-200'
-                        }`}>
-                          {letterBadge}
-                        </div>
-                        <span className="text-xs sm:text-sm font-semibold leading-relaxed break-words flex-1">
-                          <KatexRenderer content={opt} />
-                        </span>
-                      </div>
+                {/* Format 3: Multi-Select MSQ (Checkboxes & Partial Marking Indicator) */}
+                {isMsq && !isNumerical && !isMatrix && (
+                  <div className="space-y-3">
+                    <div className="p-3.5 bg-teal-50 border border-teal-200 rounded-2xl text-xs text-teal-950 font-bold flex items-center gap-2.5 shadow-xs">
+                      <Info className="w-4 h-4 text-teal-600 shrink-0" />
+                      <span>
+                        Multiple Correct Options (MSQ): One or more options may be correct. (+4 for all correct, partial marks apply, -2 for incorrect).
+                      </span>
+                    </div>
 
-                      <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-300 bg-white'
-                      }`}>
-                        {isSelected ? <CheckSquare className="w-4 h-4 stroke-[3]" /> : <Square className="w-4 h-4 text-slate-400" />}
-                      </div>
-                    </button>
-                  )
-                })}
+                    {currentQuestion?.options?.map((opt, optIdx) => {
+                      const selectedList = Array.isArray(currentAnswer?.selected_options) 
+                        ? currentAnswer.selected_options 
+                        : (currentAnswer?.selected_option !== undefined ? [Number(currentAnswer.selected_option)] : [])
+                      const isSelected = selectedList.includes(optIdx)
+                      const letterBadge = ['A', 'B', 'C', 'D', 'E', 'F'][optIdx] || optIdx + 1
 
-                {/* Format 3: Single Choice MCQ (Radio Behavior) */}
-                {!isMsq && !isNumerical && currentQuestion?.options?.map((opt, optIdx) => {
+                      return (
+                        <button
+                          key={optIdx}
+                          onClick={() => handleMsqToggle(optIdx)}
+                          className={`min-h-[52px] w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3.5 select-none active:scale-[0.98] ${
+                            isSelected 
+                              ? 'bg-teal-50/90 border-teal-600 text-teal-950 font-bold shadow-xs ring-1 ring-teal-600/30' 
+                              : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-black text-xs transition-colors ${
+                              isSelected ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 border border-slate-200'
+                            }`}>
+                              {letterBadge}
+                            </div>
+                            <span className="text-xs sm:text-sm font-semibold leading-relaxed break-words flex-1">
+                              <KatexRenderer content={opt} />
+                            </span>
+                          </div>
+
+                          <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected ? <CheckSquare className="w-4 h-4 stroke-[3]" /> : <Square className="w-4 h-4 text-slate-400" />}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Format 4: Single Choice MCQ (Radio Behavior) */}
+                {!isMsq && !isNumerical && !isMatrix && currentQuestion?.options?.map((opt, optIdx) => {
                   const isSelected = currentAnswer?.selected_option === optIdx
                   const letterBadge = ['A', 'B', 'C', 'D', 'E', 'F'][optIdx] || optIdx + 1
 
@@ -950,11 +1195,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
 
                 const ans = answers[q.id]
                 const isCurrent = idx === currentIdx
-                const isAnswered = ans && (
-                  (ans.selected_option !== undefined && ans.selected_option !== null && ans.selected_option !== '') ||
-                  (Array.isArray(ans.selected_options) && ans.selected_options.length > 0) ||
-                  (ans.numerical_value !== undefined && ans.numerical_value !== null && String(ans.numerical_value).trim() !== '')
-                )
+                const isAnswered = isAnswerFilled(ans)
                 const isMarkedRev = markedReview.has(q.id)
 
                 let btnBg = 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
@@ -1056,7 +1297,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
             onClick={() => setCurrentIdx(prev => Math.min(questions.length - 1, prev + 1))}
             className="flex-1 sm:flex-none justify-center px-3 sm:px-6 py-2 sm:py-2.5 bg-teal-600 disabled:opacity-40 hover:bg-teal-700 active:scale-95 text-white font-black text-[11px] sm:text-xs rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1"
           >
-            <span>Next</span>
+            <span>Next Question</span>
             <ChevronRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
@@ -1156,11 +1397,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
                     const idx = q.originalIndex
                     const ans = answers[q.id]
                     const isCurrent = idx === currentIdx
-                    const isAnswered = ans && (
-                      (ans.selected_option !== undefined && ans.selected_option !== null && ans.selected_option !== '') ||
-                      (Array.isArray(ans.selected_options) && ans.selected_options.length > 0) ||
-                      (ans.numerical_value !== undefined && ans.numerical_value !== null && String(ans.numerical_value).trim() !== '')
-                    )
+                    const isAnswered = isAnswerFilled(ans)
                     const isMarkedRev = markedReview.has(q.id)
 
                     let btnBg = 'bg-white border-slate-200 text-slate-700'
@@ -1360,6 +1597,30 @@ export default function CbtEngineClient({ user, profile, exam }) {
                 <div className="text-xs sm:text-sm font-semibold text-slate-900">
                   <KatexRenderer content={q.question_text || q.text || 'Question text'} />
                 </div>
+
+                {/* Question Diagram in Question Paper View */}
+                {(q.diagram_url || q.diagramUrl || q.image_url) && (
+                  <div 
+                    onClick={() => {
+                      setLightboxImageUrl(q.diagram_url || q.diagramUrl || q.image_url)
+                      setLightboxTitle(`Question ${idx + 1} Diagram • ${q.subject || 'General'}`)
+                      setIsLightboxOpen(true)
+                    }}
+                    className="relative h-44 max-w-sm rounded-xl overflow-hidden border border-slate-200 bg-white cursor-pointer hover:border-teal-500 my-2 group p-1"
+                    title="Click to zoom diagram"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={q.diagram_url || q.diagramUrl || q.image_url}
+                      alt={`Diagram Q${idx + 1}`}
+                      className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-200"
+                    />
+                    <div className="absolute bottom-1 right-1 bg-slate-900/80 text-white text-[9px] px-2 py-0.5 rounded font-bold flex items-center gap-1 shadow-sm">
+                      <Maximize2 className="w-2.5 h-2.5 text-teal-400" /> Zoom
+                    </div>
+                  </div>
+                )}
+
                 {q.options && q.options.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     {q.options.map((opt, oIdx) => (
@@ -1379,7 +1640,7 @@ export default function CbtEngineClient({ user, profile, exam }) {
           <div className="pt-3 border-t border-slate-200 flex justify-end shrink-0">
             <button
               onClick={() => setShowQuestionPaper(false)}
-              className="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl"
+              className="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-slate-800"
             >
               Close Question Paper
             </button>
@@ -1450,6 +1711,25 @@ export default function CbtEngineClient({ user, profile, exam }) {
           </div>
         </div>
       )}
+
+      {/* 10. Diagram Lightbox Modal */}
+      <DiagramLightboxModal
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        imageUrl={lightboxImageUrl}
+        title={lightboxTitle}
+      />
+
+      {/* 11. Section B Over-Attempt Warning & Review Modal */}
+      <SectionAttemptLimitModal
+        isOpen={showSectionBWarningModal}
+        onClose={() => setShowSectionBWarningModal(false)}
+        subject={activeSubject}
+        sectionName={currentQuestion?.section || 'Section B'}
+        maxAttempts={maxSecBAllowed}
+        answeredQuestions={answeredSecBQuestions}
+        onJumpToQuestion={(targetIdx) => setCurrentIdx(targetIdx)}
+      />
 
     </div>
   )

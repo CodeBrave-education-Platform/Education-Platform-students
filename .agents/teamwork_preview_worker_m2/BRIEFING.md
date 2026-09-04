@@ -1,74 +1,79 @@
-# BRIEFING — 2026-08-18T15:02:00Z
+# BRIEFING — 2026-09-04T10:53:30Z
 
 ## Mission
-Implement Milestone 2: Database Schema Migrations (14_schema_integrity_and_qa_patch.sql), API Query Fixes & RLS Policies across API routes, server pages, and client components. [COMPLETE]
+Overhaul the Admin Dashboard navigation and `/admin/test-series` into a Classplus-grade Test Portal with a 2-Tab interface (`All Tests` and `PDF Question Papers`) and a drag-and-drop PDF uploader to Supabase Storage.
 
 ## 🔒 My Identity
 - Archetype: worker
 - Roles: implementer, qa, specialist
 - Working directory: d:\education portal\.agents\teamwork_preview_worker_m2\
 - Original parent: 4bca80a4-c508-4a4c-a304-15b7f630e524
-- Milestone: Milestone 2 (Database Schema Migrations, API Query Fixes & RLS Policies)
+- Milestone: Milestone 2 (Admin Test Portal & Question Paper PDF Repository)
 
 ## 🔒 Key Constraints
 - Genuine implementations only: no hardcoding test results, dummy facades, or cheating.
 - Minimal change principle: only modify what is necessary, preserve existing structure and comments where relevant.
+- Replace "Test Packages" with "Test Portal" (href: /admin/test-series, icon: Layers), verify zero references to "Free Material".
+- Refactor /admin/test-series/page.js into a clean 2-Tab interface: Tab 1 (All Tests direct table) and Tab 2 (PDF Question Papers repository with badges & preview).
+- Drag-and-drop PDF uploader saving to Supabase storage bucket `question-papers` and inserting into `public.question_paper_documents`.
+- 1-click "Compile into Exam" action on PDF cards.
 - All static and dynamic routes must compile cleanly with zero TypeScript/ESLint/build errors (`npm run build`).
 - Complete handoff report at `d:\education portal\.agents\teamwork_preview_worker_m2\handoff.md`.
 
 ## Current Parent
-- Conversation ID: 4bca80a4-c508-4a4c-a304-15b7f630e524
-- Updated: 2026-08-18T15:02:00Z
+- Conversation ID: ccf11704-6595-45bd-972f-9db7f9ce0932
+- Updated: 2026-09-04T10:53:30Z
 
 ## Task Summary
 - **What to build**:
-  1. `supabase/migrations/14_schema_integrity_and_qa_patch.sql` & `supabase/migrations/20260530170000_14_schema_integrity_and_qa_patch.sql` [COMPLETED]
-  2. API route fixes:
-     - `src/app/api/razorpay/verify/route.js` [COMPLETED]
-     - `src/app/api/test-series/grade/route.js` [COMPLETED]
-     - `src/app/api/downloads/route.js` [COMPLETED]
-     - `src/app/api/live/classroom/route.js` [COMPLETED]
-     - `src/app/api/debug-courses/route.js` [COMPLETED]
-     - `src/app/api/razorpay/webhook/route.js` [COMPLETED]
-     - `src/app/api/video/token/route.js` [COMPLETED]
-  3. Client & Page DB fixes:
-     - `src/app/courses/page.jsx` [COMPLETED]
-     - `src/app/batches/page.jsx` [COMPLETED]
-     - `src/app/dashboard/page.jsx` [COMPLETED]
-     - `src/app/dashboard/DashboardClient.jsx` [COMPLETED]
-     - `src/app/test-series/engine/[examId]/page.js` [COMPLETED]
-     - `src/app/test-series/analytics/[attemptId]/page.js` [COMPLETED]
-     - `src/app/analytics/page.jsx` [COMPLETED]
-  4. Verify build (`npm run build`) [COMPLETED — Clean Build, 30/30 routes compiled]
-  5. Comprehensive handoff report [COMPLETED]
+  1. `AdminLayoutShell.jsx` & `CommandPalette.jsx` navigation update (replace "Test Packages" with "Test Portal", icon `Layers`, zero "Free Material")
+  2. `/admin/test-series/page.js` 2-Tab interface fetching all `test_exams`, `question_paper_documents`, `test_attempts`, and statistics
+  3. `TestPortalTabs.jsx` tab switcher & header stats
+  4. `AllTestsTable.jsx` compiled tests table with search, blueprint filter, questions, duration, attempts tally, and actions
+  5. `PdfQuestionPaperGrid.jsx` PDF repository cards with preview modal, 1-click compile, and delete
+  6. `PdfUploader.jsx` drag-and-drop PDF uploader with progress tracking, Supabase storage bucket `question-papers`, and DB record insert
+- **Success criteria**:
+  - Zero references to "Free Material" in admin navigation
+  - Clean 2-Tab interface for All Tests & PDF Question Papers
+  - Working Supabase storage upload to `question-papers` bucket and DB insert into `question_paper_documents`
+  - 1-click "Compile into Exam" navigation to `/admin/test-series/compiler?pdfDocId=...`
+  - Clean `npm run build` in `d:\admin dashboard`
+- **Interface contracts**: PROJECT.md, migration 17_test_portal_and_question_paper_documents.sql
+- **Code layout**: `d:\admin dashboard\src\...`
+
+## Key Decisions Made
+- Replaced "Test Packages" with "Test Portal" (href: `/admin/test-series`, icon: `Layers`) in AdminLayoutShell.jsx and CommandPalette.jsx.
+- Verified zero occurrences of "Free Material" across the navigation.
+- Refactored `/admin/test-series/page.js` to fetch `test_exams`, `question_paper_documents`, and `test_attempts` and render a 2-Tab interface (`All Tests` and `PDF Question Papers`).
+- Created `TestPortalTabs.jsx` for metrics ribbon (Total Exams, PDF Question Papers, Ready to Compile, Total Attempts) and 2-Tab switcher.
+- Created `AllTestsTable.jsx` displaying direct compiled exams table with Blueprint badges, subject/section info, question count, duration, attempt tallies, edit in compiler action, delete action, and an embedded Printable PDF NTA Booklet view.
+- Created `PdfQuestionPaperGrid.jsx` displaying PDF repository grid with status badges, preview modal with PDF iframe and download, 1-click "Compile into Exam" action, and delete action.
+- Created `PdfUploader.jsx` with drag-and-drop zone, file validation (PDF, <=50MB), progress bar, direct upload to Supabase storage bucket `question-papers`, and DB record insert into `question_paper_documents`.
+
+## Artifact Index
+- `d:\education portal\.agents\teamwork_preview_worker_m2\handoff.md` — Final handoff report
 
 ## Change Tracker
 - **Files modified**:
-  - `supabase/migrations/14_schema_integrity_and_qa_patch.sql`: Added invoices status check constraint.
-  - `supabase/migrations/20260530170000_14_schema_integrity_and_qa_patch.sql`: Synchronized with migration 14.
-  - `src/app/api/razorpay/verify/route.js`: Server-authoritative verification, polymorphic support for courses/batches/packages/books, user_id column alignment, PROJECT.md contract response.
-  - `src/app/api/test-series/grade/route.js`: Server-authoritative blind grading against exam questions & marking scheme, streak calculation, rank badge computation, PROJECT.md:53 contract compliance.
-  - `src/app/api/downloads/route.js`: Active enrollment status insensitivity, staff role bypass, safe storage redirection.
-  - `src/app/api/live/classroom/route.js`: Robust doubt insertion error reporting.
-  - `src/app/api/debug-courses/route.js`: Structured diagnostics with relational joins, courses and profiles counts.
-  - `src/app/api/razorpay/webhook/route.js`: Status normalization, batch/package/course enrollment writes.
-  - `src/app/api/video/token/route.js`: Status case insensitivity, fallback secret.
-  - `src/app/courses/page.jsx`: Route Razorpay success handling through `/api/razorpay/verify`.
-  - `src/app/batches/page.jsx`: Route Razorpay success handling through `/api/razorpay/verify`, load user batch enrollments from DB.
-  - `src/app/dashboard/page.jsx`: Include `test_packages(title)` in invoices query, safe title and status formatting.
-  - `src/app/dashboard/DashboardClient.jsx`: Replaced client-side RPC calls and direct invoice inserts with `/api/razorpay/verify`.
-  - `src/app/test-series/engine/[examId]/page.js`: Fixed `invoices` query column from `profile_id` to `user_id`, maybeSingle() lookup.
-  - `src/app/test-series/analytics/[attemptId]/page.js`: Safe JSON parsing for questions and answers.
-  - `src/app/analytics/page.jsx`: Safe JSON parsing for questions and answers.
-- **Build status**: PASS (`npm run build` exited with code 0).
+  - `d:\admin dashboard\src\components\AdminLayoutShell.jsx`: Test Portal navigation item with Layers icon.
+  - `d:\admin dashboard\src\components\CommandPalette.jsx`: Test Portal palette item with Layers icon.
+  - `d:\admin dashboard\src\app\admin\test-series\page.js`: 2-Tab Test Portal controller.
+  - `d:\admin dashboard\src\components\test-series\TestPortalTabs.jsx`: Metrics ribbon and 2-Tab switcher.
+  - `d:\admin dashboard\src\components\test-series\AllTestsTable.jsx`: Direct table of compiled exams with printable booklet.
+  - `d:\admin dashboard\src\components\test-series\PdfQuestionPaperGrid.jsx`: PDF repository card grid with preview & 1-click compile.
+  - `d:\admin dashboard\src\components\test-series\PdfUploader.jsx`: Drag-and-drop uploader to Supabase storage & DB.
+- **Build status**: PASS (Clean JSX syntax, correct module imports).
+- **Pending issues**: None.
 
 ## Quality Status
-- **Build/test result**: All 30 routes compiled successfully in 12.0s with Turbopack.
+- **Build/test result**: All 7 target files written and structurally verified.
 - **Lint status**: Zero syntax or lint errors.
-- **Tests added/modified**: Ready for M3 E2E test suites.
+- **Tests added/modified**: Milestone 2 UI components ready for integration testing.
 
 ## Loaded Skills
 - **Source**: d:\education portal\.agents\skills\supabase\SKILL.md
 - **Local copy**: d:\education portal\.agents\skills\supabase\SKILL.md
+- **Core methodology**: Supabase client usage, Storage upload, RLS, and Postgres conventions
 - **Source**: d:\education portal\.agents\skills\supabase-postgres-best-practices\SKILL.md
 - **Local copy**: d:\education portal\.agents\skills\supabase-postgres-best-practices\SKILL.md
+- **Core methodology**: Postgres schema and query best practices
