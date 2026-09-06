@@ -8,7 +8,8 @@ import Script from 'next/script'
 import { createClient } from '@/utils/supabase/client'
 import { 
   GraduationCap, Calendar, Clock, BookOpen, CheckCircle2, 
-  ArrowLeft, ArrowRight, ShieldAlert, Sparkles, Loader2, Award, Play
+  ArrowLeft, ArrowRight, ShieldAlert, Sparkles, Loader2, Award, Play,
+  ClipboardList, Target, Lock, RotateCcw, BarChart3, Activity, Layers
 } from 'lucide-react'
 import Footer from '@/components/Footer'
 
@@ -64,12 +65,20 @@ const handleImageError = (e, level) => {
   e.target.src = getDefaultThumbnail(level);
 }
 
-export default function CourseDetailsClient({ course, lessons, initialEnrolled, user }) {
+export default function CourseDetailsClient({ 
+  course, 
+  lessons = [], 
+  initialEnrolled = false, 
+  user,
+  courseExams = [],
+  initialAttempts = []
+}) {
   const router = useRouter()
   const supabase = createClient()
   const [isPending, startTransition] = useTransition()
   
   const [enrolled, setEnrolled] = useState(initialEnrolled)
+  const [activeViewTab, setActiveViewTab] = useState('curriculum') // 'curriculum' | 'tests'
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -282,69 +291,197 @@ export default function CourseDetailsClient({ course, lessons, initialEnrolled, 
             </div>
           </div>
 
-          {/* Dynamic Syllabus Timelines */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2.5">
-              <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-              <h2 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight">
-                Curriculum syllabus chapters
-              </h2>
-            </div>
+          {/* Dual View Switcher: Curriculum Syllabus vs Mock Tests & Quizzes */}
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveViewTab('curriculum')}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+                activeViewTab === 'curriculum'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Curriculum Lectures ({lessons.length})</span>
+            </button>
 
-            <div className="relative border-l border-slate-200/80 dark:border-zinc-800/80 pl-6 space-y-8 select-none">
-              {lessons.map((lesson, idx) => (
-                <div 
-                  key={lesson.id} 
-                  className={`relative group transition-all duration-200 ${
-                    enrolled 
-                      ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-zinc-900/50 p-4 rounded-2xl -mx-4' 
-                      : ''
-                  }`}
-                  onClick={() => {
-                    if (enrolled) {
-                      router.push(`/learn/${course.id}?lesson=${lesson.id}`)
-                    }
-                  }}
-                >
-                  
-                  {/* Glowing vertical point marker */}
-                  <span className={`absolute top-5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-700 ring-4 ring-[#F8FAFC] dark:ring-zinc-950 transition-colors group-hover:border-teal-500 ${
-                    enrolled ? '-left-[15px]' : '-left-[31px]'
-                  }`}>
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400 group-hover:bg-teal-500 transition-colors" />
-                  </span>
-                  
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono text-slate-400">
-                      <span>CHAPTER 0{idx + 1}</span>
-                      <span>•</span>
-                      <span>LECTURE MODULE</span>
-                      {enrolled && (
-                        <>
-                          <span>•</span>
-                          <span className="text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                            <Play className="w-2.5 h-2.5 inline" /> Play Lesson
-                          </span>
-                        </>
+            <button
+              type="button"
+              onClick={() => setActiveViewTab('tests')}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+                activeViewTab === 'tests'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>Mock Tests & Quizzes ({courseExams.length})</span>
+            </button>
+          </div>
+
+          {/* TAB 1: CURRICULUM SYLLABUS */}
+          {activeViewTab === 'curriculum' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2.5">
+                <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                <h2 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight">
+                  Curriculum syllabus chapters
+                </h2>
+              </div>
+
+              <div className="relative border-l border-slate-200/80 dark:border-zinc-800/80 pl-6 space-y-8 select-none">
+                {lessons.map((lesson, idx) => (
+                  <div 
+                    key={lesson.id} 
+                    className={`relative group transition-all duration-200 ${
+                      enrolled 
+                        ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-zinc-900/50 p-4 rounded-2xl -mx-4' 
+                        : ''
+                    }`}
+                    onClick={() => {
+                      if (enrolled) {
+                        router.push(`/learn/${course.id}?lesson=${lesson.id}`)
+                      }
+                    }}
+                  >
+                    
+                    {/* Glowing vertical point marker */}
+                    <span className={`absolute top-5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-700 ring-4 ring-[#F8FAFC] dark:ring-zinc-950 transition-colors group-hover:border-teal-500 ${
+                      enrolled ? '-left-[15px]' : '-left-[31px]'
+                    }`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400 group-hover:bg-teal-500 transition-colors" />
+                    </span>
+                    
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono text-slate-400">
+                        <span>CHAPTER 0{idx + 1}</span>
+                        <span>•</span>
+                        <span>LECTURE MODULE</span>
+                        {enrolled && (
+                          <>
+                            <span>•</span>
+                            <span className="text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                              <Play className="w-2.5 h-2.5 inline" /> Play Lesson
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      
+                      <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 leading-snug group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                        {lesson.title}
+                      </h3>
+                      
+                      {lesson.assignment_title && (
+                        <div className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200/40 dark:border-zinc-800/40 px-2 py-0.5 rounded text-[8px] font-semibold text-slate-500 dark:text-zinc-400">
+                          <Award className="w-3 h-3 text-amber-500" />
+                          <span>Worksheet: {lesson.assignment_title}</span>
+                        </div>
                       )}
                     </div>
-                    
-                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 leading-snug group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                      {lesson.title}
-                    </h3>
-                    
-                    {lesson.assignment_title && (
-                      <div className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200/40 dark:border-zinc-800/40 px-2 py-0.5 rounded text-[8px] font-semibold text-slate-500 dark:text-zinc-400">
-                        <Award className="w-3 h-3 text-amber-500" />
-                        <span>Worksheet: {lesson.assignment_title}</span>
-                      </div>
-                    )}
-                  </div>
 
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* TAB 2: TESTS & CBT ASSESSMENTS */}
+          {activeViewTab === 'tests' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-zinc-100">
+                  Course Assessments & Mock Tests
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Proctored computer-based mock tests calibrated specifically for this course curriculum.
+                </p>
+              </div>
+
+              {courseExams.length === 0 ? (
+                <div className="p-10 text-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl space-y-2">
+                  <ClipboardList className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">No mock tests uploaded yet</p>
+                  <p className="text-[11px] text-slate-500">Curriculum mock tests will appear here once published by faculty.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {courseExams.map(exam => {
+                    const attempt = initialAttempts.find(a => a.exam_id === exam.id);
+                    const bpType = (exam.blueprint_type || 'jee_main').toLowerCase();
+
+                    return (
+                      <div
+                        key={exam.id}
+                        className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-teal-500 dark:hover:border-teal-600 rounded-3xl p-5 shadow-xs transition-all flex flex-col justify-between space-y-4 group"
+                      >
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800">
+                              {bpType === 'jee_advanced' ? 'JEE Advanced' : bpType === 'neet' ? 'NEET' : 'JEE Main'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono font-bold">
+                              {exam.duration_minutes || 180} mins • {exam.total_questions || 75} Qs
+                            </span>
+                          </div>
+
+                          <h4 className="text-sm font-black text-slate-900 dark:text-zinc-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition">
+                            {exam.title}
+                          </h4>
+
+                          <p className="text-xs text-slate-500 line-clamp-2">
+                            Official exam simulation with live scoring and section-wise analytics.
+                          </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80">
+                          {enrolled ? (
+                            attempt ? (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => router.push(`/test-series/analytics/${attempt.id}`)}
+                                  className="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                >
+                                  <BarChart3 className="w-3.5 h-3.5" />
+                                  <span>Scorecard ({attempt.score} pts)</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => router.push(`/test-series/engine/${exam.id}?reset=true`)}
+                                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
+                                  title="Retake test"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/test-series/engine/${exam.id}`)}
+                                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                              >
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                                <span>Attempt Test</span>
+                              </button>
+                            )
+                          ) : (
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-zinc-800/50 rounded-xl border border-slate-200 dark:border-zinc-800 text-[11px] text-slate-500 font-medium">
+                              <span className="flex items-center gap-1.5">
+                                <Lock className="w-3.5 h-3.5 text-amber-500" />
+                                <span>Course Mock Exam</span>
+                              </span>
+                              <span className="font-bold text-slate-700 dark:text-zinc-300">Enroll to Unlock</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 
